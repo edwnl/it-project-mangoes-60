@@ -1,3 +1,21 @@
+@import '~antd/dist/reset.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    --primary-color: #BF0018;
+    --primary-hover-color: #A50015;
+}
+
+.custom-button {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.custom-button:hover,
+.custom-button:focus {
+    background-color: var(--primary-hover-color) !important;
+    border-color: var(--primary-hover-color) !important;
+}
