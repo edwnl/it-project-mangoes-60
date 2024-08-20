@@ -3,7 +3,11 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Input, Button, Tag } from "antd";
-import { SearchOutlined, LogoutOutlined } from "@ant-design/icons";
+import {
+  SearchOutlined,
+  LogoutOutlined,
+  CameraOutlined,
+} from "@ant-design/icons";
 import FullLogo from "@/assets/full_logo.svg";
 
 interface NavBarProps {
@@ -35,10 +39,11 @@ const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout }) => {
   );
 
   const SearchBar = () => (
-    <div className="w-full max-w-sm mx-auto">
+    <div className="w-full">
       <Input
         placeholder="Enter item name..."
         prefix={<SearchOutlined />}
+        suffix={<CameraOutlined className="text-gray-400 cursor-pointer" />}
         onChange={(e) => onSearch(e.target.value)}
         className="w-full"
       />
@@ -61,7 +66,7 @@ const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout }) => {
       <div className="">
         <LogoSection />
       </div>
-      <div className="flex-grow flex justify-center">
+      <div className="flex-grow flex justify-center mx-10 max-w-md">
         <SearchBar />
       </div>
       <div className="flex justify-end">
