@@ -93,9 +93,12 @@ const DragDropImageUpload: React.FC = () => {
                 <X size={16} />
               </button>
               {file.category && (
-                <p className="mt-1 text-sm text-gray-600">Category: {file.category}</p>
+                <div className="mt-2">
+                <p className="w-full text-center mt-1 text-sm text-gray-600">Category: {file.category}</p>
+                </div>
               )}
             </div>
+            
           ))}
         </div>
       )}
