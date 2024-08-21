@@ -18,7 +18,7 @@ export async function textSearch(query: string) {
   `;
 
   try {
-    const completion = await openai.chat.completions.create({
+    const response = await openai.chat.completions.create({
       messages: [
         {
           role: "user",
@@ -33,15 +33,19 @@ export async function textSearch(query: string) {
       model: "gpt-4o-mini",
     });
 
-    if (completion.usage) {
-      console.log(`Total tokens used: ${completion.usage.total_tokens}`);
+    if (response.usage) {
+      console.log(`Total tokens used: ${response.usage.total_tokens}`);
+    }
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error("No content in response");
     }
 
-    const response = completion.choices[0].message.content!.slice(7, -3);
+    // Extract JSON from the content (assuming it's wrapped in backticks)
+    const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
+    const jsonString = jsonMatch ? jsonMatch[1] : content;
 
-    console.log(response);
-
-    const json_res = JSON.parse(response);
+    const json_res = JSON.parse(jsonString);
     const concatData = json_res
       .map(([id, confidence]: [string, number]) => {
         const item = categoryItems.find((item) => item.id === id);
