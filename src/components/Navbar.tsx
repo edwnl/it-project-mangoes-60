@@ -14,10 +14,10 @@ import FullLogo from "@/assets/full_logo.svg";
 interface NavBarProps {
   onSearch: (value: string) => void;
   onLogout: () => void;
-  onCameraClick: () => void;
+  // onCameraClick: () => void;
 }
 
-const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout, onCameraClick }) => {
+const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout}) => {
   const [isMobile, setIsMobile] = useState(false);
   const router = useRouter(); 
 
@@ -57,7 +57,7 @@ const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout, onCameraClick }) =>
     <Button 
       type="default"
       icon={<CameraOutlined />}
-      onClick={onCameraClick}
+      onClick={() => router.push('/image-search')}
       className="custom-button text-zinc-50 cursor-pointer w-full"
     >
       Take a Photo 
