@@ -5,12 +5,13 @@ import Image from "next/image";
 import { Tag } from "antd";
 import syringeImage from "@/assets/syringe.png";
 
-interface CategoryItem {
+export interface CategoryItem {
   id: string;
   name: string;
   type: string;
   aisle: number;
   column: number;
+  image_url: string;
 }
 
 interface CategoryGridProps {
