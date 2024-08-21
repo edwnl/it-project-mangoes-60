@@ -1,8 +1,8 @@
 "use server";
 import OpenAI from "openai";
-import { categoryItems } from "@/utils/categoryData";
+import { categoryItems } from "@/data/categoryData";
 
-export async function smartSearch(query: string) {
+export async function textSearch(query: string) {
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
