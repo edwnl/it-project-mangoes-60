@@ -2,8 +2,6 @@
 
 import OpenAI from "openai";
 import { categoryItems } from "@/data/categoryData";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
 
 export async function imageSearch(formData: FormData) {
   const openai = new OpenAI({
@@ -18,24 +16,6 @@ export async function imageSearch(formData: FormData) {
 
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
-
-  // Ensure the uploads directory exists
-  const uploadsDir = join(process.cwd(), "public/uploads");
-  try {
-    await mkdir(uploadsDir, { recursive: true });
-  } catch (err) {
-    console.error("Failed to create uploads directory:", err);
-    return { success: false, error: "Server error" };
-  }
-
-  // Save file to disk
-  const filePath = join(uploadsDir, file.name);
-  try {
-    await writeFile(filePath, buffer);
-  } catch (err) {
-    console.error("Failed to write file:", err);
-    return { success: false, error: "Failed to save file" };
-  }
 
   // Create a base64 representation of the image
   const base64Image = buffer.toString("base64");
@@ -73,13 +53,16 @@ export async function imageSearch(formData: FormData) {
       console.log(`Total tokens used: ${response.usage.total_tokens}`);
     }
 
-    const content = response.choices[0].message.content!.slice(7, -3);
-    console.log(content);
+    const content = response.choices[0].message.content;
     if (!content) {
       throw new Error("No content in response");
     }
 
-    const json_res = JSON.parse(content);
+    // Extract JSON from the content (assuming it's wrapped in backticks)
+    const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
+    const jsonString = jsonMatch ? jsonMatch[1] : content;
+
+    const json_res = JSON.parse(jsonString);
     const concatData = json_res
       .map(([id, confidence]: [string, number]) => {
         const item = categoryItems.find((item) => item.id === id);
@@ -89,7 +72,10 @@ export async function imageSearch(formData: FormData) {
 
     return { success: true, data: concatData };
   } catch (error: any) {
-    console.error(error.message);
-    return { success: false, error: JSON.stringify(error.message) };
+    console.error("Error in imageSearch:", error);
+    return {
+      success: false,
+      error: error.message || "An unexpected error occurred",
+    };
   }
 }

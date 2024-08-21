@@ -73,7 +73,7 @@ const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
             <img
               src={preview}
               alt={file.name}
-              className="h-40 object-cover rounded-md"
+              className="object-cover rounded-md"
             />
             <button
               onClick={removeFile}
