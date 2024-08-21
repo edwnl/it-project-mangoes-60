@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Input, Button, Tag } from "antd";
 import {
   SearchOutlined,
@@ -19,7 +20,7 @@ interface NavBarProps {
 
 const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout}) => {
   const [isMobile, setIsMobile] = useState(false);
-  const router = useRouter(); 
+  const pathname = usePathname();  
 
   useEffect(() => {
     const checkMobile = () => {
@@ -54,14 +55,15 @@ const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout}) => {
   );
 
   const CameraButton = () => (
-    <Button 
-      type="default"
-      icon={<CameraOutlined />}
-      onClick={() => router.push('/image-search')}
-      className="custom-button text-zinc-50 cursor-pointer w-full"
-    >
-      Take a Photo 
-    </Button>
+    <Link href="/image-search" passHref>
+      <Button 
+        type="default"
+        icon={<CameraOutlined />}
+        className="custom-button text-zinc-50 cursor-pointer w-full"
+      >
+        Take a Photo 
+      </Button>
+    </Link>
 
   );
 
