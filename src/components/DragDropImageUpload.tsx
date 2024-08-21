@@ -63,7 +63,7 @@ const DragDropImageUpload: React.FC = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6">
+    <div className="max-w-xl mx-auto p-8">
       <div
         {...getRootProps()}
         className={`p-10 border-2 border-dashed rounded-lg text-center cursor-pointer ${

@@ -1,10 +1,43 @@
+"use client";
+
+import React from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import DragDropImageUpload from "@/components/DragDropImageUpload";
+import NavBar from "@/components/Navbar";
 
-export default function Home() {
-  return (
-    <main className='absolute inset-0 flex justify-center items-center'>
-      <DragDropImageUpload />
-    </main>
-  );
-}
+
+const ImageSearchPage: React.FC = () => {
+    const router = useRouter(); 
+
+    const handleSearch = (value: string) => {
+        console.log("Searching for:", value);
+    }; 
+
+    const handleLogout = () => {
+        console.log("Logging out");
+        router.push("/login");
+    }
+
+    return (
+        <main className="min-h-screen">
+            <NavBar onSearch={handleSearch} onLogout={handleLogout} />
+            <div className='absolute inset-0 flex justify-center items-center'>
+                <DragDropImageUpload/>
+            </div>
+        </main>
+    );
+
+};
+
+export default ImageSearchPage;
+
+
+
+// export default function Home() {
+//   return (
+//     <main className='absolute inset-0 flex justify-center items-center'>
+//         <DragDropImageUpload />
+//     </main>
+//   );
+// }
