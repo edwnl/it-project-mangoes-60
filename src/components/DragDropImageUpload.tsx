@@ -78,17 +78,17 @@ const DragDropImageUpload: React.FC = () => {
       </div>
       
       {files.length > 0 && (
-        <div className="mt-6 grid grid-cols-2 gap-4">
+        <div className="mt-6 grid gap-4">
           {files.map((file) => (
-            <div key={file.name} className="relative">
+            <div key={file.name} className="relative inline-block">
               <img
                 src={file.preview}
                 alt={file.name}
-                className="h-24 w-full object-cover rounded-md"
+                className="h-24 object-cover rounded-md"
               />
               <button
                 onClick={() => removeFile(file)}
-                className="absolute top-0 right-0 p-1 bg-red-500 text-white rounded-full"
+                className="absolute top-0 left-0 p-1 bg-red-500 text-white rounded-full"
               >
                 <X size={16} />
               </button>
