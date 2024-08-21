@@ -1,18 +1,28 @@
 "use client";
 
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import NavBar from "@/components/Navbar";
-import CategoryGrid from "@/app/dashboard/CategoryGrid";
+import CategoryGrid, { CategoryItem, searchForCategory } from "@/app/dashboard/CategoryGrid";
 import { mockCategories } from "@/app/dashboard/mockCategoryData";
+import { smartSearch } from "@/app/api/search/smartSearch";
+import { TopCategoryAIResponse } from "@/types";
 
 const DashboardPage: React.FC = () => {
   const router = useRouter();
-
-  const handleSearch = (value: string) => {
+  const [items, setItems] = useState(mockCategories);
+  const handleSearch = (value: TopCategoryAIResponse) => {
     console.log("Searching for:", value);
-  };
 
+    let results: CategoryItem[] = [];
+    value["top_categories"].map((category: string) =>{
+      results.push(...searchForCategory(category));
+    })
+
+
+    setItems(Array.from(new Set(results)));
+
+  };
   const handleLogout = () => {
     console.log("Logging out");
     router.push("/login");
@@ -24,10 +34,10 @@ const DashboardPage: React.FC = () => {
       <div className="max-w-5xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold">Categories</h1>
         <p className="text-gray-600 mb-6">
-          {mockCategories.length} categories in total
+          {items.length} categories in total
         </p>
         <div className="mb-6"></div>
-        <CategoryGrid categories={mockCategories} />
+        <CategoryGrid categories={items}/>
       </div>
     </div>
   );
