@@ -9,19 +9,21 @@ import {
   CameraOutlined,
 } from "@ant-design/icons";
 import FullLogo from "@/assets/full_logo.svg";
-import { smartSearch } from "@/app/api/search/smartSearch";
-import { TopCategoryAIResponse } from "@/types";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-interface NavBarProps {
-  onSearch: (value: TopCategoryAIResponse) => void;
-  onLogout: () => void;
-}
-interface searchBarForm {
+interface SearchBarForm {
   query: string;
 }
 
-const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout }) => {
+interface NavBarProps {
+  onSearch: (query: string) => Promise<void>;
+}
+
+const NavBar: React.FC<NavBarProps> = ({ onSearch }) => {
   const [isMobile, setIsMobile] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -36,36 +38,41 @@ const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout }) => {
 
   const LogoSection = () => (
     <div className="flex items-center">
-      <Image src={FullLogo} alt="Medical Pantry Logo" />
+      <Link href="/dashboard">
+        <Image src={FullLogo} alt="Medical Pantry Logo" />
+      </Link>
       <Tag className="mx-2" color="red">
         Admin
       </Tag>
     </div>
   );
-  const handleForm = async (value: searchBarForm) => {
-    console.log(value);
-    // TODO: uncomment this
-    // console.log(await smartSearch(value.query));
-    onSearch(await smartSearch(value.query));
+
+  const handleForm = async (value: SearchBarForm) => {
+    setIsLoading(true);
+    await onSearch(value.query);
+    setIsLoading(false);
   };
 
   const [form] = Form.useForm();
-  // @ts-ignore
   const SearchBar = () => (
     <div className="w-full">
-      <Form name={"searchBar"} form={form} onFinish={handleForm}>
+      <Form
+        name={"searchBar"}
+        form={form}
+        disabled={isLoading}
+        onFinish={handleForm}
+      >
         <Form.Item name={"query"}>
           <Input
             placeholder="Enter item name..."
             prefix={<SearchOutlined />}
-            suffix={<CameraOutlined className="text-gray-400 cursor-pointer" />}
+            suffix={<CameraOutlined className="cursor-pointer" />}
             className="w-full"
+            onPressEnter={(e) => {
+              e.preventDefault();
+              form.submit();
+            }}
           />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Search
-          </Button>
         </Form.Item>
       </Form>
     </div>
@@ -75,7 +82,7 @@ const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout }) => {
     <Button
       type="primary"
       icon={<LogoutOutlined />}
-      onClick={onLogout}
+      onClick={() => router.push("/")}
       className="custom-button"
     >
       Logout
