@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Input, Button, Tag } from "antd";
 import {
@@ -13,10 +14,12 @@ import FullLogo from "@/assets/full_logo.svg";
 interface NavBarProps {
   onSearch: (value: string) => void;
   onLogout: () => void;
+  onCameraClick: () => void;
 }
 
-const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout }) => {
+const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout, onCameraClick }) => {
   const [isMobile, setIsMobile] = useState(false);
+  const router = useRouter(); 
 
   useEffect(() => {
     const checkMobile = () => {
@@ -43,11 +46,23 @@ const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout }) => {
       <Input
         placeholder="Enter item name..."
         prefix={<SearchOutlined />}
-        suffix={<CameraOutlined className="text-gray-400 cursor-pointer" />}
+        // suffix={<CameraOutlined className="text-gray-400 cursor-pointer" />}
         onChange={(e) => onSearch(e.target.value)}
         className="w-full"
       />
     </div>
+  );
+
+  const CameraButton = () => (
+    <Button 
+      type="default"
+      icon={<CameraOutlined />}
+      onClick={onCameraClick}
+      className="custom-button text-zinc-50 cursor-pointer w-full"
+    >
+      Take a Photo 
+    </Button>
+
   );
 
   const LogoutButton = () => (
@@ -66,11 +81,14 @@ const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout }) => {
       <div className="">
         <LogoSection />
       </div>
-      <div className="flex-grow flex justify-center mx-10 max-w-md">
+      <div className="flex-grow flex justify-center gap-x-4 mx-10 max-w-md">
         <SearchBar />
+        <CameraButton />
+        
       </div>
       <div className="flex justify-end">
         <LogoutButton />
+        
       </div>
     </nav>
   );
@@ -81,8 +99,9 @@ const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout }) => {
         <LogoSection />
         <LogoutButton />
       </div>
-      <div className="mt-4 w-full">
+      <div className="mt-4 w-full space-y-4">
         <SearchBar />
+        <CameraButton/>
       </div>
     </nav>
   );
