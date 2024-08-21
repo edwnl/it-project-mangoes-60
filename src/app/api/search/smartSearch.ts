@@ -1,14 +1,13 @@
-"use server"
-import OpenAI from 'openai';
-
-
+"use server";
+import OpenAI from "openai";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 const categories = [
-  "1ml Luer Slip Syringe", "5ml Luer Lock Syringes",
+  "1ml Luer Slip Syringe",
+  "5ml Luer Lock Syringes",
   "3ml Luer Lock Syringes",
   "10ml Luer Slip Syringes",
   "Thermal Shock Blankets",
@@ -22,11 +21,10 @@ const categories = [
   "Silicon Anaesthetic Face Mask",
   "Nasal prongs O2 Cannula with CO2 sample line",
   "Adult Intubating Stylet",
-  "Nasopharyngeal Tube"
+  "Nasopharyngeal Tube",
 ];
 
 export async function smartSearch(query: string) {
-
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
@@ -38,8 +36,7 @@ export async function smartSearch(query: string) {
           content: [
             {
               type: "text",
-              text:
-                `from these categories ${[...categories]}, please find me the top 3 categories that the product name: "${query}" might be. Please only respond in JSON format in the following schema { "top_categories": result}`,
+              text: `from these categories ${[...categories]}, please find me the top 3 categories that the product name: "${query}" might be. Please only respond in JSON format in the following schema { "top_categories": result}`,
             },
           ],
         },
@@ -47,7 +44,7 @@ export async function smartSearch(query: string) {
       model: "gpt-4o-mini",
     });
 
-    const response = completion.choices[0].message.content!.slice(7,-3);
+    const response = completion.choices[0].message.content!.slice(7, -3);
     return JSON.parse(response);
   } catch (e) {
     console.error(e);

@@ -17,7 +17,7 @@ interface NavBarProps {
   onLogout: () => void;
 }
 interface searchBarForm {
-  query: string
+  query: string;
 }
 
 const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout }) => {
@@ -42,34 +42,31 @@ const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout }) => {
       </Tag>
     </div>
   );
-  const handleForm = async (value: searchBarForm) =>  {
+  const handleForm = async (value: searchBarForm) => {
     console.log(value);
     // TODO: uncomment this
     // console.log(await smartSearch(value.query));
     onSearch(await smartSearch(value.query));
-
-    }
+  };
 
   const [form] = Form.useForm();
   // @ts-ignore
   const SearchBar = () => (
     <div className="w-full">
-      <Form
-        name={"searchBar"}
-        form={form}
-        onFinish={handleForm}>
-      <Form.Item name={"query"}>
-        <Input
-          placeholder="Enter item name..."
-          prefix={<SearchOutlined />}
-          suffix={<CameraOutlined className="text-gray-400 cursor-pointer" />}
-
-          className="w-full"
-        />
-      </Form.Item>
-      <Form.Item>
-        <Button type="primary" htmlType="submit" >Search</Button>
-      </Form.Item>
+      <Form name={"searchBar"} form={form} onFinish={handleForm}>
+        <Form.Item name={"query"}>
+          <Input
+            placeholder="Enter item name..."
+            prefix={<SearchOutlined />}
+            suffix={<CameraOutlined className="text-gray-400 cursor-pointer" />}
+            className="w-full"
+          />
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            Search
+          </Button>
+        </Form.Item>
       </Form>
     </div>
   );

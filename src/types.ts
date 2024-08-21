@@ -1,3 +1,3 @@
 export interface TopCategoryAIResponse {
-  "top_categories": string[];
+  top_categories: string[];
 }
