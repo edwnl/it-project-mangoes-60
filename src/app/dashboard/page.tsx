@@ -1,44 +1,123 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useCallback } from "react";
+import { Button, message, notification, Spin } from "antd";
 import NavBar from "@/components/Navbar";
-import CategoryGrid, { CategoryItem, searchForCategory } from "@/app/dashboard/CategoryGrid";
-import { mockCategories } from "@/app/dashboard/mockCategoryData";
-import { smartSearch } from "@/app/api/search/smartSearch";
-import { TopCategoryAIResponse } from "@/types";
+import CategoryGrid from "@/components/CategoryGrid";
+import { categoryItems } from "@/data/categoryData";
+import { CategoryItem } from "@/components/CategoryGrid";
+import { textSearch } from "@/api/search/textSearch";
+import { imageSearch } from "@/api/search/imageSearch";
+
+interface SearchResult extends CategoryItem {
+  confidence: number;
+}
 
 const DashboardPage: React.FC = () => {
-  const router = useRouter();
-  const [items, setItems] = useState(mockCategories);
-  const handleSearch = (value: TopCategoryAIResponse) => {
-    console.log("Searching for:", value);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [lastQuery, setLastQuery] = useState("");
+  const [api, contextHolder] = notification.useNotification();
 
-    let results: CategoryItem[] = [];
-    value["top_categories"].map((category: string) =>{
-      results.push(...searchForCategory(category));
-    })
+  const handleSearch = useCallback(async (query: string) => {
+    setIsSearching(true);
+    setSearchResults([]);
+    setLastQuery(query);
 
+    const startTime = performance.now();
 
-    setItems(Array.from(new Set(results)));
+    const { success, data, error } = await textSearch(query);
+    if (!success) {
+      api.error({
+        message: "Error",
+        description: `Something went wrong while fetching results. ${error}.`,
+      });
+      resetSearch();
+      return;
+    }
 
-  };
-  const handleLogout = () => {
-    console.log("Logging out");
-    router.push("/login");
+    api.success({
+      message: "Search Completed",
+      description: `Found ${data.length} result(s) in ${Math.round(performance.now() - startTime)}ms.`,
+    });
+
+    setSearchResults(data);
+    setIsSearching(false);
+  }, []);
+
+  const handleImageSearch = useCallback(async (image: File) => {
+    setIsSearching(true);
+    setSearchResults([]);
+    setLastQuery("Image Search");
+
+    const startTime = performance.now();
+
+    const formData = new FormData();
+    formData.append("file", image);
+
+    const { success, data, error } = await imageSearch(formData);
+    if (!success) {
+      api.error({
+        message: "Error",
+        description: `Something went wrong while analyzing the image. ${error}.`,
+      });
+      resetSearch();
+      return;
+    }
+
+    api.success({
+      message: "Image Search Completed",
+      description: `Found ${data.length} result(s) in ${Math.round(performance.now() - startTime)}ms.`,
+    });
+
+    setSearchResults(data);
+    setIsSearching(false);
+  }, []);
+
+  const resetSearch = () => {
+    setSearchResults([]);
+    setIsSearching(false);
+    setLastQuery("");
   };
 
   return (
     <div className="min-h-screen">
-      <NavBar onSearch={handleSearch} onLogout={handleLogout} />
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold">Categories</h1>
-        <p className="text-gray-600 mb-6">
-          {items.length} categories in total
-        </p>
-        <div className="mb-6"></div>
-        <CategoryGrid categories={items}/>
-      </div>
+      {contextHolder}
+      <NavBar onSearch={handleSearch} onImageSearch={handleImageSearch} />
+
+      {isSearching ? (
+        <div className="flex justify-center items-center h-[calc(100vh-64px)]">
+          <Spin size="large" />
+        </div>
+      ) : (
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-2xl font-bold">
+              {searchResults.length > 0 ? "Search Results" : "Categories"}
+            </h1>
+            {searchResults.length > 0 && (
+              <Button
+                onClick={resetSearch}
+                type="primary"
+                className="custom-button"
+              >
+                Reset
+              </Button>
+            )}
+          </div>
+          <p className="text-gray-600 mb-6">
+            {searchResults.length > 0
+              ? `Top ${searchResults.length} results matching "${lastQuery}"`
+              : `${categoryItems.length} categories in total`}
+          </p>
+          <CategoryGrid
+            categories={
+              searchResults.length > 0 ? searchResults : categoryItems
+            }
+            showConfidence={searchResults.length > 0}
+          />
+        </div>
+      )}
     </div>
   );
 };

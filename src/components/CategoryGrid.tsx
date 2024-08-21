@@ -2,45 +2,32 @@
 
 import React from "react";
 import Image from "next/image";
-import { Tag } from "antd";
+import { Empty, Tag } from "antd";
 import syringeImage from "@/assets/syringe.png";
-
-import { mockCategories } from "@/app/dashboard/mockCategoryData";
-
-import Fuse from "fuse.js"
 
 export interface CategoryItem {
   id: string;
-  name: string;
-  type: string;
+  box_name: string;
+  category_name: string;
   aisle: number;
   column: number;
   image_url: string;
+  confidence?: number;
 }
 
 interface CategoryGridProps {
   categories: CategoryItem[];
+  showConfidence: boolean;
 }
-export function searchForCategory(query: string): CategoryItem[] {
 
-  const fuse = new Fuse(
-    mockCategories,
-    {
-      includeScore: true,
-      keys: ["name"],
-      shouldSort: true,
-      isCaseSensitive: false,
-      findAllMatches: true,
-    }
-  );
-  const result: CategoryItem[] = [];
-  fuse.search(query).map((e) => {
-    result.push(e.item);
-  })
-  console.log(result);
-  return result;
-}
-const CategoryGrid: React.FC<CategoryGridProps> = ({ categories }) => {
+const CategoryGrid: React.FC<CategoryGridProps> = ({
+  categories,
+  showConfidence,
+}) => {
+  if (!categories || categories.length === 0) {
+    return <Empty />;
+  }
+
   return (
     <div className="max-w-5xl mx-auto">
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -51,8 +38,8 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({ categories }) => {
           >
             <div className="relative h-40 w-40 mx-auto">
               <Image
-                src={syringeImage}
-                alt={category.name}
+                src={category.image_url || syringeImage}
+                alt={category.box_name}
                 layout="fill"
                 objectFit="contain"
                 className="rounded-md p-2"
@@ -62,11 +49,18 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({ categories }) => {
               <p className="text-sm text-gray-500 mb-2">
                 Located at Aisle {category.aisle}, Column {category.column}
               </p>
-              <h3 className="text-lg font-semibold mb-2">{category.name}</h3>
-              <Tag color={category.type === "SYRINGE" ? "red" : "purple"}>
-                {category.type.charAt(0).toUpperCase() +
-                  category.type.slice(1).toLowerCase()}
-              </Tag>
+              <h3 className="text-lg font-semibold mb-2">
+                {category.box_name}
+              </h3>
+              <div className="flex justify-between items-center">
+                <Tag color={"purple"}>
+                  {category.category_name.charAt(0).toUpperCase() +
+                    category.category_name.slice(1).toLowerCase()}
+                </Tag>
+                {showConfidence && category.confidence !== undefined && (
+                  <Tag color="blue">Confidence: {category.confidence}%</Tag>
+                )}
+              </div>
             </div>
           </div>
         ))}
