@@ -63,16 +63,16 @@ const DragDropImageUpload: React.FC = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-8">
+    <div className="w-full max-w-4xl mx-auto p-8">
       <div
         {...getRootProps()}
-        className={`p-10 border-2 border-dashed rounded-lg text-center cursor-pointer ${
+        className={`p-20 border-2 border-dashed rounded-lg text-center cursor-pointer ${
           isDragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
         }`}
       >
         <input {...getInputProps()} />
-        <Upload className="mx-auto h-12 w-12 text-gray-400" />
-        <p className="mt-2 text-sm text-gray-600">
+        <Upload className="mx-auto h-24 w-24 text-gray-400" />
+        <p className="mt-4 text-lg text-gray-600">
           Drag 'n' drop some images here, or click to select files
         </p>
       </div>
@@ -84,7 +84,7 @@ const DragDropImageUpload: React.FC = () => {
               <img
                 src={file.preview}
                 alt={file.name}
-                className="h-24 object-cover rounded-md"
+                className="h-28 object-cover rounded-md"
               />
               <button
                 onClick={() => removeFile(file)}
@@ -94,7 +94,7 @@ const DragDropImageUpload: React.FC = () => {
               </button>
               {file.category && (
                 <div className="mt-2">
-                <p className="w-full text-center mt-1 text-sm text-gray-600">Category: {file.category}</p>
+                <p className="w-full text-center mt-1 text-lg text-gray-600">Category: {file.category}</p>
                 </div>
               )}
             </div>
@@ -107,7 +107,7 @@ const DragDropImageUpload: React.FC = () => {
         <button
           onClick={uploadFiles}
           disabled={uploading}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
+          className="mt-6 px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 text-lg"
         >
           {uploading ? 'Analyzing...' : 'Analyze Images'}
         </button>

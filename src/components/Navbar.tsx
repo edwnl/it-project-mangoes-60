@@ -101,7 +101,7 @@ const NavBar: React.FC<NavBarProps> = ({ onSearch, onLogout}) => {
         <LogoSection />
         <LogoutButton />
       </div>
-      <div className="mt-4 w-full space-y-4">
+      <div className="mt-4 w-full flex flex-col gap-4">
         <SearchBar />
         <CameraButton/>
       </div>

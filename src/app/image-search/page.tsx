@@ -20,7 +20,7 @@ const ImageSearchPage: React.FC = () => {
     }
 
     return (
-        <main className="min-h-screen">
+        <main className="min-h-screen flex flex-col">
             <NavBar onSearch={handleSearch} onLogout={handleLogout} />
             <div className='flex-grow flex justify-center items-center'>
                 <DragDropImageUpload/>
