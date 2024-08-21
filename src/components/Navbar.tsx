@@ -11,6 +11,7 @@ import {
 import FullLogo from "@/assets/full_logo.svg";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import DragDropImageUpload from "./modals/DragDropImageUpload";
 
 interface SearchBarForm {
   query: string;
@@ -18,11 +19,13 @@ interface SearchBarForm {
 
 interface NavBarProps {
   onSearch: (query: string) => Promise<void>;
+  onImageSearch: (image: File) => Promise<void>;
 }
 
-const NavBar: React.FC<NavBarProps> = ({ onSearch }) => {
+const NavBar: React.FC<NavBarProps> = ({ onSearch, onImageSearch }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isImageModalVisible, setIsImageModalVisible] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -53,6 +56,13 @@ const NavBar: React.FC<NavBarProps> = ({ onSearch }) => {
     setIsLoading(false);
   };
 
+  const handleImageUpload = async (file: File) => {
+    setIsLoading(true);
+    setIsImageModalVisible(false);
+    await onImageSearch(file);
+    setIsLoading(false);
+  };
+
   const [form] = Form.useForm();
   const SearchBar = () => (
     <div className="w-full">
@@ -66,7 +76,12 @@ const NavBar: React.FC<NavBarProps> = ({ onSearch }) => {
           <Input
             placeholder="Enter item name..."
             prefix={<SearchOutlined />}
-            suffix={<CameraOutlined className="cursor-pointer" />}
+            suffix={
+              <CameraOutlined
+                className="cursor-pointer"
+                onClick={() => setIsImageModalVisible(true)}
+              />
+            }
             className="w-full"
             onPressEnter={(e) => {
               e.preventDefault();
@@ -115,7 +130,16 @@ const NavBar: React.FC<NavBarProps> = ({ onSearch }) => {
     </nav>
   );
 
-  return isMobile ? <MobileNavBar /> : <DesktopNavBar />;
+  return (
+    <>
+      {isMobile ? <MobileNavBar /> : <DesktopNavBar />}
+      <DragDropImageUpload
+        isVisible={isImageModalVisible}
+        onClose={() => setIsImageModalVisible(false)}
+        onImageConfirm={handleImageUpload}
+      />
+    </>
+  );
 };
 
 export default NavBar;

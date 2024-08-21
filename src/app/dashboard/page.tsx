@@ -4,9 +4,10 @@ import React, { useState, useCallback } from "react";
 import { Button, message, notification, Spin } from "antd";
 import NavBar from "@/components/Navbar";
 import CategoryGrid from "@/components/CategoryGrid";
-import { categoryItems } from "@/utils/categoryData";
+import { categoryItems } from "@/data/categoryData";
 import { CategoryItem } from "@/components/CategoryGrid";
-import { smartSearch } from "@/api/search/smartSearch";
+import { textSearch } from "@/api/search/textSearch";
+import { imageSearch } from "@/api/search/imageSearch";
 
 interface SearchResult extends CategoryItem {
   confidence: number;
@@ -25,7 +26,7 @@ const DashboardPage: React.FC = () => {
 
     const startTime = performance.now();
 
-    const { success, data, error } = await smartSearch(query);
+    const { success, data, error } = await textSearch(query);
     if (!success) {
       api.error({
         message: "Error",
@@ -37,10 +38,40 @@ const DashboardPage: React.FC = () => {
 
     api.success({
       message: "Search Completed",
-      description: `Found 3 result(s) in ${Math.round(performance.now() - startTime)}ms.`,
+      description: `Found ${data.length} result(s) in ${Math.round(performance.now() - startTime)}ms.`,
     });
 
     setSearchResults(data);
+    setIsSearching(false);
+  }, []);
+
+  const handleImageSearch = useCallback(async (image: File) => {
+    setIsSearching(true);
+    setSearchResults([]);
+    setLastQuery("Image Search");
+
+    const startTime = performance.now();
+
+    const formData = new FormData();
+    formData.append("file", image);
+
+    const { success, data, error } = await imageSearch(formData);
+    if (!success) {
+      api.error({
+        message: "Error",
+        description: `Something went wrong while analyzing the image. ${error}.`,
+      });
+      resetSearch();
+      return;
+    }
+
+    api.success({
+      message: "Image Search Completed",
+      description: `Found ${data.length} result(s) in ${Math.round(performance.now() - startTime)}ms.`,
+    });
+
+    setSearchResults(data);
+    setIsSearching(false);
   }, []);
 
   const resetSearch = () => {
@@ -52,9 +83,9 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="min-h-screen">
       {contextHolder}
-      <NavBar onSearch={handleSearch} />
+      <NavBar onSearch={handleSearch} onImageSearch={handleImageSearch} />
 
-      {isSearching && searchResults.length === 0 ? (
+      {isSearching ? (
         <div className="flex justify-center items-center h-[calc(100vh-64px)]">
           <Spin size="large" />
         </div>
@@ -62,26 +93,28 @@ const DashboardPage: React.FC = () => {
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex justify-between items-center mb-2">
             <h1 className="text-2xl font-bold">
-              {isSearching ? "Search Results" : "Categories"}
+              {searchResults.length > 0 ? "Search Results" : "Categories"}
             </h1>
-            {isSearching && (
+            {searchResults.length > 0 && (
               <Button
                 onClick={resetSearch}
                 type="primary"
-                className={"custom-button"}
+                className="custom-button"
               >
                 Reset
               </Button>
             )}
           </div>
           <p className="text-gray-600 mb-6">
-            {isSearching
-              ? `Top 3 results matching "${lastQuery}`
+            {searchResults.length > 0
+              ? `Top ${searchResults.length} results matching "${lastQuery}"`
               : `${categoryItems.length} categories in total`}
           </p>
           <CategoryGrid
-            categories={isSearching ? searchResults : categoryItems}
-            showConfidence={isSearching}
+            categories={
+              searchResults.length > 0 ? searchResults : categoryItems
+            }
+            showConfidence={searchResults.length > 0}
           />
         </div>
       )}
