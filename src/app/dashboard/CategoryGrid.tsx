@@ -11,6 +11,7 @@ export interface CategoryItem {
   type: string;
   aisle: number;
   column: number;
+  image_url: string;
 }
 
 interface CategoryGridProps {

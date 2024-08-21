@@ -9,6 +9,7 @@ export const mockCategories: CategoryItem[] = [
     type: "SYRINGE",
     aisle: 5,
     column: 7,
+    image_url: "",
   },
   {
     id: "2",
@@ -16,6 +17,7 @@ export const mockCategories: CategoryItem[] = [
     type: "AIRWAY",
     aisle: 2,
     column: 9,
+    image_url: "",
   },
   {
     id: "3",
@@ -23,6 +25,7 @@ export const mockCategories: CategoryItem[] = [
     type: "SYRINGE",
     aisle: 5,
     column: 8,
+    image_url: "",
   },
   {
     id: "4",
@@ -30,6 +33,7 @@ export const mockCategories: CategoryItem[] = [
     type: "AIRWAY",
     aisle: 2,
     column: 10,
+    image_url: "",
   },
   {
     id: "5",
@@ -37,6 +41,7 @@ export const mockCategories: CategoryItem[] = [
     type: "SYRINGE",
     aisle: 5,
     column: 6,
+    image_url: "",
   },
   {
     id: "6",
@@ -44,5 +49,6 @@ export const mockCategories: CategoryItem[] = [
     type: "AIRWAY",
     aisle: 3,
     column: 1,
+    image_url: "",
   },
 ];
