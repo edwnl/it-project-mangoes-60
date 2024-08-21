@@ -5,6 +5,10 @@ import Image from "next/image";
 import { Tag } from "antd";
 import syringeImage from "@/assets/syringe.png";
 
+import { mockCategories } from "@/app/dashboard/mockCategoryData";
+
+import Fuse from "fuse.js"
+
 export interface CategoryItem {
   id: string;
   name: string;
@@ -17,7 +21,25 @@ export interface CategoryItem {
 interface CategoryGridProps {
   categories: CategoryItem[];
 }
+export function searchForCategory(query: string): CategoryItem[] {
 
+  const fuse = new Fuse(
+    mockCategories,
+    {
+      includeScore: true,
+      keys: ["name"],
+      shouldSort: true,
+      isCaseSensitive: false,
+      findAllMatches: true,
+    }
+  );
+  const result: CategoryItem[] = [];
+  fuse.search(query).map((e) => {
+    result.push(e.item);
+  })
+  console.log(result);
+  return result;
+}
 const CategoryGrid: React.FC<CategoryGridProps> = ({ categories }) => {
   return (
     <div className="max-w-5xl mx-auto">
