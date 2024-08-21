@@ -8,6 +8,7 @@ import syringeImage from "@/assets/syringe.png";
 import { mockCategories } from "@/app/dashboard/mockCategoryData";
 
 import Fuse from "fuse.js"
+
 export interface CategoryItem {
   id: string;
   name: string;
