@@ -29,7 +29,10 @@ const CameraPage: React.FC = () => {
         />
       </div>
       <div className="hidden md:block">
-        <DragDropImageUpload />
+      <DragDropImageUpload
+        onSearchResult={handleSearchResult}
+        onSearchStateChange={handleSearchStateChange}
+      />
       </div>
 
       {isSearching && (

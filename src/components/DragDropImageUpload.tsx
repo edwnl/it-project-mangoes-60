@@ -3,13 +3,17 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X } from 'lucide-react';
+import { imageSearch } from "@/api/search/imageSearch";
 
 interface FileWithPreview extends File {
   preview: string;
-  category?: string;
+  categories?: any[];
 }
 
-const DragDropImageUpload: React.FC = () => {
+const DragDropImageUpload: React.FC<{
+  onSearchResult: (result: any) => void;
+  onSearchStateChange: (isSearching: boolean) => void;
+}> = ({ onSearchResult, onSearchStateChange }) => {
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [uploading, setUploading] = useState(false);
 
@@ -35,6 +39,7 @@ const DragDropImageUpload: React.FC = () => {
 
   const uploadFiles = async () => {
     setUploading(true);
+    onSearchStateChange(true);
     const updatedFiles = [...files];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -42,23 +47,23 @@ const DragDropImageUpload: React.FC = () => {
       formData.append('file', file);
 
       try {
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error('Upload failed');
+        const result = await imageSearch(formData);
+        if (result.success) {
+          updatedFiles[i] = { ...file, categories: result.data };
+          onSearchResult(result);
+        } else {
+          throw new Error(result.error || 'Analysis failed');
         }
-
-        const data = await response.json();
-        updatedFiles[i] = { ...file, category: data.category };
       } catch (error) {
-        console.error('Error uploading file:', error);
-        // Handle error (e.g., show error message)
+        console.error('Error processing file:', error);
+        onSearchResult({
+          success: false,
+          error: 'Failed to process image',
+        });
       }
     }
     setUploading(false);
+    onSearchStateChange(false);
     setFiles(updatedFiles);
   };
 
@@ -92,13 +97,16 @@ const DragDropImageUpload: React.FC = () => {
               >
                 <X size={16} />
               </button>
-              {file.category && (
+              {file.categories && (
                 <div className="mt-2">
-                <p className="w-full text-center mt-1 text-lg text-gray-600">Category: {file.category}</p>
+                  {file.categories.map((category, index) => (
+                    <p key={index} className="text-center text-sm text-gray-600">
+                      {category.box_name}: {category.confidence.toFixed(2)}%
+                    </p>
+                  ))}
                 </div>
               )}
             </div>
-            
           ))}
         </div>
       )}
