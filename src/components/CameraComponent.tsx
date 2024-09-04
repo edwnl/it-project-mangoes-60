@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useCallback, useEffect } from "react";
-import { Button } from "antd";
+import { Button, message } from "antd";
 import { CameraOutlined } from "@ant-design/icons";
 
 const SQUARE_SIZE = 300; // Define the size of our square photo
@@ -30,7 +30,8 @@ const CameraComponent: React.FC = () => {
         videoRef.current.play();
       }
     } catch (err) {
-      console.error("Error accessing the camera:", err);
+      console.error(err);
+      message.error("Error accessing the camera.");
     }
   }, []);
 
@@ -113,7 +114,7 @@ const CameraComponent: React.FC = () => {
           </div>
           <Button
             onClick={stream ? captureImage : startCamera}
-            className="flex items-center"
+            className="flex items-center custom-button"
           >
             <CameraOutlined className="mr-2" />
             {stream ? "Capture" : "Start Camera"}
@@ -133,7 +134,9 @@ const CameraComponent: React.FC = () => {
           </div>
           <div className="flex space-x-4">
             <Button onClick={retakePhoto}>Retake</Button>
-            <Button onClick={confirmPhoto}>Confirm</Button>
+            <Button className="custom-button" onClick={confirmPhoto}>
+              Confirm
+            </Button>
           </div>
         </>
       )}

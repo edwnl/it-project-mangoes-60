@@ -10,6 +10,7 @@
 }
 
 .custom-button {
+  color: white !important;
   background-color: var(--primary-color) !important;
   border-color: var(--primary-color) !important;
 }
@@ -18,6 +19,7 @@
 .custom-button:focus {
   background-color: var(--primary-hover-color) !important;
   border-color: var(--primary-hover-color) !important;
+  color: white !important;
 }
 
 .ant-spin-dot-item {

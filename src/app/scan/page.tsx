@@ -14,11 +14,6 @@ const CameraPage: React.FC = () => {
       </p>
 
       <CameraComponent />
-
-      <p className="mt-6 text-sm text-gray-600">
-        Note: This feature requires camera permissions. Please ensure you've
-        granted access when prompted.
-      </p>
     </div>
   );
 };
