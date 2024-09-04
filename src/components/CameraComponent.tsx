@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useRef, useState, useCallback, useEffect } from "react";
-import { Camera } from "lucide-react";
 import { Button } from "antd";
+import { CameraOutlined } from "@ant-design/icons";
+
+const SQUARE_SIZE = 300; // Define the size of our square photo
 
 const CameraComponent: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -14,9 +16,9 @@ const CameraComponent: React.FC = () => {
     try {
       const constraints: MediaStreamConstraints = {
         video: {
-          facingMode: "environment", // This requests the back camera
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+          facingMode: "environment",
+          width: { ideal: SQUARE_SIZE },
+          height: { ideal: SQUARE_SIZE },
         },
       };
 
@@ -25,7 +27,7 @@ const CameraComponent: React.FC = () => {
       setStream(mediaStream);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
-        videoRef.current.play(); // Explicitly start playing
+        videoRef.current.play();
       }
     } catch (err) {
       console.error("Error accessing the camera:", err);
@@ -41,16 +43,34 @@ const CameraComponent: React.FC = () => {
 
   const captureImage = useCallback((): void => {
     if (videoRef.current && canvasRef.current) {
-      const context = canvasRef.current.getContext("2d");
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext("2d");
+
       if (context) {
+        // Calculate the square crop
+        const size = Math.min(video.videoWidth, video.videoHeight);
+        const startX = (video.videoWidth - size) / 2;
+        const startY = (video.videoHeight - size) / 2;
+
+        // Set canvas to our desired SQUARE_SIZE
+        canvas.width = SQUARE_SIZE;
+        canvas.height = SQUARE_SIZE;
+
+        // Draw the cropped and resized image
         context.drawImage(
-          videoRef.current,
+          video,
+          startX,
+          startY,
+          size,
+          size, // Source rectangle
           0,
           0,
-          canvasRef.current.width,
-          canvasRef.current.height,
+          SQUARE_SIZE,
+          SQUARE_SIZE, // Destination rectangle
         );
-        const imageDataUrl = canvasRef.current.toDataURL("image/jpeg");
+
+        const imageDataUrl = canvas.toDataURL("image/jpeg");
         setCapturedImage(imageDataUrl);
         stopCamera();
       }
@@ -79,26 +99,32 @@ const CameraComponent: React.FC = () => {
     <div className="flex flex-col items-center space-y-4">
       {!capturedImage ? (
         <>
-          <div className="relative w-64 h-64 bg-gray-200 rounded-lg overflow-hidden">
+          <div
+            className="relative bg-gray-200 rounded-lg overflow-hidden"
+            style={{ width: `${SQUARE_SIZE}px`, height: `${SQUARE_SIZE}px` }}
+          >
             <video
               ref={videoRef}
               playsInline
               muted
               autoPlay
-              className="w-full h-full object-cover"
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full object-cover"
             />
           </div>
           <Button
             onClick={stream ? captureImage : startCamera}
             className="flex items-center"
           >
-            <Camera className="mr-2" />
+            <CameraOutlined className="mr-2" />
             {stream ? "Capture" : "Start Camera"}
           </Button>
         </>
       ) : (
         <>
-          <div className="w-64 h-64 bg-gray-200 rounded-lg overflow-hidden">
+          <div
+            className="bg-gray-200 rounded-lg overflow-hidden"
+            style={{ width: `${SQUARE_SIZE}px`, height: `${SQUARE_SIZE}px` }}
+          >
             <img
               src={capturedImage}
               alt="Captured"
@@ -111,7 +137,7 @@ const CameraComponent: React.FC = () => {
           </div>
         </>
       )}
-      <canvas ref={canvasRef} className="hidden" width="640" height="480" />
+      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 };

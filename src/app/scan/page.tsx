@@ -3,7 +3,7 @@ import CameraComponent from "@/components/CameraComponent";
 
 const CameraPage: React.FC = () => {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl mt-16">
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
       <h1 className="text-3xl font-bold mb-4">Camera Capture Page</h1>
 
       <p className="mb-6">
