@@ -97,7 +97,7 @@ const DragDropImageUpload: React.FC<{
               >
                 <X size={16} />
               </button>
-              {file.categories && (
+              {/* {file.categories && (
                 <div className="mt-2">
                   {file.categories.map((category, index) => (
                     <p key={index} className="text-center text-sm text-gray-600">
@@ -105,7 +105,7 @@ const DragDropImageUpload: React.FC<{
                     </p>
                   ))}
                 </div>
-              )}
+              )} */}
             </div>
           ))}
         </div>
