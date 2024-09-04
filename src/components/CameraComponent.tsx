@@ -3,14 +3,19 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { Button, message } from "antd";
 import { CameraOutlined } from "@ant-design/icons";
+import { imageSearch } from "@/api/search/imageSearch";
 
-const SQUARE_SIZE = 300; // Define the size of our square photo
+const SQUARE_SIZE = 300;
+const MAX_UPLOAD_SIZE = 512;
 
-const CameraComponent: React.FC = () => {
+const CameraComponent: React.FC<{ onSearchResult: (result: any) => void }> = ({
+  onSearchResult,
+}) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   const startCamera = useCallback(async (): Promise<void> => {
     try {
@@ -49,26 +54,23 @@ const CameraComponent: React.FC = () => {
       const context = canvas.getContext("2d");
 
       if (context) {
-        // Calculate the square crop
         const size = Math.min(video.videoWidth, video.videoHeight);
         const startX = (video.videoWidth - size) / 2;
         const startY = (video.videoHeight - size) / 2;
 
-        // Set canvas to our desired SQUARE_SIZE
         canvas.width = SQUARE_SIZE;
         canvas.height = SQUARE_SIZE;
 
-        // Draw the cropped and resized image
         context.drawImage(
           video,
           startX,
           startY,
           size,
-          size, // Source rectangle
+          size,
           0,
           0,
           SQUARE_SIZE,
-          SQUARE_SIZE, // Destination rectangle
+          SQUARE_SIZE,
         );
 
         const imageDataUrl = canvas.toDataURL("image/jpeg");
@@ -78,15 +80,56 @@ const CameraComponent: React.FC = () => {
     }
   }, [stopCamera]);
 
+  const processAndUploadImage = async (imageDataUrl: string) => {
+    const img = new Image();
+    img.onload = async () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const scale = Math.min(
+        MAX_UPLOAD_SIZE / img.width,
+        MAX_UPLOAD_SIZE / img.height,
+      );
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+
+      ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob(
+        async (blob) => {
+          if (blob) {
+            const formData = new FormData();
+            formData.append("file", blob, "image.jpg");
+
+            try {
+              setIsProcessing(true);
+              const result = await imageSearch(formData);
+              onSearchResult(result);
+            } catch (error) {
+              console.error("Error processing image:", error);
+              message.error("Failed to process image");
+            } finally {
+              setIsProcessing(false);
+            }
+          }
+        },
+        "image/jpeg",
+        0.8,
+      );
+    };
+    img.src = imageDataUrl;
+  };
+
+  const confirmPhoto = useCallback(async (): Promise<void> => {
+    if (capturedImage) {
+      await processAndUploadImage(capturedImage);
+    }
+  }, [capturedImage, onSearchResult]);
+
   const retakePhoto = useCallback((): void => {
     setCapturedImage(null);
     startCamera();
   }, [startCamera]);
-
-  const confirmPhoto = useCallback((): void => {
-    console.log("Photo confirmed:", capturedImage);
-    // Implement your confirmation logic here
-  }, [capturedImage]);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -133,9 +176,15 @@ const CameraComponent: React.FC = () => {
             />
           </div>
           <div className="flex space-x-4">
-            <Button onClick={retakePhoto}>Retake</Button>
-            <Button className="custom-button" onClick={confirmPhoto}>
-              Confirm
+            <Button onClick={retakePhoto} disabled={isProcessing}>
+              Retake
+            </Button>
+            <Button
+              className="custom-button"
+              onClick={confirmPhoto}
+              disabled={isProcessing}
+            >
+              {isProcessing ? "Processing..." : "Confirm"}
             </Button>
           </div>
         </>
