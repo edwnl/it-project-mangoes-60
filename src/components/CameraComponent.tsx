@@ -8,9 +8,10 @@ import { imageSearch } from "@/api/search/imageSearch";
 const SQUARE_SIZE = 300;
 const MAX_UPLOAD_SIZE = 512;
 
-const CameraComponent: React.FC<{ onSearchResult: (result: any) => void }> = ({
-  onSearchResult,
-}) => {
+const CameraComponent: React.FC<{
+  onSearchResult: (result: any) => void;
+  onSearchStateChange: (isSearching: boolean) => void;
+}> = ({ onSearchResult, onSearchStateChange }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -103,13 +104,19 @@ const CameraComponent: React.FC<{ onSearchResult: (result: any) => void }> = ({
 
             try {
               setIsProcessing(true);
+              onSearchStateChange(true); // Notify parent that search is starting
               const result = await imageSearch(formData);
               onSearchResult(result);
             } catch (error) {
               console.error("Error processing image:", error);
               message.error("Failed to process image");
+              onSearchResult({
+                success: false,
+                error: "Failed to process image",
+              });
             } finally {
               setIsProcessing(false);
+              onSearchStateChange(false); // Notify parent that search has ended
             }
           }
         },
