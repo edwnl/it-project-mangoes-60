@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import CameraComponent from "@/components/CameraComponent";
+import DragDropImageUpload from "@/components/DragDropImageUpload";
 import { Spin } from "antd";
 
 const CameraPage: React.FC = () => {
