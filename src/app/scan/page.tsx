@@ -21,10 +21,17 @@ const CameraPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <CameraComponent
-        onSearchResult={handleSearchResult}
-        onSearchStateChange={handleSearchStateChange}
-      />
+      <div className="md:hidden">
+        <CameraComponent
+          onSearchResult={handleSearchResult}
+          onSearchStateChange={handleSearchStateChange}
+        />
+      </div>
+      <div className="hidden md:block">
+        <p className="text-center text-lg">
+          Camera component is only available on mobile devices.
+        </p>
+      </div>
 
       {isSearching && (
         <div className="mt-8 text-center">
