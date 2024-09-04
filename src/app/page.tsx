@@ -12,7 +12,7 @@ const LoginPage: React.FC = () => {
 
   const onFinish = (values: { username: string; password: string }) => {
     console.log("Success:", values);
-    router.push("/dashboard");
+    router.push("/scan");
   };
 
   return (
