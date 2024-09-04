@@ -1,12 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CameraComponent from "@/components/CameraComponent";
+import DragDropImageUpload from "@/components/DragDropImageUpload";
 import { Spin } from "antd";
 
 const CameraPage: React.FC = () => {
   const [searchResults, setSearchResults] = useState<any>(null);
   const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px is the 'md' breakpoint in Tailwind by default
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleSearchResult = (result: any) => {
     setSearchResults(result);
@@ -21,19 +34,27 @@ const CameraPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <CameraComponent
-        onSearchResult={handleSearchResult}
-        onSearchStateChange={handleSearchStateChange}
-      />
+      <div className="md:hidden">
+        <CameraComponent
+          onSearchResult={handleSearchResult}
+          onSearchStateChange={handleSearchStateChange}
+        />
+      </div>
+      <div className="hidden md:block">
+        <DragDropImageUpload
+          onSearchResult={handleSearchResult}
+          onSearchStateChange={handleSearchStateChange}
+        />
+      </div>
 
-      {isSearching && (
+      {isMobile && isSearching && (
         <div className="mt-8 text-center">
           <Spin />
         </div>
       )}
 
-      {!isSearching && searchResults && (
-        <div className="mt-8">
+      {isMobile && !isSearching && searchResults && (
+        <div className="mt-8 text-center">
           <h2 className="text-2xl font-bold mb-4">Search Results</h2>
           {searchResults.success ? (
             <ul>
