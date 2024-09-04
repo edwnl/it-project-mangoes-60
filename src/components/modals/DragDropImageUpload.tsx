@@ -2,8 +2,8 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, X } from "lucide-react";
 import { Button, Modal } from "antd";
+import { UploadOutlined, XOutlined } from "@ant-design/icons";
 
 interface DragDropImageUploadProps {
   isVisible: boolean;
@@ -60,7 +60,7 @@ const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
           }`}
         >
           <input {...getInputProps()} />
-          <Upload className="mx-auto h-12 w-12 text-gray-400" />
+          <UploadOutlined className="mx-auto h-12 w-12 text-gray-400" />
           <p className="mt-2 text-sm text-gray-600">
             Drag 'n' drop an image here, or click to select a file
           </p>
@@ -79,7 +79,7 @@ const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
               onClick={removeFile}
               className="absolute top-0 right-0 p-1 bg-red-500 text-white rounded-full"
             >
-              <X size={16} />
+              <XOutlined size={16} />
             </button>
           </div>
           <div className="mt-4">
