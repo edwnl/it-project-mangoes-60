@@ -3,16 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/fuzzy-search": "^2.1.5",
     "antd": "^5.20.1",
+    "fuse": "^0.12.1",
+    "fuse.js": "^7.0.0",
+    "lucide-react": "^0.429.0",
     "next": "14.2.5",
+    "openai": "^4.56.0",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-dropzone": "^14.2.3",
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -20,6 +27,7 @@
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
+    "fuzzy-search": "^3.2.1",
     "postcss": "^8",
     "prettier": "3.3.3",
     "tailwindcss": "^3.4.1",
