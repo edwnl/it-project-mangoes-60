@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import { Camera } from "lucide-react";
 import { Button } from "antd";
 
@@ -12,11 +12,20 @@ const CameraComponent: React.FC = () => {
 
   const startCamera = useCallback(async (): Promise<void> => {
     try {
+      const constraints: MediaStreamConstraints = {
+        video: {
+          facingMode: "environment", // This requests the back camera
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+      };
+
       const mediaStream: MediaStream =
-        await navigator.mediaDevices.getUserMedia({ video: true });
+        await navigator.mediaDevices.getUserMedia(constraints);
       setStream(mediaStream);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+        videoRef.current.play(); // Explicitly start playing
       }
     } catch (err) {
       console.error("Error accessing the camera:", err);
@@ -58,6 +67,14 @@ const CameraComponent: React.FC = () => {
     // Implement your confirmation logic here
   }, [capturedImage]);
 
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.setAttribute("playsinline", "true");
+      videoRef.current.setAttribute("muted", "true");
+      videoRef.current.setAttribute("autoplay", "true");
+    }
+  }, []);
+
   return (
     <div className="flex flex-col items-center space-y-4">
       {!capturedImage ? (
@@ -65,6 +82,8 @@ const CameraComponent: React.FC = () => {
           <div className="relative w-64 h-64 bg-gray-200 rounded-lg overflow-hidden">
             <video
               ref={videoRef}
+              playsInline
+              muted
               autoPlay
               className="w-full h-full object-cover"
             />
