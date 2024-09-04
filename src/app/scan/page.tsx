@@ -29,9 +29,7 @@ const CameraPage: React.FC = () => {
         />
       </div>
       <div className="hidden md:block">
-        <p className="text-center text-lg">
-          Camera component is only available on mobile devices.
-        </p>
+        <DragDropImageUpload />
       </div>
 
       {isSearching && (
