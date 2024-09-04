@@ -21,15 +21,13 @@ const CameraPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-4">Camera Test</h1>
-
       <CameraComponent
         onSearchResult={handleSearchResult}
         onSearchStateChange={handleSearchStateChange}
       />
 
       {isSearching && (
-        <div className="mt-8">
+        <div className="mt-8 text-center">
           <Spin />
         </div>
       )}
@@ -41,7 +39,7 @@ const CameraPage: React.FC = () => {
             <ul>
               {searchResults.data.map((item: any, index: number) => (
                 <li key={index} className="mb-2">
-                  {item.box_name}: {item.confidence.toFixed(2)}% confidence
+                  {item.box_name}: {item.confidence}% confidence
                 </li>
               ))}
             </ul>

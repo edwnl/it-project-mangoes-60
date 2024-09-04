@@ -135,6 +135,7 @@ const CameraComponent: React.FC<{
 
   const retakePhoto = useCallback((): void => {
     setCapturedImage(null);
+    onSearchResult(null);
     startCamera();
   }, [startCamera]);
 
