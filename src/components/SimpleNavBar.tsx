@@ -11,7 +11,7 @@ const SimpleNavBar: React.FC = () => {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-start h-16">
           <div className="flex-shrink-0 flex items-center">
-            <Link href="/scan">
+            <Link href="/">
               <Image src={FullLogo} alt="Medical Pantry Logo" />
             </Link>
           </div>

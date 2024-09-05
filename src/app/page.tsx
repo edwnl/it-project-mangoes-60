@@ -1,68 +1,78 @@
 "use client";
 
-import React from "react";
-import { Input, Button, Form } from "antd";
-import Image from "next/image";
+import React, { useState, useEffect } from "react";
+import { Spin, message } from "antd";
+import CameraComponent from "@/components/CameraComponent";
+import DragDropImageUpload from "@/components/DragDropImageUpload";
+import CategoryFilterButton from "@/components/CategoryFilterButton";
+import { imageSearch } from "@/api/search/imageSearch";
 import { useRouter } from "next/navigation";
-import Logo from "@/assets/logo_white_hole.svg";
+import Navbar from "@/components/Navbar";
+import SimpleNavBar from "@/components/SimpleNavBar";
 
-const LoginPage: React.FC = () => {
-  const [form] = Form.useForm();
+const CameraPage: React.FC = () => {
+  const [username, setUsername] = useState("Volunteer");
+  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const router = useRouter();
 
-  const onFinish = (values: { username: string; password: string }) => {
-    console.log("Success:", values);
-    router.push("/scan");
+  const handleSearchResult = async (formData: FormData) => {
+    try {
+      const result = await imageSearch(formData);
+      if (result.success && result.searchId) {
+        router.push(`/scan/${result.searchId}`);
+      } else {
+        throw new Error(result.error || "Failed to process image");
+      }
+    } catch (err: any) {
+      setError(err.message);
+      message.error(err.message);
+    }
   };
 
+  const handleSearchStateChange = (isSearching: boolean) => {
+    setIsLoading(isSearching);
+  };
+
+  useEffect(() => {
+    if (error) {
+      message.error(error);
+    }
+  }, [error]);
+
   return (
-    <div className="flex items-center min-h-screen justify-center bg-white ">
-      <div className="w-full max-w-md p-16">
-        <div className="flex justify-center mb-8">
-          <Image src={Logo} alt="Medical Pantry Logo" width={60} height={60} />
+    <>
+      <SimpleNavBar />
+      <div className="container mx-auto px-4 py-8 max-w-4xl flex flex-col justify-center w-max">
+        <div className={"flex flex-col align-left mb-2 md:pl-8"}>
+          <h1 className={"text-3xl"}>Welcome</h1>
+          <h1 className={"font-bold text-3xl"}>{username}!</h1>
+        </div>
+        <div className={"mb-8"}>
+          <CategoryFilterButton name={null} />
+        </div>
+        <div className="md:hidden">
+          <CameraComponent
+            onSearchResult={handleSearchResult}
+            onSearchStateChange={handleSearchStateChange}
+          />
+        </div>
+        <div className="hidden md:block">
+          <DragDropImageUpload
+            onSearchResult={handleSearchResult}
+            onSearchStateChange={handleSearchStateChange}
+          />
         </div>
 
-        <h1 className="text-center text-2xl font-bold ">Welcome Back!</h1>
-        <p className="text-center mb-8">Please enter your details.</p>
-
-        <Form form={form} name="login" onFinish={onFinish} layout="vertical">
-          <Form.Item
-            name="username"
-            label="Username"
-            rules={[{ required: true, message: "Please input your username!" }]}
-          >
-            <Input
-              placeholder="Enter your username"
-              className="rounded-md h-10"
-            />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            label="Password"
-            rules={[{ required: true, message: "Please input your password!" }]}
-          >
-            <Input.Password
-              placeholder="Password"
-              className="rounded-md h-10"
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="w-full h-10 custom-button"
-            >
-              Sign In
-            </Button>
-          </Form.Item>
-        </Form>
-
-        <p className="text-center text-gray-600 text-sm mt-8">
-          © 2024 Medical Pantry
-        </p>
+        {isLoading && (
+          <div className="mt-8 text-center">
+            <Spin />
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 };
 
-export default LoginPage;
+export default CameraPage;

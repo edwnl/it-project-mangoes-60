@@ -83,7 +83,7 @@ const SearchResultsPage: React.FC = () => {
   }, [params.result_id]);
 
   const handleBack = () => {
-    router.push("/scan");
+    router.push("/");
   };
 
   const handleCardClick = (item: SearchResult) => {
