@@ -4,6 +4,8 @@ import OpenAI from "openai";
 import { categoryItems } from "@/data/categoryData";
 import { adminDb, adminStorage } from "@/api/firebaseAdmin";
 import { firestore } from "firebase-admin";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import { storage } from "@/api/firebaseClient";
 
 export async function imageSearch(
   formData: FormData,
@@ -18,23 +20,28 @@ export async function imageSearch(
     return { success: false, error: "No file uploaded" };
   }
 
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-
-  // Create a base64 representation of the image
-  const base64Image = buffer.toString("base64");
-
-  const boxData = categoryItems
-    .map((item) => `${item.id}:${item.subcategory_name}`)
-    .join(", ");
-
-  const prompt = `
-  Boxes: ${boxData}. 
-  Analyze the item in this image and match it to the top 3 boxes with % confidence in DESC order. 
-  RESPOND ONLY AS VALID JSON "[[ID,CONF],[ID,CONF],[ID,CONF]]"
-  `;
-
   try {
+    // Upload image to Firebase Storage as a Blob
+    const fileName = `searches/${Date.now()}_${file.name}`;
+    const storageRef = ref(storage, fileName);
+
+    // Upload the file as a Blob directly
+    await uploadBytes(storageRef, file);
+
+    // Get the public download URL for the uploaded image
+    const downloadURL = await getDownloadURL(storageRef);
+
+    const boxData = categoryItems
+      .map((item) => `${item.id}:${item.subcategory_name}`)
+      .join(", ");
+
+    const prompt = `
+    Boxes: ${boxData}. 
+    Analyze the item in this image and match it to the top 3 boxes with % confidence in DESC order. 
+    RESPOND ONLY AS VALID JSON "[[ID,CONF],[ID,CONF],[ID,CONF]]"
+    `;
+
+    // Send prompt with image URL to OpenAI
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -45,7 +52,7 @@ export async function imageSearch(
             {
               type: "image_url",
               image_url: {
-                url: `data:${file.type};base64,${base64Image}`,
+                url: downloadURL,
               },
             },
           ],
@@ -62,30 +69,22 @@ export async function imageSearch(
       throw new Error("No content in response");
     }
 
-    // Extract JSON from the content (assuming it's wrapped in backticks)
+    // Extract JSON from the content
     const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
     const jsonString = jsonMatch ? jsonMatch[1] : content;
 
     const json_res = JSON.parse(jsonString);
     const topResults = json_res
-      .slice(0, 4)
+      .slice(0, 3)
       .map(([id, confidence]: [string, number]) => ({
         id,
         confidence,
       }));
 
-    // Upload image to Firebase Storage
-    const bucket = adminStorage.bucket();
-    const fileName = `searches/${Date.now()}_${file.name}`;
-    const fileBuffer = Buffer.from(await file.arrayBuffer());
-    await bucket.file(fileName).save(fileBuffer);
-
-    const imageUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
-
     // Store search results in Firestore
     const searchResultRef = await adminDb.collection("searchResults").add({
       results: topResults,
-      imageUrl,
+      imageUrl: downloadURL,
       timestamp: firestore.FieldValue.serverTimestamp(),
     });
 
