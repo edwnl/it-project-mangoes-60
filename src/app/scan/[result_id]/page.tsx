@@ -3,7 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button, Card, Tag, Spin, Empty, Modal, message } from "antd";
-import { ArrowLeftOutlined, MenuOutlined } from "@ant-design/icons";
+import {
+  ArrowLeftOutlined,
+  MenuOutlined,
+  ExclamationCircleOutlined,
+} from "@ant-design/icons";
 import Image from "next/image";
 import { doc, getDoc, updateDoc, DocumentReference } from "firebase/firestore";
 import { categoryItems } from "@/data/categoryData";
@@ -12,6 +16,10 @@ import { CategoryItem } from "@/components/CategoryGrid";
 
 interface SearchResult extends CategoryItem {
   confidence: number;
+}
+
+interface SearchResultsState {
+  results: SearchResult[];
   feedback_status: "NOT_PROVIDED" | "CORRECT" | "INCORRECT";
   correct_subcategory?: string;
 }
@@ -19,10 +27,16 @@ interface SearchResult extends CategoryItem {
 const SearchResultsPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searchResultsState, setSearchResultsState] =
+    useState<SearchResultsState>({
+      results: [],
+      feedback_status: "NOT_PROVIDED",
+    });
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isConfirmModalVisible, setIsConfirmModalVisible] =
+    useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<SearchResult | null>(null);
 
   useEffect(() => {
@@ -35,8 +49,8 @@ const SearchResultsPage: React.FC = () => {
           const data = searchDocSnap.data();
           setUploadedImageUrl(data.imageUrl);
 
-          const fullResults: SearchResult[] = data.results.map(
-            (result: any) => {
+          const fullResults: SearchResult[] = data.results
+            .map((result: any) => {
               const categoryItem = categoryItems.find(
                 (item) => item.id === result.id,
               );
@@ -44,14 +58,16 @@ const SearchResultsPage: React.FC = () => {
                 ? {
                     ...categoryItem,
                     confidence: result.confidence,
-                    feedback_status: result.feedback_status || "NOT_PROVIDED",
-                    correct_subcategory: result.correct_subcategory,
                   }
                 : null;
-            },
-          );
+            })
+            .filter(Boolean);
 
-          setSearchResults(fullResults);
+          setSearchResultsState({
+            results: fullResults,
+            feedback_status: data.feedback_status || "NOT_PROVIDED",
+            correct_subcategory: data.correct_subcategory,
+          });
         } else {
           console.error("No such document!");
         }
@@ -71,15 +87,20 @@ const SearchResultsPage: React.FC = () => {
     router.push("/scan");
   };
 
+  const showConfirmModal = () => {
+    setIsConfirmModalVisible(true);
+  };
+
   const handleReportIncorrectResults = async () => {
-    const updatedResults: SearchResult[] = searchResults.map((result) => ({
-      ...result,
+    const updatedState: SearchResultsState = {
+      ...searchResultsState,
       feedback_status: "INCORRECT",
       correct_subcategory: undefined,
-    }));
-    setSearchResults(updatedResults);
-    await updateFeedbackInFirestore(updatedResults);
+    };
+    setSearchResultsState(updatedState);
+    await updateFeedbackInFirestore(updatedState);
     message.success("All results marked as incorrect");
+    setIsConfirmModalVisible(false);
   };
 
   const handleCardClick = (item: SearchResult) => {
@@ -89,17 +110,13 @@ const SearchResultsPage: React.FC = () => {
 
   const handleModalOk = async () => {
     if (selectedItem) {
-      const updatedResults: SearchResult[] = searchResults.map((result) =>
-        result.id === selectedItem.id
-          ? {
-              ...result,
-              feedback_status: "CORRECT",
-              correct_subcategory: selectedItem.id,
-            }
-          : result,
-      );
-      setSearchResults(updatedResults);
-      await updateFeedbackInFirestore(updatedResults);
+      const updatedState: SearchResultsState = {
+        ...searchResultsState,
+        feedback_status: "CORRECT",
+        correct_subcategory: selectedItem.id,
+      };
+      setSearchResultsState(updatedState);
+      await updateFeedbackInFirestore(updatedState);
       setIsModalVisible(false);
     }
   };
@@ -108,7 +125,13 @@ const SearchResultsPage: React.FC = () => {
     setIsModalVisible(false);
   };
 
-  const updateFeedbackInFirestore = async (updatedResults: SearchResult[]) => {
+  const handleConfirmModalCancel = () => {
+    setIsConfirmModalVisible(false);
+  };
+
+  const updateFeedbackInFirestore = async (
+    updatedState: SearchResultsState,
+  ) => {
     if (params.result_id) {
       try {
         const searchDocRef: DocumentReference = doc(
@@ -117,14 +140,8 @@ const SearchResultsPage: React.FC = () => {
           params.result_id as string,
         );
         await updateDoc(searchDocRef, {
-          results: updatedResults.map(
-            ({ id, confidence, feedback_status, correct_subcategory }) => ({
-              id,
-              confidence,
-              feedback_status,
-              correct_subcategory,
-            }),
-          ),
+          feedback_status: updatedState.feedback_status,
+          correct_subcategory: updatedState.correct_subcategory || null,
         });
         message.success("Feedback submitted successfully");
       } catch (error) {
@@ -157,6 +174,30 @@ const SearchResultsPage: React.FC = () => {
 
       <main>
         <h1 className="text-2xl font-bold mb-4">Search Results</h1>
+        <div className="mt-8 flex justify-center">
+          <Button
+            onClick={showConfirmModal}
+            className="custom-button"
+            disabled={searchResultsState.feedback_status === "INCORRECT"}
+          >
+            Report All Results as Incorrect
+          </Button>
+        </div>
+
+        <div className="mt-4 flex justify-center mb-4">
+          <Tag
+            color={
+              searchResultsState.feedback_status === "CORRECT"
+                ? "green"
+                : searchResultsState.feedback_status === "INCORRECT"
+                  ? "red"
+                  : "gray"
+            }
+            className="text-lg"
+          >
+            Overall Feedback: {searchResultsState.feedback_status}
+          </Tag>
+        </div>
 
         {uploadedImageUrl && (
           <div className="mb-4 flex justify-center">
@@ -170,9 +211,9 @@ const SearchResultsPage: React.FC = () => {
           </div>
         )}
 
-        {searchResults.length > 0 ? (
+        {searchResultsState.results.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {searchResults.map((result) => (
+            {searchResultsState.results.map((result) => (
               <Card
                 key={result.id}
                 className="shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
@@ -198,18 +239,11 @@ const SearchResultsPage: React.FC = () => {
                   <p className="text-xs text-gray-500 mt-1">
                     Location: {result.location}
                   </p>
-                  <Tag
-                    color={
-                      result.feedback_status === "CORRECT"
-                        ? "green"
-                        : result.feedback_status === "INCORRECT"
-                          ? "red"
-                          : "gray"
-                    }
-                    className="mt-2"
-                  >
-                    Feedback: {result.feedback_status}
-                  </Tag>
+                  {searchResultsState.correct_subcategory === result.id && (
+                    <Tag color="green" className="mt-2">
+                      Marked as Correct
+                    </Tag>
+                  )}
                 </div>
               </Card>
             ))}
@@ -217,15 +251,6 @@ const SearchResultsPage: React.FC = () => {
         ) : (
           <Empty description="No results found" className="mt-8" />
         )}
-
-        <div className="mt-8 flex justify-center">
-          <Button
-            onClick={handleReportIncorrectResults}
-            className="custom-button"
-          >
-            Report All Results as Incorrect
-          </Button>
-        </div>
       </main>
 
       <Modal
@@ -233,7 +258,7 @@ const SearchResultsPage: React.FC = () => {
         open={isModalVisible}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
-        okText="Correct"
+        okText="Mark as Correct"
         cancelText="Cancel"
       >
         <p>Is this the correct subcategory for the image?</p>
@@ -249,6 +274,17 @@ const SearchResultsPage: React.FC = () => {
             <p className="font-semibold">{selectedItem.subcategory_name}</p>
           </div>
         )}
+      </Modal>
+
+      <Modal
+        title="Confirm Action"
+        open={isConfirmModalVisible}
+        onOk={handleReportIncorrectResults}
+        onCancel={handleConfirmModalCancel}
+        okText="Yes, mark all as incorrect"
+        cancelText="Cancel"
+      >
+        <p>Are you sure you want to mark all results as incorrect?</p>
       </Modal>
     </div>
   );
