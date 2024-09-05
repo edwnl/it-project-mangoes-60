@@ -1,18 +1,21 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Spin, message } from "antd";
 import CameraComponent from "@/components/CameraComponent";
 import DragDropImageUpload from "@/components/DragDropImageUpload";
-import { Spin } from "antd";
 import CategoryFilterButton from "@/components/CategoryFilterButton";
+import { imageSearch } from "@/api/search/imageSearch";
+import { useRouter } from "next/navigation";
+import Navbar from "@/components/Navbar";
+import SimpleNavBar from "@/components/SimpleNavBar";
 
 const CameraPage: React.FC = () => {
-  const [searchResults, setSearchResults] = useState<any>(null);
-  const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [isMobile, setIsMobile] = useState<boolean>(false);
   const [username, setUsername] = useState("Volunteer");
+  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const router = useRouter();
 
   const handleSearchResult = async (formData: FormData) => {
     try {
@@ -39,31 +42,36 @@ const CameraPage: React.FC = () => {
   }, [error]);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl flex flex-col justify-center w-max">
+    <>
+      <SimpleNavBar />
+      <div className="container mx-auto px-4 py-8 max-w-4xl flex flex-col justify-center w-max">
         <div className={"flex flex-col align-left mb-2 md:pl-8"}>
           <h1 className={"text-3xl"}>Welcome</h1>
-          <h1 className={"font-bold text-3xl"}>{username}</h1>
+          <h1 className={"font-bold text-3xl"}>{username}!</h1>
         </div>
-      <CategoryFilterButton name={null}/>
-      <div className="md:hidden">
-        <CameraComponent
-          onSearchResult={handleSearchResult}
-          onSearchStateChange={handleSearchStateChange}
-        />
-      </div>
-      <div className="hidden md:block">
-        <DragDropImageUpload
-          onSearchResult={handleSearchResult}
-          onSearchStateChange={handleSearchStateChange}
-        />
-      </div>
+        <div className={"mb-8"}>
+          <CategoryFilterButton name={null} />
+        </div>
+        <div className="md:hidden">
+          <CameraComponent
+            onSearchResult={handleSearchResult}
+            onSearchStateChange={handleSearchStateChange}
+          />
+        </div>
+        <div className="hidden md:block">
+          <DragDropImageUpload
+            onSearchResult={handleSearchResult}
+            onSearchStateChange={handleSearchStateChange}
+          />
+        </div>
 
-      {isLoading && (
-        <div className="mt-8 text-center">
-          <Spin />
-        </div>
-      )}
-    </div>
+        {isLoading && (
+          <div className="mt-8 text-center">
+            <Spin />
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

@@ -160,12 +160,18 @@ const CameraComponent: React.FC<{
               className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full object-cover"
             />
           </div>
-          {!stream?
-            <Button className="flex items-center custom-button rounded-full" onClick={startCamera}>
+          {!stream ? (
+            <Button
+              className="flex items-center custom-button"
+              size={"large"}
+              onClick={startCamera}
+            >
               <CameraOutlined className="mr-2" />
               Start Camera
-            </Button>  : <CameraButton onClick={captureImage}/>
-          }
+            </Button>
+          ) : (
+            <CameraButton onClick={captureImage} />
+          )}
         </>
       ) : (
         <>
