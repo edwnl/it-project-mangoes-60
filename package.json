@@ -11,6 +11,8 @@
   "dependencies": {
     "@types/fuzzy-search": "^2.1.5",
     "antd": "^5.20.1",
+    "firebase": "^10.13.1",
+    "firebase-admin": "^12.4.0",
     "fuse": "^0.12.1",
     "fuse.js": "^7.0.0",
     "lucide-react": "^0.438.0",
