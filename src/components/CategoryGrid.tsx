@@ -7,10 +7,9 @@ import syringeImage from "@/assets/syringe.png";
 
 export interface CategoryItem {
   id: string;
-  box_name: string;
+  subcategory_name: string;
   category_name: string;
-  aisle: number;
-  column: number;
+  location: string;
   image_url: string;
   confidence?: number;
 }
