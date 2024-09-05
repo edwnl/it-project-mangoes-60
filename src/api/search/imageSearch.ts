@@ -3,7 +3,9 @@
 import OpenAI from "openai";
 import { categoryItems } from "@/data/categoryData";
 
-export async function imageSearch(formData: FormData) {
+export async function imageSearch(
+  formData: FormData,
+): Promise<{ success: boolean; data?: CategoryItem[]; error?: string }> {
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
@@ -21,7 +23,7 @@ export async function imageSearch(formData: FormData) {
   const base64Image = buffer.toString("base64");
 
   const boxData = categoryItems
-    .map((item) => `${item.id}:${item.box_name}`)
+    .map((item) => `${item.id}:${item.subcategory_name}`)
     .join(", ");
 
   const prompt = `
