@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { Spin, message } from "antd";
 import CameraComponent from "@/components/CameraComponent";
 import DragDropImageUpload from "@/components/DragDropImageUpload";
-import { imageSearch } from "@/api/search/imageSearch";
+import { Spin } from "antd";
+import CategoryFilterButton from "@/components/CategoryFilterButton";
 
 const CameraPage: React.FC = () => {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<any>(null);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [username, setUsername] = useState("Volunteer");
 
   const handleSearchResult = async (formData: FormData) => {
     try {
@@ -37,7 +39,12 @@ const CameraPage: React.FC = () => {
   }, [error]);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-8 max-w-4xl flex flex-col justify-center w-max">
+        <div className={"flex flex-col align-left mb-2 md:pl-8"}>
+          <h1 className={"text-3xl"}>Welcome</h1>
+          <h1 className={"font-bold text-3xl"}>{username}</h1>
+        </div>
+      <CategoryFilterButton name={null}/>
       <div className="md:hidden">
         <CameraComponent
           onSearchResult={handleSearchResult}
