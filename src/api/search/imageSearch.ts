@@ -37,8 +37,8 @@ export async function imageSearch(
 
     const prompt = `
     Boxes: ${boxData}. 
-    Analyze the item in this image and match it to the top 3 boxes with % confidence in DESC order. 
-    RESPOND ONLY AS VALID JSON "[[ID,CONF],[ID,CONF],[ID,CONF]]"
+    Analyze the item in this image and match it to the top 4 boxes with % confidence in DESC order. 
+    RESPOND ONLY AS VALID JSON "[[ID,CONF],[ID,CONF],[ID,CONF],[ID,CONF]]"
     `;
 
     // Send prompt with image URL to OpenAI
@@ -75,7 +75,7 @@ export async function imageSearch(
 
     const json_res = JSON.parse(jsonString);
     const topResults = json_res
-      .slice(0, 3)
+      .slice(0, 4)
       .map(([id, confidence]: [string, number]) => ({
         id,
         confidence,
@@ -85,6 +85,7 @@ export async function imageSearch(
     const searchResultRef = await adminDb.collection("searchResults").add({
       results: topResults,
       imageUrl: downloadURL,
+      prompt_response: content,
       timestamp: firestore.FieldValue.serverTimestamp(),
     });
 

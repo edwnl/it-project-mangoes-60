@@ -13,8 +13,8 @@ export async function textSearch(query: string) {
 
   const prompt = `
   Boxes: ${boxData}. 
-  Match "${query}" to top 3 boxes with % confidence in DESC order. 
-  RESPOND ONLY AS VALID JSON "[[ID,CONF],[ID,CONF],[ID,CONF]]"
+  Match "${query}" to top 4 boxes with % confidence in DESC order. 
+  RESPOND ONLY AS VALID JSON "[[ID,CONF],[ID,CONF],[ID,CONF], [ID,CONF]]"
   `;
 
   try {
