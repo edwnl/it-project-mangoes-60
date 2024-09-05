@@ -4,6 +4,7 @@ import React, { useRef, useState, useCallback, useEffect } from "react";
 import { Button, message } from "antd";
 import { CameraOutlined } from "@ant-design/icons";
 import { imageSearch } from "@/api/search/imageSearch";
+import CameraButton from "@/components/CameraButton";
 
 const SQUARE_SIZE = 300;
 const MAX_UPLOAD_SIZE = 512;
@@ -163,13 +164,12 @@ const CameraComponent: React.FC<{
               className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full object-cover"
             />
           </div>
-          <Button
-            onClick={stream ? captureImage : startCamera}
-            className="flex items-center custom-button"
-          >
-            <CameraOutlined className="mr-2" />
-            {stream ? "Capture" : "Start Camera"}
-          </Button>
+          {!stream?
+            <Button className="flex items-center custom-button rounded-full" onClick={startCamera}>
+              <CameraOutlined className="mr-2" />
+              Start Camera
+            </Button>  : <CameraButton onClick={captureImage}/>
+          }
         </>
       ) : (
         <>
