@@ -8,7 +8,7 @@ export async function textSearch(query: string) {
   });
 
   const boxData = categoryItems
-    .map((item) => `${item.id}:${item.box_name}`)
+    .map((item) => `${item.id}:${item.subcategory_name}`)
     .join(", ");
 
   const prompt = `

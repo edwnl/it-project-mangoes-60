@@ -38,7 +38,7 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
             <div className="relative h-40 w-40 mx-auto">
               <Image
                 src={category.image_url || syringeImage}
-                alt={category.box_name}
+                alt={category.subcategory_name}
                 layout="fill"
                 objectFit="contain"
                 className="rounded-md p-2"
@@ -46,10 +46,10 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({
             </div>
             <div className="p-4">
               <p className="text-sm text-gray-500 mb-2">
-                Located at Aisle {category.aisle}, Column {category.column}
+                Located at {category.location}
               </p>
               <h3 className="text-lg font-semibold mb-2">
-                {category.box_name}
+                {category.subcategory_name}
               </h3>
               <div className="flex justify-between items-center">
                 <Tag color={"purple"}>
