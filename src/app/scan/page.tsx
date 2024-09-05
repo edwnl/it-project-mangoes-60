@@ -16,7 +16,7 @@ const CameraPage: React.FC = () => {
     try {
       const result = await imageSearch(formData);
       if (result.success && result.searchId) {
-        router.push(`/search-results?searchId=${result.searchId}`);
+        router.push(`/scan/${result.searchId}`);
       } else {
         throw new Error(result.error || "Failed to process image");
       }

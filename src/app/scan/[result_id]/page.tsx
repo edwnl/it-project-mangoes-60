@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter, useParams } from "next/navigation";
 import { Button, Card, Tag, Spin, Empty, Modal, message } from "antd";
 import { ArrowLeftOutlined, MenuOutlined } from "@ant-design/icons";
 import Image from "next/image";
@@ -18,6 +18,7 @@ interface SearchResult extends CategoryItem {
 
 const SearchResultsPage: React.FC = () => {
   const router = useRouter();
+  const params = useParams();
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -25,9 +26,9 @@ const SearchResultsPage: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<SearchResult | null>(null);
 
   useEffect(() => {
-    const fetchSearchResults = async (searchId: string) => {
+    const fetchSearchResults = async (resultId: string) => {
       try {
-        const searchDocRef = doc(db, "searchResults", searchId);
+        const searchDocRef = doc(db, "searchResults", resultId);
         const searchDocSnap = await getDoc(searchDocRef);
 
         if (searchDocSnap.exists()) {
@@ -61,10 +62,10 @@ const SearchResultsPage: React.FC = () => {
       }
     };
 
-    if (router.isReady && typeof router.query.searchId === "string") {
-      fetchSearchResults(router.query.searchId);
+    if (params.result_id) {
+      fetchSearchResults(params.result_id as string);
     }
-  }, [router.isReady, router.query]);
+  }, [params.result_id]);
 
   const handleBack = () => {
     router.push("/scan");
@@ -108,12 +109,12 @@ const SearchResultsPage: React.FC = () => {
   };
 
   const updateFeedbackInFirestore = async (updatedResults: SearchResult[]) => {
-    if (typeof router.query.searchId === "string") {
+    if (params.result_id) {
       try {
         const searchDocRef: DocumentReference = doc(
           db,
           "searchResults",
-          router.query.searchId,
+          params.result_id as string,
         );
         await updateDoc(searchDocRef, {
           results: updatedResults.map(
@@ -229,7 +230,7 @@ const SearchResultsPage: React.FC = () => {
 
       <Modal
         title="Confirm Subcategory"
-        visible={isModalVisible}
+        open={isModalVisible}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
         okText="Correct"
