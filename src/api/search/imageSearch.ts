@@ -2,10 +2,12 @@
 
 import OpenAI from "openai";
 import { categoryItems } from "@/data/categoryData";
+import { adminDb, adminStorage } from "@/api/firebaseAdmin";
+import { firestore } from "firebase-admin";
 
 export async function imageSearch(
   formData: FormData,
-): Promise<{ success: boolean; data?: CategoryItem[]; error?: string }> {
+): Promise<{ success: boolean; searchId?: string; error?: string }> {
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
@@ -65,14 +67,29 @@ export async function imageSearch(
     const jsonString = jsonMatch ? jsonMatch[1] : content;
 
     const json_res = JSON.parse(jsonString);
-    const concatData = json_res
-      .map(([id, confidence]: [string, number]) => {
-        const item = categoryItems.find((item) => item.id === id);
-        return item ? { ...item, confidence } : null;
-      })
-      .filter(Boolean);
+    const topResults = json_res
+      .slice(0, 4)
+      .map(([id, confidence]: [string, number]) => ({
+        id,
+        confidence,
+      }));
 
-    return { success: true, data: concatData };
+    // Upload image to Firebase Storage
+    const bucket = adminStorage.bucket();
+    const fileName = `searches/${Date.now()}_${file.name}`;
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    await bucket.file(fileName).save(fileBuffer);
+
+    const imageUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+
+    // Store search results in Firestore
+    const searchResultRef = await adminDb.collection("searchResults").add({
+      results: topResults,
+      imageUrl,
+      timestamp: firestore.FieldValue.serverTimestamp(),
+    });
+
+    return { success: true, searchId: searchResultRef.id };
   } catch (error: any) {
     console.error("Error in imageSearch:", error);
     return {
