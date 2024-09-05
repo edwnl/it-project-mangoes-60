@@ -2,12 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Button, Card, Tag, Spin, Empty, Modal, message } from "antd";
-import {
-  ArrowLeftOutlined,
-  MenuOutlined,
-  ExclamationCircleOutlined,
-} from "@ant-design/icons";
+import { Button, Tag, Spin, Modal, message, Empty } from "antd";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import { doc, getDoc, updateDoc, DocumentReference } from "firebase/firestore";
 import { categoryItems } from "@/data/categoryData";
@@ -34,8 +30,11 @@ const SearchResultsPage: React.FC = () => {
     });
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isSubmittingFeedback, setIsSubmittingFeedback] =
+    useState<boolean>(false);
   const [isConfirmModalVisible, setIsConfirmModalVisible] =
+    useState<boolean>(false);
+  const [isImageModalVisible, setIsImageModalVisible] =
     useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<SearchResult | null>(null);
 
@@ -64,7 +63,7 @@ const SearchResultsPage: React.FC = () => {
             .filter(Boolean);
 
           setSearchResultsState({
-            results: fullResults,
+            results: fullResults.slice(0, 4), // Limit to 4 results
             feedback_status: data.feedback_status || "NOT_PROVIDED",
             correct_subcategory: data.correct_subcategory,
           });
@@ -87,29 +86,14 @@ const SearchResultsPage: React.FC = () => {
     router.push("/scan");
   };
 
-  const showConfirmModal = () => {
+  const handleCardClick = (item: SearchResult) => {
+    setSelectedItem(item);
     setIsConfirmModalVisible(true);
   };
 
-  const handleReportIncorrectResults = async () => {
-    const updatedState: SearchResultsState = {
-      ...searchResultsState,
-      feedback_status: "INCORRECT",
-      correct_subcategory: undefined,
-    };
-    setSearchResultsState(updatedState);
-    await updateFeedbackInFirestore(updatedState);
-    message.success("All results marked as incorrect");
-    setIsConfirmModalVisible(false);
-  };
-
-  const handleCardClick = (item: SearchResult) => {
-    setSelectedItem(item);
-    setIsModalVisible(true);
-  };
-
-  const handleModalOk = async () => {
+  const handleConfirmCategorySelection = async () => {
     if (selectedItem) {
+      setIsSubmittingFeedback(true);
       const updatedState: SearchResultsState = {
         ...searchResultsState,
         feedback_status: "CORRECT",
@@ -117,16 +101,29 @@ const SearchResultsPage: React.FC = () => {
       };
       setSearchResultsState(updatedState);
       await updateFeedbackInFirestore(updatedState);
-      setIsModalVisible(false);
+      setIsSubmittingFeedback(false);
+      setIsConfirmModalVisible(false);
+      message.success("Feedback submitted successfully");
     }
   };
 
-  const handleModalCancel = () => {
-    setIsModalVisible(false);
+  const handleCantFindCategory = () => {
+    setIsConfirmModalVisible(true);
+    setSelectedItem(null);
   };
 
-  const handleConfirmModalCancel = () => {
+  const handleConfirmIncorrectResults = async () => {
+    setIsSubmittingFeedback(true);
+    const updatedState: SearchResultsState = {
+      ...searchResultsState,
+      feedback_status: "INCORRECT",
+      correct_subcategory: undefined,
+    };
+    setSearchResultsState(updatedState);
+    await updateFeedbackInFirestore(updatedState);
+    setIsSubmittingFeedback(false);
     setIsConfirmModalVisible(false);
+    message.success("All results marked as incorrect");
   };
 
   const updateFeedbackInFirestore = async (
@@ -143,12 +140,15 @@ const SearchResultsPage: React.FC = () => {
           feedback_status: updatedState.feedback_status,
           correct_subcategory: updatedState.correct_subcategory || null,
         });
-        message.success("Feedback submitted successfully");
       } catch (error) {
         console.error("Error updating feedback:", error);
         message.error("Failed to submit feedback");
       }
     }
+  };
+
+  const handleImageClick = () => {
+    setIsImageModalVisible(true);
   };
 
   if (isLoading) {
@@ -160,7 +160,7 @@ const SearchResultsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white p-4">
+    <div className="min-h-screen max-w-5xl mx-auto bg-white p-4">
       <header className="flex justify-between items-center mb-6">
         <Button
           icon={<ArrowLeftOutlined />}
@@ -169,57 +169,32 @@ const SearchResultsPage: React.FC = () => {
         >
           Back
         </Button>
-        <Button icon={<MenuOutlined />} />
       </header>
 
-      <main>
-        <h1 className="text-2xl font-bold mb-4">Search Results</h1>
-        <div className="mt-8 flex justify-center">
-          <Button
-            onClick={showConfirmModal}
-            className="custom-button"
-            disabled={searchResultsState.feedback_status === "INCORRECT"}
-          >
-            Report All Results as Incorrect
-          </Button>
-        </div>
+      <main className={"max-w-xl mx-auto"}>
+        <h1 className="text-2xl font-bold mb-1">Search Results</h1>
+        <p className={"mb-4"}>
+          Showing results for{" "}
+          <span className="cursor-pointer underline" onClick={handleImageClick}>
+            image.
+          </span>{" "}
+        </p>
 
-        <div className="mt-4 flex justify-center mb-4">
-          <Tag
-            color={
-              searchResultsState.feedback_status === "CORRECT"
-                ? "green"
-                : searchResultsState.feedback_status === "INCORRECT"
-                  ? "red"
-                  : "gray"
-            }
-            className="text-lg"
-          >
-            Overall Feedback: {searchResultsState.feedback_status}
-          </Tag>
-        </div>
+        <div className="relative mb-6">
+          {isSubmittingFeedback && (
+            <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10">
+              <Spin size="large" />
+            </div>
+          )}
 
-        {uploadedImageUrl && (
-          <div className="mb-4 flex justify-center">
-            <Image
-              src={uploadedImageUrl}
-              alt="Uploaded Image"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover"
-            />
-          </div>
-        )}
-
-        {searchResultsState.results.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {searchResultsState.results.map((result) => (
-              <Card
-                key={result.id}
-                className="shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                onClick={() => handleCardClick(result)}
-              >
-                <div className="flex flex-col items-center">
+          {searchResultsState.results.length > 0 ? (
+            <div className="grid grid-cols-2 gap-4 justify-items-center">
+              {searchResultsState.results.map((result) => (
+                <div
+                  key={result.id}
+                  className="border rounded-lg p-4 cursor-pointer w-full max-w-[300px]"
+                  onClick={() => handleCardClick(result)}
+                >
                   <Image
                     src={result.image_url}
                     alt={result.subcategory_name}
@@ -227,64 +202,97 @@ const SearchResultsPage: React.FC = () => {
                     height={150}
                     className="mb-2 object-contain"
                   />
-                  <p className="text-lg font-semibold">
-                    {result.subcategory_name}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Confidence: {result.confidence.toFixed(2)}%
-                  </p>
-                  <Tag color="#BF0018" className="mt-2">
-                    {result.category_name}
-                  </Tag>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Location: {result.location}
-                  </p>
-                  {searchResultsState.correct_subcategory === result.id && (
-                    <Tag color="green" className="mt-2">
-                      Marked as Correct
+                  <p className="text-sm text-gray-500">{result.id}</p>
+                  <p className="font-semibold">{result.subcategory_name}</p>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    <Tag
+                      color={
+                        result.category_name === "Medical Supplies"
+                          ? "#FFCCCB"
+                          : result.category_name === "Airway Supplies"
+                            ? "#FFE5B4"
+                            : result.category_name === "First-Aid Supplies"
+                              ? "#E5FFE5"
+                              : "#CCE5FF"
+                      }
+                    >
+                      {result.category_name}
                     </Tag>
-                  )}
+                    {searchResultsState.correct_subcategory === result.id && (
+                      <Tag color="green">Correct</Tag>
+                    )}
+                    {searchResultsState.feedback_status === "INCORRECT" && (
+                      <Tag color="red">Incorrect</Tag>
+                    )}
+                  </div>
                 </div>
-              </Card>
-            ))}
+              ))}
+            </div>
+          ) : (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="No search results found"
+            />
+          )}
+        </div>
+
+        {searchResultsState.results.length > 0 && (
+          <div className="flex justify-center relative">
+            {isSubmittingFeedback && (
+              <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10">
+                <Spin size="small" />
+              </div>
+            )}
+            <Button
+              onClick={handleCantFindCategory}
+              className="custom-button bg-[#BF0018] text-white hover:bg-[#8B0012] border-none"
+              disabled={isSubmittingFeedback}
+            >
+              Mark all as Incorrect
+            </Button>
           </div>
-        ) : (
-          <Empty description="No results found" className="mt-8" />
         )}
       </main>
 
       <Modal
-        title="Confirm Subcategory"
-        open={isModalVisible}
-        onOk={handleModalOk}
-        onCancel={handleModalCancel}
-        okText="Mark as Correct"
+        title="Confirm Category Selection"
+        open={isConfirmModalVisible}
+        onOk={
+          selectedItem
+            ? handleConfirmCategorySelection
+            : handleConfirmIncorrectResults
+        }
+        onCancel={() => setIsConfirmModalVisible(false)}
+        okText={
+          selectedItem ? "Confirm Selection" : "Yes, mark all as incorrect"
+        }
         cancelText="Cancel"
       >
-        <p>Is this the correct subcategory for the image?</p>
-        {selectedItem && (
-          <div className="flex flex-col items-center mt-4">
-            <Image
-              src={selectedItem.image_url}
-              alt={selectedItem.subcategory_name}
-              width={100}
-              height={100}
-              className="mb-2 object-contain"
-            />
-            <p className="font-semibold">{selectedItem.subcategory_name}</p>
-          </div>
+        {selectedItem ? (
+          <p>
+            Are you sure you want to select "{selectedItem.subcategory_name}" as
+            the correct category?
+          </p>
+        ) : (
+          <p>Are you sure you want to mark all results as incorrect?</p>
         )}
       </Modal>
 
       <Modal
-        title="Confirm Action"
-        open={isConfirmModalVisible}
-        onOk={handleReportIncorrectResults}
-        onCancel={handleConfirmModalCancel}
-        okText="Yes, mark all as incorrect"
-        cancelText="Cancel"
+        title="Searched Image"
+        open={isImageModalVisible}
+        onCancel={() => setIsImageModalVisible(false)}
+        footer={null}
       >
-        <p>Are you sure you want to mark all results as incorrect?</p>
+        {uploadedImageUrl && (
+          <Image
+            src={uploadedImageUrl}
+            alt="Searched Image"
+            width={400}
+            height={400}
+            className="object-contain"
+          />
+        )}
       </Modal>
     </div>
   );

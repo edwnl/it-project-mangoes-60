@@ -6,10 +6,15 @@ interface CameraButtonProps {
   onClick?: () => void;
 }
 
-const CameraButton = (props:CameraButtonProps) => {
+const CameraButton = (props: CameraButtonProps) => {
   return (
     <a onClick={props.onClick}>
-      <Image src={CameraButtonImg} alt={"Camera Button"} width={112} height={112} />
+      <Image
+        src={CameraButtonImg}
+        alt={"Camera Button"}
+        width={80}
+        height={80}
+      />
     </a>
   );
 };

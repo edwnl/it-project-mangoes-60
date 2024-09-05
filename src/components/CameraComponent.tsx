@@ -149,7 +149,7 @@ const CameraComponent: React.FC<{
       {!capturedImage ? (
         <>
           <div
-            className="relative bg-gray-200 rounded-lg overflow-hidden"
+            className="relative bg-gray-200 rounded-lg overflow-hidden mb-4"
             style={{ width: `${SQUARE_SIZE}px`, height: `${SQUARE_SIZE}px` }}
           >
             <video
