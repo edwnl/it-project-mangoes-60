@@ -3,13 +3,12 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { Button, message } from "antd";
 import { CameraOutlined } from "@ant-design/icons";
-import { imageSearch } from "@/api/search/imageSearch";
 
 const SQUARE_SIZE = 300;
 const MAX_UPLOAD_SIZE = 512;
 
 const CameraComponent: React.FC<{
-  onSearchResult: (result: any) => void;
+  onSearchResult: (formData: FormData) => Promise<void>;
   onSearchStateChange: (isSearching: boolean) => void;
 }> = ({ onSearchResult, onSearchStateChange }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -99,24 +98,21 @@ const CameraComponent: React.FC<{
       canvas.toBlob(
         async (blob) => {
           if (blob) {
-            const formData = new FormData();
-            formData.append("file", blob, "image.jpg");
-
             try {
               setIsProcessing(true);
-              onSearchStateChange(true); // Notify parent that search is starting
-              const result = await imageSearch(formData);
-              onSearchResult(result);
+              onSearchStateChange(true);
+              // Prepare form data for API call
+              const formData = new FormData();
+              formData.append("file", blob, "image.jpg");
+
+              // Call onSearchResult with formData
+              await onSearchResult(formData);
             } catch (error) {
               console.error("Error processing image:", error);
               message.error("Failed to process image");
-              onSearchResult({
-                success: false,
-                error: "Failed to process image",
-              });
             } finally {
               setIsProcessing(false);
-              onSearchStateChange(false); // Notify parent that search has ended
+              onSearchStateChange(false);
             }
           }
         },
@@ -131,11 +127,10 @@ const CameraComponent: React.FC<{
     if (capturedImage) {
       await processAndUploadImage(capturedImage);
     }
-  }, [capturedImage, onSearchResult]);
+  }, [capturedImage, onSearchResult, onSearchStateChange]);
 
   const retakePhoto = useCallback((): void => {
     setCapturedImage(null);
-    onSearchResult(null);
     startCamera();
   }, [startCamera]);
 
