@@ -5,7 +5,7 @@ import { Spin, message } from "antd";
 import CameraComponent from "@/components/CameraComponent";
 import DragDropImageUpload from "@/components/DragDropImageUpload";
 import CategoryFilterButton from "@/components/CategoryFilterButton";
-import { imageSearch } from "@/api/search/imageSearch";
+import { imageSearch } from "@/lib/search/imageSearch";
 import { useRouter } from "next/navigation";
 import SimpleNavBar from "@/components/SimpleNavBar";
 
@@ -13,12 +13,17 @@ const CameraPage: React.FC = () => {
   const [username, setUsername] = useState("Volunteer");
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
 
   const router = useRouter();
 
   const handleSearchResult = async (formData: FormData) => {
     try {
+      setIsLoading(true);
+      setElapsedTime(0);
+
       const result = await imageSearch(formData);
+
       if (result.success && result.searchId) {
         router.push(`/scan/${result.searchId}`);
       } else {
@@ -28,21 +33,20 @@ const CameraPage: React.FC = () => {
       const errorMessage =
         err instanceof Error ? err.message : "An unknown error occurred";
       setError(errorMessage);
-      message.error(errorMessage);
-    } finally {
       setIsLoading(false);
+      message.error(errorMessage);
     }
-  };
-
-  const handleSearchStateChange = (isSearching: boolean) => {
-    setIsLoading(isSearching);
   };
 
   useEffect(() => {
-    if (error) {
-      message.error(error);
+    let interval: NodeJS.Timeout;
+    if (isLoading) {
+      interval = setInterval(() => {
+        setElapsedTime((prevTime) => prevTime + 0.1);
+      }, 100);
     }
-  }, [error]);
+    return () => clearInterval(interval);
+  }, [isLoading]);
 
   return (
     <>
@@ -60,22 +64,16 @@ const CameraPage: React.FC = () => {
 
         <div className="relative">
           <div className="md:hidden">
-            <CameraComponent
-              onSearchResult={handleSearchResult}
-              onSearchStateChange={handleSearchStateChange}
-            />
+            <CameraComponent onSearchResult={handleSearchResult} />
           </div>
           <div className="hidden md:block">
-            <DragDropImageUpload
-              onSearchResult={handleSearchResult}
-              onSearchStateChange={handleSearchStateChange}
-            />
+            <DragDropImageUpload onSearchResult={handleSearchResult} />
           </div>
 
           {isLoading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 z-10">
               <Spin size="large" />
-              Searching...
+              <p className="mt-2">Searching... ({elapsedTime.toFixed(1)}s)</p>
             </div>
           )}
         </div>
