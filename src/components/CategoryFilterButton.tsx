@@ -54,7 +54,7 @@ const CategoryFilterButton: React.FC<CategoryFilterButtonProps> = ({
         open={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
-        className={"max-w-[300px]"}
+        className={"max-w-[400px] px-8"}
         okButtonProps={{ className: "custom-button" }}
       >
         <Select
