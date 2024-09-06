@@ -8,12 +8,10 @@ import type { RcFile, UploadProps } from "antd/es/upload/interface";
 
 interface DragDropImageUploadProps {
   onSearchResult: (formData: FormData) => Promise<void>;
-  onSearchStateChange: (isSearching: boolean) => void;
 }
 
 const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
   onSearchResult,
-  onSearchStateChange,
 }) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -30,7 +28,6 @@ const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
 
   const processImage = async (file: RcFile) => {
     setIsProcessing(true);
-    onSearchStateChange(true);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -42,19 +39,18 @@ const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
       message.error("Failed to process image");
     } finally {
       setIsProcessing(false);
-      onSearchStateChange(false);
     }
   };
 
   const uploadButton = (
     <div className="flex flex-col items-center justify-center h-full">
       <PlusOutlined />
-      <div className="mt-2">Upload</div>
+      <div className="mt-2">Drag'n drop or click to select an image</div>
     </div>
   );
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto ">
       <ImgCrop
         modalOk={"Search Now"}
         modalProps={{

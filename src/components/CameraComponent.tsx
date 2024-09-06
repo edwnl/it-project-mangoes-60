@@ -3,7 +3,7 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { Button, message } from "antd";
 import { CameraOutlined } from "@ant-design/icons";
-import { imageSearch } from "@/api/search/imageSearch";
+import { imageSearch } from "@/lib/search/imageSearch";
 import CameraButton from "@/components/CameraButton";
 
 const SQUARE_SIZE = 300;
@@ -11,8 +11,7 @@ const MAX_UPLOAD_SIZE = 512;
 
 const CameraComponent: React.FC<{
   onSearchResult: (formData: FormData) => Promise<void>;
-  onSearchStateChange: (isSearching: boolean) => void;
-}> = ({ onSearchResult, onSearchStateChange }) => {
+}> = ({ onSearchResult }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -102,7 +101,6 @@ const CameraComponent: React.FC<{
           if (blob) {
             try {
               setIsProcessing(true);
-              onSearchStateChange(true);
               // Prepare form data for API call
               const formData = new FormData();
               formData.append("file", blob, "image.jpg");
@@ -114,7 +112,6 @@ const CameraComponent: React.FC<{
               message.error("Failed to process image");
             } finally {
               setIsProcessing(false);
-              onSearchStateChange(false);
             }
           }
         },
@@ -129,7 +126,7 @@ const CameraComponent: React.FC<{
     if (capturedImage) {
       await processAndUploadImage(capturedImage);
     }
-  }, [capturedImage, onSearchResult, onSearchStateChange]);
+  }, [capturedImage, onSearchResult]);
 
   const retakePhoto = useCallback((): void => {
     setCapturedImage(null);

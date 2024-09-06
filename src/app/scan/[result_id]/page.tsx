@@ -7,7 +7,7 @@ import { ArrowLeftOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import { doc, getDoc, updateDoc, DocumentReference } from "firebase/firestore";
 import { categoryItems } from "@/data/categoryData";
-import { db } from "@/api/firebaseClient";
+import { db } from "@/lib/firebaseClient";
 import { CategoryItem } from "@/components/CategoryGrid";
 
 interface SearchResult extends CategoryItem {
