@@ -13,8 +13,8 @@ export function generateAIPrompt(
   let prompt = `
   Analyze the item in this image and match it to the top 4 SUBCATEGORY with % confidence in DESC order.
   ${selectedCategory ? `RETURN STRICTLY ONLY ${selectedCategory}` : ""}
-  YOU CAN ONLY RESPOND WITH SUBCATEGORIES IN THE LIST BELOW.
-  RESPOND ONLY AS VALID JSON "[[ID,CONF],[ID,CONF],[ID,CONF],[ID,CONF]]"
+  RETURN STRICTLY WITH ONLY SUBCATEGORIES IN THE LIST BELOW.
+  RESPOND ONLY AS VALID JSON [["ID",CONF],["ID",CONF],["ID",CONF],["ID",CONF]]
   Data Format: ID - CATEGORY NAME - SUBCATEGORY NAME`;
 
   console.log(prompt);

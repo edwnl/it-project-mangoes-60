@@ -63,8 +63,8 @@ const CameraPage: React.FC = () => {
     <>
       <SimpleNavBar />
       <div className="container mx-auto flex flex-col justify-center w-max">
-        <div className="my-8">
-          <div className="flex flex-col text-3xl mb-2">
+        <div className="my-4 md:my-8">
+          <div className="flex flex-col text-xl md:text-3xl mb-2">
             <h1>Welcome,</h1>
             <h1 className="font-bold">{username}!</h1>
           </div>

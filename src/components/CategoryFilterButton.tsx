@@ -26,19 +26,10 @@ const CategoryFilterButton: React.FC<CategoryFilterButtonProps> = ({
     new Set(categoryItems.map((item) => item.category_name)),
   );
 
-  const handleOk = () => {
-    setIsModalVisible(false);
-    onCategoryChange(categoryName);
-  };
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
-
   const handleCategoryChange = (value: string | null) => {
     setCategoryName(value);
+    onCategoryChange(value);
     setIsModalVisible(false);
-    onCategoryChange(categoryName);
   };
 
   return (
@@ -57,10 +48,9 @@ const CategoryFilterButton: React.FC<CategoryFilterButtonProps> = ({
       <Modal
         title="Select Category"
         open={isModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
+        onCancel={() => setIsModalVisible(false)}
+        footer={null}
         className={"max-w-[400px] px-8"}
-        okButtonProps={{ className: "custom-button" }}
       >
         <Select
           style={{ width: "100%" }}
