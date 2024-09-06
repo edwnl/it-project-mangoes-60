@@ -6,8 +6,8 @@ import NavBar from "@/components/Navbar";
 import CategoryGrid from "@/components/CategoryGrid";
 import { categoryItems } from "@/data/categoryData";
 import { CategoryItem } from "@/components/CategoryGrid";
-import { textSearch } from "@/api/search/textSearch";
-import { imageSearch } from "@/api/search/imageSearch";
+import { textSearch } from "@/lib/search/textSearch";
+import { imageSearch } from "@/lib/search/imageSearch";
 
 interface SearchResult extends CategoryItem {
   confidence: number;
