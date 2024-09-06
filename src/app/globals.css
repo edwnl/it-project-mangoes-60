@@ -25,3 +25,9 @@
 .ant-spin-dot-item {
   background-color: var(--primary-color) !important;
 }
+
+.ant-upload,
+.ant-upload-select {
+  width: 350px !important;
+  height: 350px !important;
+}

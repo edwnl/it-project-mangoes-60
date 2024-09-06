@@ -1,53 +1,37 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
-import { useDropzone } from "react-dropzone";
-import { Upload, X } from "lucide-react";
-import { message } from "antd";
+import React, { useState } from "react";
+import { Upload, message } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import ImgCrop from "antd-img-crop";
+import type { RcFile, UploadProps } from "antd/es/upload/interface";
 
-interface FileWithPreview extends File {
-  preview: string;
-}
-
-const DragDropImageUpload: React.FC<{
+interface DragDropImageUploadProps {
   onSearchResult: (formData: FormData) => Promise<void>;
   onSearchStateChange: (isSearching: boolean) => void;
-}> = ({ onSearchResult, onSearchStateChange }) => {
-  const [files, setFiles] = useState<FileWithPreview[]>([]);
+}
+
+const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
+  onSearchResult,
+  onSearchStateChange,
+}) => {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    setFiles(
-      acceptedFiles.map((file) =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file),
-        }),
-      ),
-    );
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { "image/*": [] },
-    multiple: false, // Changed to false to match CameraComponent behavior
-  });
-
-  const removeFile = (file: FileWithPreview) => {
-    const newFiles = [...files];
-    newFiles.splice(newFiles.indexOf(file), 1);
-    setFiles(newFiles);
+  const handleChange: UploadProps["onChange"] = (info) => {
+    if (info.file.status === "done") {
+      const localImageUrl = URL.createObjectURL(
+        info.file.originFileObj as Blob,
+      );
+      setImageUrl(localImageUrl);
+      processImage(info.file.originFileObj as RcFile);
+    }
   };
 
-  const processImage = async () => {
-    if (files.length === 0) {
-      message.error("Please select an image first");
-      return;
-    }
-
+  const processImage = async (file: RcFile) => {
     setIsProcessing(true);
     onSearchStateChange(true);
 
-    const file = files[0];
     const formData = new FormData();
     formData.append("file", file);
 
@@ -59,52 +43,59 @@ const DragDropImageUpload: React.FC<{
     } finally {
       setIsProcessing(false);
       onSearchStateChange(false);
-      setFiles([]); // Clear the file after processing
     }
   };
 
+  const uploadButton = (
+    <div className="flex flex-col items-center justify-center h-full">
+      <PlusOutlined />
+      <div className="mt-2">Upload</div>
+    </div>
+  );
+
   return (
-    <div className="w-full max-w-4xl mx-auto p-8">
-      <div
-        {...getRootProps()}
-        className={`p-20 border-2 border-dashed rounded-lg text-center cursor-pointer ${
-          isDragActive ? "border-blue-400 bg-blue-50" : "border-gray-300"
-        }`}
+    <div className="w-full max-w-2xl mx-auto">
+      <ImgCrop
+        modalOk={"Search Now"}
+        modalProps={{
+          okButtonProps: {
+            className: "custom-button",
+          },
+        }}
+        aspect={1}
+        quality={1}
+        modalTitle="Crop Image"
+        modalWidth={500}
       >
-        <input {...getInputProps()} />
-        <Upload className="mx-auto h-24 w-24 text-gray-400" />
-        <p className="mt-4 text-lg text-gray-600">
-          Drag 'n' drop an image here, or click to select a file
-        </p>
-      </div>
-
-      {files.length > 0 && (
-        <div className="mt-6 flex justify-center">
-          <div className="relative inline-block">
-            <img
-              src={files[0].preview}
-              alt={files[0].name}
-              className="h-48 object-cover rounded-md"
-            />
-            <button
-              onClick={() => removeFile(files[0])}
-              className="absolute top-0 right-0 p-1 bg-red-500 text-white rounded-full"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {files.length > 0 && (
-        <button
-          onClick={processImage}
-          disabled={isProcessing}
-          className="mt-6 px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 text-lg mx-auto block custom-button"
+        <Upload
+          listType="picture-card"
+          showUploadList={false}
+          className="rounded-lg overflow-hidden"
+          beforeUpload={(file) => {
+            const isJpgOrPng =
+              file.type === "image/jpeg" || file.type === "image/png";
+            if (!isJpgOrPng) {
+              message.error("You can only upload JPG/PNG file!");
+            }
+            const isLt2M = file.size / 1024 / 1024 < 2;
+            if (!isLt2M) {
+              message.error("Image must smaller than 2MB!");
+            }
+            return isJpgOrPng && isLt2M;
+          }}
+          onChange={handleChange}
         >
-          {isProcessing ? "Processing..." : "Analyze Image"}
-        </button>
-      )}
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt="Uploaded"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            uploadButton
+          )}
+        </Upload>
+      </ImgCrop>
     </div>
   );
 };

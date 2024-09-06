@@ -7,7 +7,6 @@ import DragDropImageUpload from "@/components/DragDropImageUpload";
 import CategoryFilterButton from "@/components/CategoryFilterButton";
 import { imageSearch } from "@/api/search/imageSearch";
 import { useRouter } from "next/navigation";
-import Navbar from "@/components/Navbar";
 import SimpleNavBar from "@/components/SimpleNavBar";
 
 const CameraPage: React.FC = () => {
@@ -25,9 +24,13 @@ const CameraPage: React.FC = () => {
       } else {
         throw new Error(result.error || "Failed to process image");
       }
-    } catch (err: any) {
-      setError(err.message);
-      message.error(err.message);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An unknown error occurred";
+      setError(errorMessage);
+      message.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -44,32 +47,38 @@ const CameraPage: React.FC = () => {
   return (
     <>
       <SimpleNavBar />
-      <div className="container mx-auto px-4 py-8 max-w-4xl flex flex-col justify-center w-max">
-        <div className={"flex flex-col align-left mb-2 md:pl-8"}>
-          <h1 className={"text-3xl"}>Welcome</h1>
-          <h1 className={"font-bold text-3xl"}>{username}!</h1>
-        </div>
-        <div className={"mb-8"}>
-          <CategoryFilterButton name={null} />
-        </div>
-        <div className="md:hidden">
-          <CameraComponent
-            onSearchResult={handleSearchResult}
-            onSearchStateChange={handleSearchStateChange}
-          />
-        </div>
-        <div className="hidden md:block">
-          <DragDropImageUpload
-            onSearchResult={handleSearchResult}
-            onSearchStateChange={handleSearchStateChange}
+      <div className="container mx-auto flex flex-col justify-center w-max">
+        <div className="my-8">
+          <div className="flex flex-col text-3xl mb-2">
+            <h1>Welcome,</h1>
+            <h1 className="font-bold">{username}!</h1>
+          </div>
+          <CategoryFilterButton
+            onCategoryChange={(category) => console.log(category)}
           />
         </div>
 
-        {isLoading && (
-          <div className="mt-8 text-center">
-            <Spin />
+        <div className="relative">
+          <div className="md:hidden">
+            <CameraComponent
+              onSearchResult={handleSearchResult}
+              onSearchStateChange={handleSearchStateChange}
+            />
           </div>
-        )}
+          <div className="hidden md:block">
+            <DragDropImageUpload
+              onSearchResult={handleSearchResult}
+              onSearchStateChange={handleSearchStateChange}
+            />
+          </div>
+
+          {isLoading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 z-10">
+              <Spin size="large" />
+              Searching...
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
