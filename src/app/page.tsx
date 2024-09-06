@@ -1,22 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Spin, message, Button } from "antd";
+import { Spin, message } from "antd";
 import CameraComponent from "@/components/CameraComponent";
 import DragDropImageUpload from "@/components/DragDropImageUpload";
 import CategoryFilterButton from "@/components/CategoryFilterButton";
 import { imageSearch } from "@/lib/search/imageSearch";
 import { useRouter } from "next/navigation";
 import SimpleNavBar from "@/components/SimpleNavBar";
-import { generateAIPrompt } from "@/lib/generatePrompt";
-import { categoryItems } from "@/data/demoCategoryData";
-import categoryLoader from "@/lib/categoryLoader";
 
 const CameraPage: React.FC = () => {
-  const [username, setUsername] = useState("Volunteer");
+  const [username, setUsername] = useState<string>("Volunteer");
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -24,6 +22,11 @@ const CameraPage: React.FC = () => {
     try {
       setIsLoading(true);
       setElapsedTime(0);
+
+      // Add the selected category to the formData
+      if (selectedCategory) {
+        formData.append("category", selectedCategory);
+      }
 
       const result = await imageSearch(formData);
 
@@ -36,13 +39,17 @@ const CameraPage: React.FC = () => {
       const errorMessage =
         err instanceof Error ? err.message : "An unknown error occurred";
       setError(errorMessage);
-      setIsLoading(false);
       message.error(errorMessage);
+      setIsLoading(false);
     }
   };
 
+  const handleCategoryChange = (category: string | null) => {
+    setSelectedCategory(category);
+    console.log("Selected category:", category);
+  };
+
   useEffect(() => {
-    console.log(generateAIPrompt(categoryLoader.getAllCategories()));
     let interval: NodeJS.Timeout;
     if (isLoading) {
       interval = setInterval(() => {
@@ -62,7 +69,8 @@ const CameraPage: React.FC = () => {
             <h1 className="font-bold">{username}!</h1>
           </div>
           <CategoryFilterButton
-            onCategoryChange={(category) => console.log(category)}
+            onCategoryChange={handleCategoryChange}
+            isDisabled={isLoading}
           />
         </div>
 
@@ -74,11 +82,7 @@ const CameraPage: React.FC = () => {
             <DragDropImageUpload onSearchResult={handleSearchResult} />
           </div>
 
-          <p
-            className={
-              "max-w-[300px] md:max-w-[350px] mt-4 text-center text-gray-500"
-            }
-          >
+          <p className="max-w-[300px] md:max-w-[350px] mt-4 text-center text-gray-500">
             Please note all uploads are recorded for feedback purposes.
           </p>
 

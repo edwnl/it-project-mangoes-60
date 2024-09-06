@@ -6,9 +6,9 @@ import { Button, Tag, Spin, Modal, message, Empty } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import { doc, getDoc, updateDoc, DocumentReference } from "firebase/firestore";
-import { categoryItems } from "@/data/demoCategoryData";
 import { db } from "@/lib/firebaseClient";
 import { CategoryItem } from "@/components/CategoryGrid";
+import { categoryLoader, reducedCategoryItems } from "@/lib/categoryLoader";
 
 interface SearchResult extends CategoryItem {
   confidence: number;
@@ -48,19 +48,16 @@ const SearchResultsPage: React.FC = () => {
           const data = searchDocSnap.data();
           setUploadedImageUrl(data.imageUrl);
 
-          const fullResults: SearchResult[] = data.results
-            .map((result: any) => {
-              const categoryItem = categoryItems.find(
-                (item) => item.id === result.id,
+          const fullResults = data.results
+            .map((result: SearchResult) => {
+              const categoryItem = categoryLoader.getCategoryById(
+                result.id.toString(),
               );
               return categoryItem
-                ? {
-                    ...categoryItem,
-                    confidence: result.confidence,
-                  }
+                ? { ...categoryItem, confidence: result.confidence }
                 : null;
             })
-            .filter(Boolean);
+            .filter((item: SearchResult | null) => item !== null);
 
           setSearchResultsState({
             results: fullResults.slice(0, 4), // Limit to 4 results
@@ -200,24 +197,12 @@ const SearchResultsPage: React.FC = () => {
                     alt={result.subcategory_name}
                     width={150}
                     height={150}
-                    className="mb-2 object-contain"
+                    className="mb-2 object-contain mx-auto"
                   />
                   <p className="text-sm text-gray-500">{result.id}</p>
                   <p className="font-semibold">{result.subcategory_name}</p>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    <Tag
-                      color={
-                        result.category_name === "Medical Supplies"
-                          ? "#FFCCCB"
-                          : result.category_name === "Airway Supplies"
-                            ? "#FFE5B4"
-                            : result.category_name === "First-Aid Supplies"
-                              ? "#E5FFE5"
-                              : "#CCE5FF"
-                      }
-                    >
-                      {result.category_name}
-                    </Tag>
+                    <Tag>{result.category_name}</Tag>
                     {searchResultsState.correct_subcategory === result.id && (
                       <Tag color="green">Correct</Tag>
                     )}

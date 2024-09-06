@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Upload, message } from "antd";
+import { Upload, message, Button } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import ImgCrop from "antd-img-crop";
 import type { RcFile, UploadProps } from "antd/es/upload/interface";
@@ -15,6 +15,7 @@ const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
 }) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [croppedFile, setCroppedFile] = useState<RcFile | null>(null);
 
   const handleChange: UploadProps["onChange"] = (info) => {
     if (info.file.status === "done") {
@@ -22,15 +23,20 @@ const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
         info.file.originFileObj as Blob,
       );
       setImageUrl(localImageUrl);
-      processImage(info.file.originFileObj as RcFile);
+      setCroppedFile(info.file.originFileObj as RcFile);
     }
   };
 
-  const processImage = async (file: RcFile) => {
+  const processImage = async () => {
+    if (!croppedFile) {
+      message.error("No image selected");
+      return;
+    }
+
     setIsProcessing(true);
 
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", croppedFile);
 
     try {
       await onSearchResult(formData);
@@ -50,9 +56,9 @@ const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
   );
 
   return (
-    <div className="w-full max-w-2xl mx-auto ">
+    <div className="w-full max-w-2xl mx-auto">
       <ImgCrop
-        modalOk={"Search Now"}
+        modalOk="Crop"
         modalProps={{
           okButtonProps: {
             className: "custom-button",
@@ -92,6 +98,17 @@ const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
           )}
         </Upload>
       </ImgCrop>
+      {croppedFile && (
+        <div className="mt-4 text-center">
+          <Button
+            onClick={processImage}
+            disabled={isProcessing}
+            className="custom-button"
+          >
+            {isProcessing ? "Searching..." : "Search Now"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

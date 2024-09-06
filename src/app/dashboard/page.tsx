@@ -4,7 +4,7 @@ import React, { useState, useCallback } from "react";
 import { Button, message, notification, Spin } from "antd";
 import NavBar from "@/components/Navbar";
 import CategoryGrid from "@/components/CategoryGrid";
-import { categoryItems } from "@/data/demoCategoryData";
+import { minimalCategoryItems } from "@/data/demoCategoryData";
 import { CategoryItem } from "@/components/CategoryGrid";
 import { textSearch } from "@/lib/search/textSearch";
 import { imageSearch } from "@/lib/search/imageSearch";
@@ -108,11 +108,11 @@ const DashboardPage: React.FC = () => {
           <p className="text-gray-600 mb-6">
             {searchResults.length > 0
               ? `Top ${searchResults.length} results matching "${lastQuery}"`
-              : `${categoryItems.length} categories in total`}
+              : `${minimalCategoryItems.length} categories in total`}
           </p>
           <CategoryGrid
             categories={
-              searchResults.length > 0 ? searchResults : categoryItems
+              searchResults.length > 0 ? searchResults : minimalCategoryItems
             }
             showConfidence={searchResults.length > 0}
           />

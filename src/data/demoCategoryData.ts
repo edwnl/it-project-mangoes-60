@@ -1,6 +1,6 @@
 import { CategoryItem } from "@/components/CategoryGrid";
 
-export const categoryItems: CategoryItem[] = [
+export const minimalCategoryItems: CategoryItem[] = [
   {
     id: "AIR001",
     subcategory_name: "Pressure Monitoring",

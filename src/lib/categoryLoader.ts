@@ -1,4 +1,4 @@
-import categoriesData from "@/lib/categories.json";
+import categoriesData from "@/data/reduced_categories.json";
 
 export interface CategoryItem {
   id: string;
@@ -11,6 +11,7 @@ export interface CategoryItem {
 
 class CategoryLoader {
   private categories: Map<string, CategoryItem>;
+  private cachedAllCategories: CategoryItem[] | null = null;
 
   constructor() {
     this.categories = new Map<string, CategoryItem>();
@@ -23,15 +24,18 @@ class CategoryLoader {
     }
     console.log(`Loaded ${this.categories.size} categories`);
   }
+
   getCategoryById(id: string): CategoryItem | undefined {
     return this.categories.get(id);
   }
 
   getAllCategories(): CategoryItem[] {
-    return Array.from(this.categories.values());
+    if (this.cachedAllCategories === null) {
+      this.cachedAllCategories = Array.from(this.categories.values());
+    }
+    return this.cachedAllCategories;
   }
 }
 
-const categoryLoader = new CategoryLoader();
-
-export default categoryLoader;
+export const categoryLoader = new CategoryLoader();
+export const reducedCategoryItems = categoryLoader.getAllCategories();

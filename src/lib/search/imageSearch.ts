@@ -1,11 +1,12 @@
 "use server";
 
 import OpenAI from "openai";
-import { categoryItems } from "@/data/demoCategoryData";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { firestore } from "firebase-admin";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebaseClient";
+import { generateAIPrompt } from "@/lib/generatePrompt";
+import { categoryLoader } from "@/lib/categoryLoader";
 
 export async function imageSearch(formData: FormData): Promise<{
   success: boolean;
@@ -19,54 +20,30 @@ export async function imageSearch(formData: FormData): Promise<{
   });
 
   const file = formData.get("file") as File;
-  const assistantId = process.env.OPENAI_ASSISTANT_ID;
+  const selectedCategory = formData.get("category") as string | null;
 
   if (!file) {
     return { success: false, error: "No file uploaded" };
   }
 
-  if (!assistantId) {
-    return { success: false, error: "Assistant ID is not configured" };
-  }
-
   try {
+    // Start file upload and OpenAI API request concurrently
     const startTime = Date.now();
-
-    // Upload image to Firebase
-    // const imageUrl = await benchmarkFunction(uploadImageToFirebase, file);
-
-    // Create a thread
-    const thread = await openai.beta.threads.create();
-
-    const buffer = await file.arrayBuffer();
-    const base64Image = Buffer.from(buffer).toString("base64");
-
-    // Add a message to the thread with the image
-    await openai.beta.threads.messages.create(thread.id, {
-      role: "user",
-      content: [{ type: "text", text: "Item name: 10ml Medtronics Syringe" }],
-    });
-
-    // Create and stream a run
-    let responseContent = "";
-    const run = openai.beta.threads.runs
-      .stream(thread.id, {
-        assistant_id: assistantId,
-      })
-      .on("textDelta", (textDelta, snapshot) => {
-        responseContent += textDelta.value;
-        console.log(textDelta.value);
-      });
-
-    const topResults = parseOpenAIResponse(responseContent);
+    const [imageUrl, openAIResponse] = await Promise.all([
+      benchmarkFunction(uploadImageToFirebase, file),
+      benchmarkFunction(processImageWithOpenAI, openai, file, selectedCategory),
+    ]);
+    console.log("OpenAI Response: ", openAIResponse);
+    const topResults = parseOpenAIResponse(openAIResponse);
 
     // Store search results in Firestore
     const searchResultRef = await benchmarkFunction(
       storeSearchResultsInFirestore,
       adminDb,
       topResults,
-      "",
-      responseContent,
+      imageUrl,
+      openAIResponse,
+      selectedCategory,
     );
 
     const totalEndTime = Date.now();
@@ -78,7 +55,7 @@ export async function imageSearch(formData: FormData): Promise<{
       success: true,
       searchId: searchResultRef.id,
       results: topResults,
-      imageUrl: "",
+      imageUrl,
     };
   } catch (error: any) {
     console.error("Error in imageSearch:", error);
@@ -94,11 +71,13 @@ async function storeSearchResultsInFirestore(
   results: any[],
   imageUrl: string,
   promptResponse: string,
+  selectedCategory: string | null,
 ) {
   return await db.collection("searchResults").add({
     results: results,
     imageUrl,
     prompt_response: promptResponse,
+    selectedCategory,
     timestamp: firestore.FieldValue.serverTimestamp(),
   });
 }
@@ -123,25 +102,26 @@ async function uploadImageToFirebase(file: File): Promise<string> {
 async function processImageWithOpenAI(
   openai: OpenAI,
   file: File,
+  selectedCategory: string | null,
 ): Promise<string> {
-  const boxData = categoryItems
-    .map((item) => `${item.id}:${item.subcategory_name}`)
-    .join(", ");
-
-  const prompt = `
-  Analyze the item in this image"
-  `;
-
   const buffer = await file.arrayBuffer();
   const base64Image = Buffer.from(buffer).toString("base64");
+  const prompt = generateAIPrompt(
+    categoryLoader.getAllCategories(),
+    selectedCategory,
+  );
+  console.log(prompt);
 
   const response = await openai.chat.completions.create({
-    model: "asst_Ez5O8wYttdtGMCYIi5G0psw9",
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "user",
         content: [
-          { type: "text", text: prompt },
+          {
+            type: "text",
+            text: prompt,
+          },
           {
             type: "image_url",
             image_url: {

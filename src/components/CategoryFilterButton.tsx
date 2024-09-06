@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Button, Modal, Select } from "antd";
 import { FilterIcon } from "lucide-react";
-import { categoryItems } from "@/data/demoCategoryData";
+import { reducedCategoryItems } from "@/lib/categoryLoader";
 
 interface CategoryFilterButtonProps {
   onCategoryChange: (category: string | null) => void;
+  isDisabled?: boolean;
 }
 
 const formatCategoryName = (name: string): string => {
@@ -16,12 +17,13 @@ const formatCategoryName = (name: string): string => {
 
 const CategoryFilterButton: React.FC<CategoryFilterButtonProps> = ({
   onCategoryChange,
+  isDisabled = false,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [categoryName, setCategoryName] = useState<string | null>(null);
 
   const uniqueCategories = Array.from(
-    new Set(categoryItems.map((item) => item.category_name)),
+    new Set(reducedCategoryItems.map((item) => item.category_name)),
   );
 
   const handleOk = () => {
@@ -35,6 +37,7 @@ const CategoryFilterButton: React.FC<CategoryFilterButtonProps> = ({
 
   const handleCategoryChange = (value: string | null) => {
     setCategoryName(value);
+    onCategoryChange(categoryName);
   };
 
   return (
@@ -42,6 +45,7 @@ const CategoryFilterButton: React.FC<CategoryFilterButtonProps> = ({
       <Button
         className="w-fit border-dashed text-[#72000B] border-[#72000B] border-2"
         onClick={() => setIsModalVisible(true)}
+        disabled={isDisabled}
       >
         <FilterIcon />
         Category Filter:

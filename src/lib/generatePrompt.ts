@@ -1,21 +1,28 @@
 import { CategoryItem } from "@/components/CategoryGrid";
 
-export function generateAIPrompt(categoryItems: CategoryItem[]): string {
+export function generateAIPrompt(
+  categoryItems: CategoryItem[],
+  selectedCategory: string | null,
+): string {
   const categoryList = categoryItems
-    .map((item) => `${item.id} - ${item.subcategory_name}`)
+    .map(
+      (item) => `${item.id} - ${item.category_name} - ${item.subcategory_name}`,
+    )
     .join("\n");
 
-  return `
-You are an AI trained to categorize medical item images into the top 4 most likely subcategories. 
+  let prompt = `
+Analyze the item in this image and match it to the top 4 SUBCATEGORY with % confidence in DESC order.
 
-If the prompt includes a category filter, ONLY respond with items in that category.
+${selectedCategory && `STRICTLY FILTER BY ${selectedCategory} Categories`}
 
-Respond ONLY as valid JSON: [[ID,CONFIDENCE],[ID,CONFIDENCE],[ID,CONFIDENCE],[ID,CONFIDENCE]]
+YOU CAN ONLY RESPOND WITH SUBCATEGORIES IN THE LIST BELOW.
 
-The response should be sorted by confidence in descending order.
+RESPOND ONLY AS VALID JSON "[[ID,CONF],[ID,CONF],[ID,CONF],[ID,CONF]]"
 
 Data Format: ID - CATEGORY NAME - SUBCATEGORY NAME
 
 ${categoryList}
   `.trim();
+
+  return prompt;
 }
