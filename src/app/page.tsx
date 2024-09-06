@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Spin, message } from "antd";
+import { Spin, message, Button } from "antd";
 import CameraComponent from "@/components/CameraComponent";
 import DragDropImageUpload from "@/components/DragDropImageUpload";
 import CategoryFilterButton from "@/components/CategoryFilterButton";
 import { imageSearch } from "@/lib/search/imageSearch";
 import { useRouter } from "next/navigation";
 import SimpleNavBar from "@/components/SimpleNavBar";
+import { generateAIPrompt } from "@/lib/generatePrompt";
+import { categoryItems } from "@/data/demoCategoryData";
+import categoryLoader from "@/lib/categoryLoader";
 
 const CameraPage: React.FC = () => {
   const [username, setUsername] = useState("Volunteer");
@@ -39,6 +42,7 @@ const CameraPage: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log(generateAIPrompt(categoryLoader.getAllCategories()));
     let interval: NodeJS.Timeout;
     if (isLoading) {
       interval = setInterval(() => {
@@ -69,6 +73,14 @@ const CameraPage: React.FC = () => {
           <div className="hidden md:block">
             <DragDropImageUpload onSearchResult={handleSearchResult} />
           </div>
+
+          <p
+            className={
+              "max-w-[300px] md:max-w-[350px] mt-4 text-center text-gray-500"
+            }
+          >
+            Please note all uploads are recorded for feedback purposes.
+          </p>
 
           {isLoading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 z-10">

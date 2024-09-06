@@ -6,7 +6,7 @@ import { Button, Tag, Spin, Modal, message, Empty } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import { doc, getDoc, updateDoc, DocumentReference } from "firebase/firestore";
-import { categoryItems } from "@/data/categoryData";
+import { categoryItems } from "@/data/demoCategoryData";
 import { db } from "@/lib/firebaseClient";
 import { CategoryItem } from "@/components/CategoryGrid";
 

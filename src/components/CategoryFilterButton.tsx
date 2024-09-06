@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, Modal, Select } from "antd";
 import { FilterIcon } from "lucide-react";
-import { categoryItems } from "@/data/categoryData";
+import { categoryItems } from "@/data/demoCategoryData";
 
 interface CategoryFilterButtonProps {
   onCategoryChange: (category: string | null) => void;

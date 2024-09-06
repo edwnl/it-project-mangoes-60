@@ -4,7 +4,7 @@ import React, { useState, useCallback } from "react";
 import { Button, message, notification, Spin } from "antd";
 import NavBar from "@/components/Navbar";
 import CategoryGrid from "@/components/CategoryGrid";
-import { categoryItems } from "@/data/categoryData";
+import { categoryItems } from "@/data/demoCategoryData";
 import { CategoryItem } from "@/components/CategoryGrid";
 import { textSearch } from "@/lib/search/textSearch";
 import { imageSearch } from "@/lib/search/imageSearch";

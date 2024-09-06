@@ -1,6 +1,6 @@
 "use server";
 import OpenAI from "openai";
-import { categoryItems } from "@/data/categoryData";
+import { categoryItems } from "@/data/demoCategoryData";
 
 export async function textSearch(query: string) {
   const openai = new OpenAI({
