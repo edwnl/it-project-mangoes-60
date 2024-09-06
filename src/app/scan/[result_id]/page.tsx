@@ -8,7 +8,7 @@ import Image from "next/image";
 import { doc, getDoc, updateDoc, DocumentReference } from "firebase/firestore";
 import { db } from "@/lib/firebaseClient";
 import { CategoryItem } from "@/components/CategoryGrid";
-import { categoryLoader, reducedCategoryItems } from "@/lib/categoryLoader";
+import { categoryLoader, categoryItems } from "@/lib/categoryLoader";
 
 interface SearchResult extends CategoryItem {
   confidence: number;

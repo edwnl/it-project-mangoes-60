@@ -5,7 +5,7 @@ import { adminDb } from "@/lib/firebaseAdmin";
 import { firestore } from "firebase-admin";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebaseClient";
-import { generateAIPrompt } from "@/lib/generatePrompt";
+import { generateAIPrompt } from "@/lib/search/generatePrompt";
 import { categoryLoader } from "@/lib/categoryLoader";
 
 export async function imageSearch(formData: FormData): Promise<{
@@ -110,7 +110,6 @@ async function processImageWithOpenAI(
     categoryLoader.getAllCategories(),
     selectedCategory,
   );
-  console.log(prompt);
 
   const response = await openai.chat.completions.create({
     model: "gpt-4o-mini",

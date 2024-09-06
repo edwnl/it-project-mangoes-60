@@ -1,13 +1,13 @@
 "use server";
 import OpenAI from "openai";
-import { minimalCategoryItems } from "@/data/demoCategoryData";
+import { categoryItems } from "@/lib/categoryLoader";
 
 export async function textSearch(query: string) {
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-  const boxData = minimalCategoryItems
+  const boxData = categoryItems
     .map((item) => `${item.id}:${item.subcategory_name}`)
     .join(", ");
 
@@ -48,7 +48,7 @@ export async function textSearch(query: string) {
     const json_res = JSON.parse(jsonString);
     const concatData = json_res
       .map(([id, confidence]: [string, number]) => {
-        const item = minimalCategoryItems.find((item) => item.id === id);
+        const item = categoryItems.find((item) => item.id === id);
         return item ? { ...item, confidence } : null;
       })
       .filter(Boolean);

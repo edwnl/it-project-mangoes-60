@@ -1,4 +1,4 @@
-import categoriesData from "@/data/reduced_categories.json";
+import categoriesData from "@/lib/data/reduced_categories.json";
 
 export interface CategoryItem {
   id: string;
@@ -38,4 +38,4 @@ class CategoryLoader {
 }
 
 export const categoryLoader = new CategoryLoader();
-export const reducedCategoryItems = categoryLoader.getAllCategories();
+export const categoryItems = categoryLoader.getAllCategories();

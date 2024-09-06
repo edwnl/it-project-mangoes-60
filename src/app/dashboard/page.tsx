@@ -4,10 +4,9 @@ import React, { useState, useCallback } from "react";
 import { Button, message, notification, Spin } from "antd";
 import NavBar from "@/components/Navbar";
 import CategoryGrid from "@/components/CategoryGrid";
-import { minimalCategoryItems } from "@/data/demoCategoryData";
 import { CategoryItem } from "@/components/CategoryGrid";
 import { textSearch } from "@/lib/search/textSearch";
-import { imageSearch } from "@/lib/search/imageSearch";
+import { categoryItems } from "@/lib/categoryLoader";
 
 interface SearchResult extends CategoryItem {
   confidence: number;
@@ -108,11 +107,11 @@ const DashboardPage: React.FC = () => {
           <p className="text-gray-600 mb-6">
             {searchResults.length > 0
               ? `Top ${searchResults.length} results matching "${lastQuery}"`
-              : `${minimalCategoryItems.length} categories in total`}
+              : `${categoryItems.length} categories in total`}
           </p>
           <CategoryGrid
             categories={
-              searchResults.length > 0 ? searchResults : minimalCategoryItems
+              searchResults.length > 0 ? searchResults : categoryItems
             }
             showConfidence={searchResults.length > 0}
           />

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, Modal, Select } from "antd";
 import { FilterIcon } from "lucide-react";
-import { reducedCategoryItems } from "@/lib/categoryLoader";
+import { categoryItems } from "@/lib/categoryLoader";
 
 interface CategoryFilterButtonProps {
   onCategoryChange: (category: string | null) => void;
@@ -23,7 +23,7 @@ const CategoryFilterButton: React.FC<CategoryFilterButtonProps> = ({
   const [categoryName, setCategoryName] = useState<string | null>(null);
 
   const uniqueCategories = Array.from(
-    new Set(reducedCategoryItems.map((item) => item.category_name)),
+    new Set(categoryItems.map((item) => item.category_name)),
   );
 
   const handleOk = () => {
@@ -37,6 +37,7 @@ const CategoryFilterButton: React.FC<CategoryFilterButtonProps> = ({
 
   const handleCategoryChange = (value: string | null) => {
     setCategoryName(value);
+    setIsModalVisible(false);
     onCategoryChange(categoryName);
   };
 
