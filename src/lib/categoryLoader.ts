@@ -1,4 +1,4 @@
-import categoriesData from "@/lib/data/reduced_categories.json";
+import categoriesData from "@/lib/data/minimal_categories.json";
 
 export interface CategoryItem {
   id: string;
