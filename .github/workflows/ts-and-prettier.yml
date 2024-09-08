@@ -1,4 +1,4 @@
-name: CI/CD
+name: ts-and-prettier
 
 on: [push, pull_request]
 
