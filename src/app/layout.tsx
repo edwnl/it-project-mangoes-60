@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${montserrat.className}`}>
+      <body className={`${montserrat.className} flex flex-row items-center justify-center`}>
 
         <ConfigProvider
           theme={{
