@@ -3,6 +3,7 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import React from "react";
 import { ConfigProvider } from "antd";
+import NavBar from "@/components/Navbar";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -27,9 +28,11 @@ export default function RootLayout({
           theme={{
             token: {
               fontFamily: "inherit",
+              colorPrimary: "#BF0018"
             },
           }}
         >
+          <NavBar/>
           {children}
         </ConfigProvider>
       </body>
