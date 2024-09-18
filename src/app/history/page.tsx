@@ -21,28 +21,28 @@ export interface HistoryRecordInterface {
 const _data :HistoryRecordInterface[]= [
   {
     id: 1,
-    imageURL: "https:/picsum.photos/100",
+    imageURL: "https:/picsum.photos/200",
     name: "Medtronics 10ml Syringe",
     time: new Date(Date.parse("13 Sep 2024 13:10:00 GMT+10")),
     quantityChange: 10,
   },
   {
     id: 2,
-    imageURL: "https://picsum.photos/100",
+    imageURL: "https://picsum.photos/200",
     name: "Viscopaste PB7",
     time: new Date(Date.parse("12 Sep 2024 13:16:00 GMT+10")),
     quantityChange: 2,
   },
   {
     id: 3,
-    imageURL: "https://picsum.photos/100",
+    imageURL: "https://picsum.photos/200",
     name: "Surviv-A-Wrap",
     time: new Date(Date.parse("13 Sep 2024 13:11:00 GMT+10")),
     quantityChange: 31,
   },
   {
     id: 4,
-    imageURL: "https://picsum.photos/100",
+    imageURL: "https://picsum.photos/200",
     name: "Sentry Instant Ice Pack",
     time: new Date(Date.parse("13 Sep 2024 13:28:00 GMT+10")),
     quantityChange: 7,
@@ -114,7 +114,6 @@ const renderDailyRecord = (historyRecords: HistoryRecordInterface[], displayDate
         </List>
         <EditHistory
           record={editInfo}
-          handleChange={() => {console.log("Changed")} }
           handleOk={() => {console.log("handleOk")}}
           isModalOpen={isModalOpen}
           handleCancel={() => {setModalOpen(false);}}

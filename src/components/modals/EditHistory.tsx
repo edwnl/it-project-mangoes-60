@@ -1,8 +1,9 @@
-import { Modal, Button, Form, Input, Select, InputNumber, ConfigProvider, FormInstance } from "antd";
+import { Modal, Button, Form, Input, Select, InputNumber, ConfigProvider, FormInstance, Image} from "antd";
 import { HistoryRecordInterface } from "@/app/history/page";
 import React from "react";
 import Title from "antd/lib/typography/Title";
 import { PencilLineIcon, TrashIcon } from "lucide-react";
+
 
 
 const _options = [
@@ -49,7 +50,15 @@ export const EditHistory = ({ record, handleOk, handleSubmit,handleDelete, isMod
            onCancel={handleCancel}
            footer={[null]}
     >
-      <Form layout={"vertical"} autoComplete="off" initialValues={{"name": record?.name, "Sub-category": '1'}}>
+      <div className="flex flex-col items-center w-full">
+
+      <Image
+        width={200}
+        src={record?.imageURL}
+        className={"mb-4"}
+      />
+      <Form layout={"vertical"} autoComplete="off" initialValues={{"name": record?.name, "Sub-category": '1'}} className={"w-full"}>
+
         <Form.Item name={"name"} rules={[{required: true}]} label={"Name"}>
           <Input placeholder={"Enter item's name"}/>
         </Form.Item>
@@ -86,6 +95,8 @@ export const EditHistory = ({ record, handleOk, handleSubmit,handleDelete, isMod
           </Form.Item>
         </div>
       </Form>
+      </div>
+
     </Modal>
 
   )
