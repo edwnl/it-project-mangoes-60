@@ -1,7 +1,7 @@
 "use server";
 
 import OpenAI from "openai";
-import { categoryItems } from "@/data/categoryData";
+import { categoryItems } from "@/lib/categoryLoader";
 
 export async function imageSearch(formData: FormData) {
   const openai = new OpenAI({
@@ -21,7 +21,7 @@ export async function imageSearch(formData: FormData) {
   const base64Image = buffer.toString("base64");
 
   const boxData = categoryItems
-    .map((item) => `${item.id}:${item.box_name}`)
+    .map((item) => `${item.id}:${item.subcategory_name}`)
     .join(", ");
 
   const prompt = `
