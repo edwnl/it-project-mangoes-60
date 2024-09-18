@@ -1,7 +1,7 @@
 "use server";
 
 import OpenAI from "openai";
-import { categoryItems } from "@/data/categoryData";
+import { categoryItems } from "@/lib/categoryLoader";
 
 export async function imageSearch(formData: FormData) {
   const openai = new OpenAI({
@@ -21,7 +21,7 @@ export async function imageSearch(formData: FormData) {
   const base64Image = buffer.toString("base64");
 
   const boxData = categoryItems
-    .map((item) => `${item.id}:${item.box_name}`)
+    .map((item) => `${item.id}:${item.subcategory_name}`)
     .join(", ");
 
   const prompt = `
@@ -61,7 +61,10 @@ export async function imageSearch(formData: FormData) {
     };
   }
   // Check for content
-  if (responseFromAPI.choices !=  undefined && responseFromAPI.choices[0] !=null) {
+  if (
+    responseFromAPI.choices != undefined &&
+    responseFromAPI.choices[0] != null
+  ) {
     const content = responseFromAPI.choices[0].message.content;
     if (content === null) {
       throw new Error("No content in response");
@@ -83,5 +86,5 @@ export async function imageSearch(formData: FormData) {
 
     return { success: true, data: concatData };
   }
-  throw new Error("No content provided by OpenAI")
+  throw new Error("No content provided by OpenAI");
 }

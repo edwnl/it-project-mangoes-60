@@ -1,6 +1,6 @@
 "use server";
 import OpenAI from "openai";
-import { categoryItems } from "@/data/categoryData";
+import { categoryItems } from "@/lib/categoryLoader";
 
 export async function textSearch(query: string) {
   const openai = new OpenAI({
@@ -8,13 +8,13 @@ export async function textSearch(query: string) {
   });
 
   const boxData = categoryItems
-    .map((item) => `${item.id}:${item.box_name}`)
+    .map((item) => `${item.id}:${item.subcategory_name}`)
     .join(", ");
 
   const prompt = `
   Boxes: ${boxData}. 
-  Match "${query}" to top 3 boxes with % confidence in DESC order. 
-  RESPOND ONLY AS VALID JSON "[[ID,CONF],[ID,CONF],[ID,CONF]]"
+  Match "${query}" to top 4 boxes with % confidence in DESC order. 
+  RESPOND ONLY AS VALID JSON "[[ID,CONF],[ID,CONF],[ID,CONF], [ID,CONF]]"
   `;
   let responseFromAPI;
   try {
@@ -42,7 +42,10 @@ export async function textSearch(query: string) {
     return { success: false, error: JSON.stringify(error.message) };
   }
   // Check for content
-  if (responseFromAPI.choices !=  undefined && responseFromAPI.choices[0] !=null) {
+  if (
+    responseFromAPI.choices != undefined &&
+    responseFromAPI.choices[0] != null
+  ) {
     const content = responseFromAPI.choices[0].message.content;
     if (content === null) {
       throw new Error("No content in response");
@@ -64,5 +67,5 @@ export async function textSearch(query: string) {
 
     return { success: true, data: concatData };
   }
-  throw new Error("No content provided by OpenAI")
+  throw new Error("No content provided by OpenAI");
 }

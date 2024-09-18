@@ -4,10 +4,9 @@ import React, { useState, useCallback } from "react";
 import { Button, message, notification, Spin } from "antd";
 import NavBar from "@/components/Navbar";
 import CategoryGrid from "@/components/CategoryGrid";
-import { categoryItems } from "@/data/categoryData";
 import { CategoryItem } from "@/components/CategoryGrid";
-import { textSearch } from "@/api/search/textSearch";
-import { imageSearch } from "@/api/search/imageSearch";
+import { textSearch } from "@/lib/search/textSearch";
+import { categoryItems } from "@/lib/categoryLoader";
 
 interface SearchResult extends CategoryItem {
   confidence: number;
@@ -55,22 +54,22 @@ const DashboardPage: React.FC = () => {
     const formData = new FormData();
     formData.append("file", image);
 
-    const { success, data, error } = await imageSearch(formData);
-    if (!success) {
-      api.error({
-        message: "Error",
-        description: `Something went wrong while analyzing the image. ${error}.`,
-      });
-      resetSearch();
-      return;
-    }
-
-    api.success({
-      message: "Image Search Completed",
-      description: `Found ${data.length} result(s) in ${Math.round(performance.now() - startTime)}ms.`,
-    });
-
-    setSearchResults(data);
+    // const { success, searchId, error } = await imageSearch(formData);
+    // if (!success) {
+    //   api.error({
+    //     message: "Error",
+    //     description: `Something went wrong while analyzing the image. ${error}.`,
+    //   });
+    //   resetSearch();
+    //   return;
+    // }
+    //
+    // api.success({
+    //   message: "Image Search Completed",
+    //   description: `Found ${data.length} result(s) in ${Math.round(performance.now() - startTime)}ms.`,
+    // });
+    //
+    // setSearchResults(data);
     setIsSearching(false);
   }, []);
 

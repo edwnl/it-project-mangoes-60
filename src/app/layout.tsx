@@ -3,6 +3,7 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import React from "react";
 import { ConfigProvider } from "antd";
+import { Analytics } from "@vercel/analytics/react";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -21,18 +22,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${montserrat.className} flex flex-row items-center justify-center`}>
-
+      <body className={`${montserrat.className}`}>
         <ConfigProvider
           theme={{
             token: {
               fontFamily: "inherit",
-              colorPrimary: '#BF0018',
+              colorPrimary: "#BF0018",
             },
-
           }}
         >
           {children}
+          <Analytics />
         </ConfigProvider>
       </body>
     </html>
