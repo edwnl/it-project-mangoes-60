@@ -27,7 +27,9 @@ export default function RootLayout({
           theme={{
             token: {
               fontFamily: "inherit",
+              colorPrimary: '#BF0018',
             },
+
           }}
         >
           {children}
