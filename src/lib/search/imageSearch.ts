@@ -132,12 +132,17 @@ async function processImageWithOpenAI(
     ],
   });
 
+  if (!response || !response.choices[0])
+    throw new Error("No content in response");
+
   return response.choices[0].message.content || "";
 }
 
 function parseOpenAIResponse(content: string): any[] {
   const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
   const jsonString = jsonMatch ? jsonMatch[1] : content;
+  if (!jsonString) throw new Error("No content in response");
+
   const json_res = JSON.parse(jsonString);
   return json_res.slice(0, 4).map(([id, confidence]: [string, number]) => ({
     id,
