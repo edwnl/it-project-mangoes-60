@@ -1,24 +1,17 @@
+// File: src/pages/SearchResultsPage.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Button, Tag, Spin, Modal, message, Empty } from "antd";
+import { Button, Spin, message, Empty } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
-import Image from "next/image";
 import { doc, getDoc, updateDoc, DocumentReference } from "firebase/firestore";
 import { db } from "@/lib/firebaseClient";
-import { CategoryItem } from "@/components/CategoryGrid";
-import { categoryLoader, categoryItems } from "@/lib/categoryLoader";
-
-interface SearchResult extends CategoryItem {
-  confidence: number;
-}
-
-interface SearchResultsState {
-  results: SearchResult[];
-  feedback_status: "NOT_PROVIDED" | "CORRECT" | "INCORRECT";
-  correct_subcategory?: string;
-}
+import { categoryLoader } from "@/lib/categoryLoader";
+import { SearchResult, SearchResultsState } from "@/types/SearchTypes";
+import ResultCard from "@/components/ResultCard";
+import ImageModal from "@/components/modals/ImageModal";
+import ConfirmModal from "@/components/modals/ConfirmModal";
 
 const SearchResultsPage: React.FC = () => {
   const router = useRouter();
@@ -60,7 +53,7 @@ const SearchResultsPage: React.FC = () => {
             .filter((item: SearchResult | null) => item !== null);
 
           setSearchResultsState({
-            results: fullResults.slice(0, 4), // Limit to 4 results
+            results: fullResults.slice(0, 4),
             feedback_status: data.feedback_status || "NOT_PROVIDED",
             correct_subcategory: data.correct_subcategory,
           });
@@ -168,9 +161,9 @@ const SearchResultsPage: React.FC = () => {
         </Button>
       </header>
 
-      <main className={"max-w-xl mx-auto"}>
+      <main className="max-w-xl mx-auto">
         <h1 className="text-2xl font-bold mb-1">Search Results</h1>
-        <p className={"mb-4"}>
+        <p className="mb-4">
           Showing results for{" "}
           <span className="cursor-pointer underline" onClick={handleImageClick}>
             image.
@@ -187,30 +180,17 @@ const SearchResultsPage: React.FC = () => {
           {searchResultsState.results.length > 0 ? (
             <div className="grid grid-cols-2 gap-4 justify-items-center">
               {searchResultsState.results.map((result) => (
-                <div
+                <ResultCard
                   key={result.id}
-                  className="border rounded-lg p-4 cursor-pointer w-full max-w-[300px]"
-                  onClick={() => handleCardClick(result)}
-                >
-                  <Image
-                    src={result.image_url}
-                    alt={result.subcategory_name}
-                    width={150}
-                    height={150}
-                    className="mb-2 object-contain mx-auto"
-                  />
-                  <p className="text-sm text-gray-500">{result.id}</p>
-                  <p className="font-semibold">{result.subcategory_name}</p>
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    <Tag>{result.category_name}</Tag>
-                    {searchResultsState.correct_subcategory === result.id && (
-                      <Tag color="green">Correct</Tag>
-                    )}
-                    {searchResultsState.feedback_status === "INCORRECT" && (
-                      <Tag color="red">Incorrect</Tag>
-                    )}
-                  </div>
-                </div>
+                  result={result}
+                  isCorrect={
+                    searchResultsState.correct_subcategory === result.id
+                  }
+                  isIncorrect={
+                    searchResultsState.feedback_status === "INCORRECT"
+                  }
+                  onClick={handleCardClick}
+                />
               ))}
             </div>
           ) : (
@@ -239,46 +219,22 @@ const SearchResultsPage: React.FC = () => {
         )}
       </main>
 
-      <Modal
-        title="Confirm Category Selection"
-        open={isConfirmModalVisible}
-        onOk={
+      <ConfirmModal
+        isVisible={isConfirmModalVisible}
+        selectedItem={selectedItem}
+        onConfirm={
           selectedItem
             ? handleConfirmCategorySelection
             : handleConfirmIncorrectResults
         }
         onCancel={() => setIsConfirmModalVisible(false)}
-        okText={
-          selectedItem ? "Confirm Selection" : "Yes, mark all as incorrect"
-        }
-        cancelText="Cancel"
-      >
-        {selectedItem ? (
-          <p>
-            Are you sure you want to select "{selectedItem.subcategory_name}" as
-            the correct category?
-          </p>
-        ) : (
-          <p>Are you sure you want to mark all results as incorrect?</p>
-        )}
-      </Modal>
+      />
 
-      <Modal
-        title="Searched Image"
-        open={isImageModalVisible}
-        onCancel={() => setIsImageModalVisible(false)}
-        footer={null}
-      >
-        {uploadedImageUrl && (
-          <Image
-            src={uploadedImageUrl}
-            alt="Searched Image"
-            width={400}
-            height={400}
-            className="object-contain"
-          />
-        )}
-      </Modal>
+      <ImageModal
+        isVisible={isImageModalVisible}
+        imageUrl={uploadedImageUrl}
+        onClose={() => setIsImageModalVisible(false)}
+      />
     </div>
   );
 };
