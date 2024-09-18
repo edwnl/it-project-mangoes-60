@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { Upload, X } from 'lucide-react';
+import React, { useState, useCallback } from "react";
+import { useDropzone } from "react-dropzone";
+import { Upload, X } from "lucide-react";
 import { imageSearch } from "@/api/search/imageSearch";
 
 interface FileWithPreview extends File {
@@ -18,17 +18,19 @@ const DragDropImageUpload: React.FC<{
   const [uploading, setUploading] = useState(false);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    setFiles(acceptedFiles.map(file => 
-      Object.assign(file, {
-        preview: URL.createObjectURL(file)
-      })
-    ));
+    setFiles(
+      acceptedFiles.map((file) =>
+        Object.assign(file, {
+          preview: URL.createObjectURL(file),
+        }),
+      ),
+    );
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {'image/*': []},
-    multiple: true
+    accept: { "image/*": [] },
+    multiple: true,
   });
 
   const removeFile = (file: FileWithPreview) => {
@@ -44,7 +46,7 @@ const DragDropImageUpload: React.FC<{
     for (let i = 0; i < files.length; i++) {
       const file = files[i]!;
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
 
       try {
         const result = await imageSearch(formData);
@@ -52,13 +54,13 @@ const DragDropImageUpload: React.FC<{
           updatedFiles[i] = { ...file, categories: result.data };
           onSearchResult(result);
         } else {
-          throw new Error(result.error || 'Analysis failed');
+          throw new Error(result.error || "Analysis failed");
         }
       } catch (error) {
-        console.error('Error processing file:', error);
+        console.error("Error processing file:", error);
         onSearchResult({
           success: false,
-          error: 'Failed to process image',
+          error: "Failed to process image",
         });
       }
     }
@@ -72,7 +74,7 @@ const DragDropImageUpload: React.FC<{
       <div
         {...getRootProps()}
         className={`p-20 border-2 border-dashed rounded-lg text-center cursor-pointer ${
-          isDragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
+          isDragActive ? "border-blue-400 bg-blue-50" : "border-gray-300"
         }`}
       >
         <input {...getInputProps()} />
@@ -81,7 +83,7 @@ const DragDropImageUpload: React.FC<{
           Drag 'n' drop some images here, or click to select files
         </p>
       </div>
-      
+
       {files.length > 0 && (
         <div className="mt-6 grid gap-4">
           {files.map((file) => (
@@ -100,7 +102,10 @@ const DragDropImageUpload: React.FC<{
               {file.categories && (
                 <div className="mt-2">
                   {file.categories.map((category, index) => (
-                    <p key={index} className="text-center text-sm text-gray-600">
+                    <p
+                      key={index}
+                      className="text-center text-sm text-gray-600"
+                    >
                       {category.box_name}: {category.confidence.toFixed(2)}%
                     </p>
                   ))}
@@ -117,7 +122,7 @@ const DragDropImageUpload: React.FC<{
           disabled={uploading}
           className="mt-6 px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 text-lg mx-auto block"
         >
-          {uploading ? 'Analyzing...' : 'Analyse Images'}
+          {uploading ? "Analyzing..." : "Analyse Images"}
         </button>
       )}
     </div>
