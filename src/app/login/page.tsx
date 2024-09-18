@@ -12,45 +12,47 @@ import Logo from "@/assets/logo_white_hole.svg";
 const LoginPage: React.FC = () => {
   const [form] = Form.useForm();
   const router = useRouter();
-  const [loading, setLoading] = useState(false); 
-
+  const [loading, setLoading] = useState(false);
 
   const onFinish = async (values: { email: string; password: string }) => {
-    setLoading(true); 
-    try { 
-      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-      const user = userCredential.user; 
+    setLoading(true);
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        values.email,
+        values.password,
+      );
+      const user = userCredential.user;
 
       // Fetch user role from Firestore
-      const userDoc = await getDoc(doc(db, "users", user.uid)); 
+      const userDoc = await getDoc(doc(db, "users", user.uid));
       const userData = userDoc.data();
 
       if (userData && userData.role) {
-        // Store user role in the browsers local storage 
-        localStorage.setItem("userRole", userData.role); 
-        // makes information easily accessible so we don't need to fetch from firebase every time 
-        
-        // STILL NEED TO IMPLEMENT THE REDIRECTS 
-        switch(userData.role) {
+        // Store user role in the browsers local storage
+        localStorage.setItem("userRole", userData.role);
+        // makes information easily accessible so we don't need to fetch from firebase every time
+
+        // STILL NEED TO IMPLEMENT THE REDIRECTS
+        switch (userData.role) {
           case "admin":
-            router.push("/"); 
-            break; 
+            router.push("/"); // just goes to home for now - PROTOTYPE
+            break;
           case "volunteer":
-            router.push("/history");
-            break; 
-          default: 
-          router.push("/");
+            router.push("/history"); // just goes to history for now - PROTOTYPE
+            break;
+          default:
+            router.push("/");
         }
         // Redirect based on role
       } else {
         message.error("User role not found");
       }
-      
     } catch (error) {
-      console.error("Error:", error); 
+      console.error("Error:", error);
       message.error("Failed to sign in . Please check your credentials");
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
     // console.log("Success:", values);
     // router.push("/");
@@ -58,7 +60,7 @@ const LoginPage: React.FC = () => {
 
   const handleSignUp = () => {
     router.push("/signup");
-  }
+  };
 
   return (
     <div className="flex items-center min-h-screen justify-center bg-white ">
@@ -74,14 +76,12 @@ const LoginPage: React.FC = () => {
           <Form.Item
             name="email"
             label="Email"
-            rules={[{ required: true, message: "Please input your email!" }, 
-                    { type: "email", message: "Please enter a valid email!"}
+            rules={[
+              { required: true, message: "Please input your email!" },
+              { type: "email", message: "Please enter a valid email!" },
             ]}
           >
-            <Input
-              placeholder="Enter your email"
-              className="rounded-md h-10"
-            />
+            <Input placeholder="Enter your email" className="rounded-md h-10" />
           </Form.Item>
           <Form.Item
             name="password"
@@ -102,11 +102,11 @@ const LoginPage: React.FC = () => {
             >
               Sign In
             </Button>
-            <Button 
+            <Button
               onClick={handleSignUp}
-              className="w-full h-10"
+              className="w-full h-10 mt-2 custom-button"
             >
-              Sign Up 
+              Sign Up
             </Button>
           </Form.Item>
         </Form>
@@ -121,5 +121,4 @@ const LoginPage: React.FC = () => {
 
 export default LoginPage;
 
-
-// need protected route 
+// need protected route
