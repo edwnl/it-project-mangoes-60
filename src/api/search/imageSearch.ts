@@ -1,36 +1,52 @@
 "use server";
-import OpenAI from "openai";
-import { categoryItems } from "@/lib/categoryLoader";
 
-export async function textSearch(query: string) {
+import OpenAI from "openai";
+import { categoryItems } from "@/data/categoryData";
+
+export async function imageSearch(formData: FormData) {
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
 
+  const file = formData.get("file") as File;
+
+  if (!file) {
+    return { success: false, error: "No file uploaded" };
+  }
+
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
+  // Create a base64 representation of the image
+  const base64Image = buffer.toString("base64");
+
   const boxData = categoryItems
-    .map((item) => `${item.id}:${item.subcategory_name}`)
+    .map((item) => `${item.id}:${item.box_name}`)
     .join(", ");
 
   const prompt = `
   Boxes: ${boxData}. 
-  Match "${query}" to top 4 boxes with % confidence in DESC order. 
-  RESPOND ONLY AS VALID JSON "[[ID,CONF],[ID,CONF],[ID,CONF], [ID,CONF]]"
+  Analyze the item in this image and match it to the top 3 boxes with % confidence in DESC order. 
+  RESPOND ONLY AS VALID JSON "[[ID,CONF],[ID,CONF],[ID,CONF]]"
   `;
   let responseFromAPI;
   try {
     const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "user",
           content: [
+            { type: "text", text: prompt },
             {
-              type: "text",
-              text: prompt,
+              type: "image_url",
+              image_url: {
+                url: `data:${file.type};base64,${base64Image}`,
+              },
             },
           ],
         },
       ],
-      model: "gpt-4o-mini",
     });
 
     if (response.usage) {
@@ -38,8 +54,11 @@ export async function textSearch(query: string) {
     }
     responseFromAPI = response;
   } catch (error: any) {
-    console.error(error.message);
-    return { success: false, error: JSON.stringify(error.message) };
+    console.error("Error in imageSearch:", error);
+    return {
+      success: false,
+      error: error.message || "An unexpected error occurred",
+    };
   }
   // Check for content
   if (responseFromAPI.choices !=  undefined && responseFromAPI.choices[0] !=null) {
