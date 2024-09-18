@@ -83,7 +83,7 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="min-h-screen">
       {contextHolder}
-      <NavBar onSearch={handleSearch} onImageSearch={handleImageSearch} />
+      <NavBar/>
 
       {isSearching ? (
         <div className="flex justify-center items-center h-[calc(100vh-64px)]">

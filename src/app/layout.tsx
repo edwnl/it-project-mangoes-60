@@ -20,6 +20,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en">
       <body className={`${montserrat.className}`}>
@@ -32,7 +33,7 @@ export default function RootLayout({
             },
           }}
         >
-          <NavBar/>
+
           {children}
         </ConfigProvider>
       </body>
