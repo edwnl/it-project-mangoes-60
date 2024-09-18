@@ -42,7 +42,10 @@ export async function textSearch(query: string) {
     return { success: false, error: JSON.stringify(error.message) };
   }
   // Check for content
-  if (responseFromAPI.choices !=  undefined && responseFromAPI.choices[0] !=null) {
+  if (
+    responseFromAPI.choices != undefined &&
+    responseFromAPI.choices[0] != null
+  ) {
     const content = responseFromAPI.choices[0].message.content;
     if (content === null) {
       throw new Error("No content in response");
@@ -64,5 +67,5 @@ export async function textSearch(query: string) {
 
     return { success: true, data: concatData };
   }
-  throw new Error("No content provided by OpenAI")
+  throw new Error("No content provided by OpenAI");
 }
