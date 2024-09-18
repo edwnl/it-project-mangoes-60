@@ -1,7 +1,7 @@
 "use server";
 
 import OpenAI from "openai";
-import { categoryItems } from "@/data/categoryData";
+import { categoryItems } from "@/lib/categoryLoader";
 
 export async function imageSearch(formData: FormData) {
   const openai = new OpenAI({
@@ -21,7 +21,7 @@ export async function imageSearch(formData: FormData) {
   const base64Image = buffer.toString("base64");
 
   const boxData = categoryItems
-    .map((item) => `${item.id}:${item.box_name}`)
+    .map((item) => `${item.id}:${item.subcategory_name}`)
     .join(", ");
 
   const prompt = `
@@ -29,7 +29,7 @@ export async function imageSearch(formData: FormData) {
   Analyze the item in this image and match it to the top 3 boxes with % confidence in DESC order. 
   RESPOND ONLY AS VALID JSON "[[ID,CONF],[ID,CONF],[ID,CONF]]"
   `;
-
+  let responseFromAPI;
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -52,16 +52,30 @@ export async function imageSearch(formData: FormData) {
     if (response.usage) {
       console.log(`Total tokens used: ${response.usage.total_tokens}`);
     }
-
-    const content = response.choices[0].message.content;
-    if (!content) {
+    responseFromAPI = response;
+  } catch (error: any) {
+    console.error("Error in imageSearch:", error);
+    return {
+      success: false,
+      error: error.message || "An unexpected error occurred",
+    };
+  }
+  // Check for content
+  if (
+    responseFromAPI.choices != undefined &&
+    responseFromAPI.choices[0] != null
+  ) {
+    const content = responseFromAPI.choices[0].message.content;
+    if (content === null) {
       throw new Error("No content in response");
     }
 
     // Extract JSON from the content (assuming it's wrapped in backticks)
     const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
     const jsonString = jsonMatch ? jsonMatch[1] : content;
-
+    if (jsonString == undefined) {
+      throw new Error("Unexpected parsing response error");
+    }
     const json_res = JSON.parse(jsonString);
     const concatData = json_res
       .map(([id, confidence]: [string, number]) => {
@@ -71,11 +85,6 @@ export async function imageSearch(formData: FormData) {
       .filter(Boolean);
 
     return { success: true, data: concatData };
-  } catch (error: any) {
-    console.error("Error in imageSearch:", error);
-    return {
-      success: false,
-      error: error.message || "An unexpected error occurred",
-    };
   }
+  throw new Error("No content provided by OpenAI");
 }

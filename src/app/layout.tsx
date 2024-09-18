@@ -3,7 +3,7 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import React from "react";
 import { ConfigProvider } from "antd";
-import NavBar from "@/components/Navbar";
+import { Analytics } from "@vercel/analytics/react";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -20,21 +20,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <html lang="en">
       <body className={`${montserrat.className}`}>
-
         <ConfigProvider
           theme={{
             token: {
               fontFamily: "inherit",
-              colorPrimary: "#BF0018"
+              colorPrimary: "#BF0018",
             },
           }}
         >
-
           {children}
+          <Analytics />
         </ConfigProvider>
       </body>
     </html>

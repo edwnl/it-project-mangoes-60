@@ -22,6 +22,7 @@ const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       const selectedFile = acceptedFiles[0];
+      if (selectedFile === undefined) return;
       setFile(selectedFile);
       setPreview(URL.createObjectURL(selectedFile));
     }
