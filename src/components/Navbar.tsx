@@ -95,7 +95,7 @@ const MobileNavBar = ({ username }: {
                     <div
                       className={"bg-red-800 rounded-full text-white w-[100px] h-[100px] flex justify-center text-xl" +
                         " flex-col items-center mb-2"}>
-                      {username.split(" ").flatMap(value => value[0].toUpperCase()).toString().replaceAll(",", "")}
+                      {username.split(" ").flatMap(value => value[0]?.toUpperCase()).toString().replaceAll(",", "")}
                     </div>
                     <Title level={2}>{username}</Title>
                   </div>

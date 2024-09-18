@@ -144,6 +144,8 @@ const HistoryPage = (props: any) => {
   }, [_data]);
 
   return (
+    <div className={"container mx-auto flex flex-col justify-center w-full items-center"}>
+
     <div className={"w-11/12 lg:w-1/3 items-center mt-4"}>
       <div className="header items-start w-full mb-10">
         <Title>History</Title>
@@ -172,6 +174,8 @@ const HistoryPage = (props: any) => {
           ),
         )}
     </div>
+    </div>
+
   );
 };
 
