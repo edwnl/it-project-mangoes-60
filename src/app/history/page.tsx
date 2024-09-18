@@ -242,7 +242,8 @@ const HistoryPage = () => {
 
   // Renders the history page
   return (
-    <div className={"w-11/12 lg:w-1/3 items-center mt-4"}>
+    <div className={"min-h-screen max-w-5xl mx-auto bg-white flex flex-row justify-center"}>
+    <div className={"w-11/12 lg:w-2/3 items-center mt-4"}>
       <div className="header items-start w-full mb-10">
         <Title>History</Title>
         <div className="flex flex-row justify-between mb-4 h-full">
@@ -283,6 +284,7 @@ const HistoryPage = () => {
           isScannedBy={editInfo.userID}
         />
       )}
+    </div>
     </div>
   );
 };
