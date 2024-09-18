@@ -11,7 +11,7 @@ const UsersPage = () => {
     { name: "Jack", status: "Joined on 11th September" },
     { name: "Jack", status: "Joined on 11th September" },
     { name: "Jack", status: "Joined on 11th September" },
-    { name: "Jack", status: "Joined on 11th Septembere" },
+    { name: "Jack", status: "Joined on 11th September" },
     { name: "Jack", status: "Joined on 11th September" },
     { name: "Jack", status: "Joined on 11th September" },
   ];
