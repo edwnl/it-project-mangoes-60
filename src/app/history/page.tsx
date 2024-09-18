@@ -87,6 +87,7 @@ const HistoryPage: React.FC = () => {
       const docRef = doc(db, "matchingHistory", updatedRecord.id);
       await updateDoc(docRef, {
         totalScanned: updatedRecord.totalScanned,
+        subCategory: updatedRecord.subCategory,
       });
 
       setHistoryRecords((prevRecords) =>
