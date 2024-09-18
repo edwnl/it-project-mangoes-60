@@ -12,11 +12,17 @@ import React, { useEffect, useState } from "react";
 import { PencilLineIcon, TrashIcon } from "lucide-react";
 
 export interface EditHistoryProps {
+  // The record that is being edited
   record: HistoryRecordInterface | undefined;
+  // Function that is called when updates are confirmed
   handleOk: (updatedRecord: HistoryRecordInterface) => void;
+  // Function that is called when record is deleted
   handleDelete?: () => void;
+  // Controls the visibility of popup
   isModalOpen: boolean;
+  // Function that is called when you cancel the edit
   handleCancel: () => void;
+  // ID of who scanned item
   isScannedBy: string;
 }
 
@@ -25,6 +31,8 @@ interface SubmitBtnProps {
   originalValue: number;
 }
 
+// Submit button
+// Disabled if there are no changes
 export const SubmitBtn: React.FC<React.PropsWithChildren<SubmitBtnProps>> = ({
   form,
   children,
@@ -32,13 +40,18 @@ export const SubmitBtn: React.FC<React.PropsWithChildren<SubmitBtnProps>> = ({
 }) => {
   const [submittable, setSubmittable] = React.useState(false);
 
-  const totalScanned = Form.useWatch('totalScanned', form);
+  // Checks for changes in totalScanned field
+  const totalScanned = Form.useWatch("totalScanned", form);
 
+  // Determines if you can choose to submit
   React.useEffect(() => {
     form
       .validateFields({ validateOnly: true })
       .then(() => {
-        setSubmittable(totalScanned !== undefined && totalScanned !== originalValue);
+        // Only allow submit if totalScanned has changed and is valid
+        setSubmittable(
+          totalScanned !== undefined && totalScanned !== originalValue,
+        );
       })
       .catch(() => setSubmittable(false));
   }, [form, totalScanned, originalValue]);
@@ -55,6 +68,7 @@ export const SubmitBtn: React.FC<React.PropsWithChildren<SubmitBtnProps>> = ({
   );
 };
 
+// Modal component for editing history
 export const EditHistory: React.FC<EditHistoryProps> = ({
   record,
   handleOk,
@@ -64,8 +78,11 @@ export const EditHistory: React.FC<EditHistoryProps> = ({
   isScannedBy,
 }) => {
   const [form] = Form.useForm();
-  const [originalTotalScanned, setOriginalTotalScanned] = useState<number | undefined>(undefined);
+  const [originalTotalScanned, setOriginalTotalScanned] = useState<
+    number | undefined
+  >(undefined);
 
+  // Effect that handles changes in the record
   useEffect(() => {
     if (record) {
       form.setFieldsValue({
@@ -76,6 +93,7 @@ export const EditHistory: React.FC<EditHistoryProps> = ({
     }
   }, [record, form]);
 
+  // Handles edits
   const onFinish = (values: any) => {
     if (record && values.totalScanned !== originalTotalScanned) {
       const updatedRecord = { ...record, totalScanned: values.totalScanned };
@@ -83,6 +101,7 @@ export const EditHistory: React.FC<EditHistoryProps> = ({
     }
   };
 
+  // Handles cancellations
   const handleModalCancel = () => {
     form.resetFields();
     handleCancel();
@@ -96,25 +115,25 @@ export const EditHistory: React.FC<EditHistoryProps> = ({
       footer={null}
     >
       <div className="flex flex-col items-center w-full">
-        {record && (
-          <Image width={200} src={record.imageURL} className="mb-4" />
-        )}
+        {record && <Image width={200} src={record.imageURL} className="mb-4" />}
         <Form
           form={form}
           layout="vertical"
           onFinish={onFinish}
           className="w-full"
         >
-          <Form.Item
-            name="subCategory"
-            label="Sub-Category"
-          >
+          <Form.Item name="subCategory" label="Sub-Category">
             <Input disabled />
           </Form.Item>
           <Form.Item
             name="totalScanned"
             label="Total Scanned"
-            rules={[{ required: true, message: 'Please input the total scanned amount!' }]}
+            rules={[
+              {
+                required: true,
+                message: "Please input the total scanned amount!",
+              },
+            ]}
           >
             <InputNumber className="w-full" />
           </Form.Item>
