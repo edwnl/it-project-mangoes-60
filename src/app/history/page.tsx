@@ -242,47 +242,53 @@ const HistoryPage = () => {
 
   // Renders the history page
   return (
-    <div className={"w-11/12 lg:w-1/3 items-center mt-4"}>
-      <div className="header items-start w-full mb-10">
-        <Title>History</Title>
-        <div className="flex flex-row justify-between mb-4 h-full">
-          <Search
-            placeholder={"Search..."}
-            size={"large"}
-            className={"w-2/3"}
-            onSearch={handleSearch}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <Button
-            className="w-300px h-full border-dashed border-[#BF0018] text-[#BF0018] pb-1.5 pt-1.5"
-            onClick={() => {
-              message.info("Filter functionality not implemented yet");
-            }}
-          >
-            Filter <FilterOutlined />
-          </Button>
+    <div
+      className={
+        "min-h-screen max-w-5xl mx-auto bg-white flex flex-row justify-center"
+      }
+    >
+      <div className={"w-11/12 lg:w-2/3 items-center mt-4"}>
+        <div className="header items-start w-full mb-10">
+          <Title>History</Title>
+          <div className="flex flex-row justify-between mb-4 h-full">
+            <Search
+              placeholder={"Search..."}
+              size={"large"}
+              className={"w-2/3"}
+              onSearch={handleSearch}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Button
+              className="w-300px h-full border-dashed border-[#BF0018] text-[#BF0018] pb-1.5 pt-1.5"
+              onClick={() => {
+                message.info("Filter functionality not implemented yet");
+              }}
+            >
+              Filter <FilterOutlined />
+            </Button>
+          </div>
         </div>
-      </div>
-      {Object.keys(categorisedRecords)
-        .sort((a, b) => (moment(a, "YYYY-MM-DD").isAfter(b) ? -1 : 1))
-        .map((val) => (
-          <DailyRecord
-            key={val}
-            historyRecords={categorisedRecords[val]!}
-            displayDate={moment(val, "YYYY-MM-DD").fromNow()}
-            openModal={openModal}
+        {Object.keys(categorisedRecords)
+          .sort((a, b) => (moment(a, "YYYY-MM-DD").isAfter(b) ? -1 : 1))
+          .map((val) => (
+            <DailyRecord
+              key={val}
+              historyRecords={categorisedRecords[val]!}
+              displayDate={moment(val, "YYYY-MM-DD").fromNow()}
+              openModal={openModal}
+            />
+          ))}
+        {editInfo && (
+          <EditHistory
+            record={editInfo}
+            handleOk={handleOk}
+            handleDelete={handleDelete}
+            isModalOpen={isModalOpen}
+            handleCancel={handleCancel}
+            isScannedBy={editInfo.userID}
           />
-        ))}
-      {editInfo && (
-        <EditHistory
-          record={editInfo}
-          handleOk={handleOk}
-          handleDelete={handleDelete}
-          isModalOpen={isModalOpen}
-          handleCancel={handleCancel}
-          isScannedBy={editInfo.userID}
-        />
-      )}
+        )}
+      </div>
     </div>
   );
 };
