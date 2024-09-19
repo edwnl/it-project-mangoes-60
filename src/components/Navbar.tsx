@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 
 const { Title } = Typography;
 type MenuItem = GetProp<MenuProps, "items">[number];
+
 const menuItems: MenuItem[] = [
   {
     key: "scan",
