@@ -7,7 +7,16 @@ import { Button, List, message, Spin } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
 import moment from "moment";
 import { EditHistory } from "@/components/modals/EditHistory";
-import { collection, deleteDoc, doc, getDocs, limit, orderBy, query, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "@/lib/firebaseClient";
 
 // Structure of the matchingHistory record from the database
@@ -43,10 +52,10 @@ interface DailyRecordProps {
 // Component to display the records for a single day
 // This component will render a list of history records for a specific date, including summary of total items
 const DailyRecord: React.FC<DailyRecordProps> = ({
-                                                   historyRecords,
-                                                   displayDate,
-                                                   openModal
-                                                 }) => {
+  historyRecords,
+  displayDate,
+  openModal,
+}) => {
   // Calculates total quantity for the day
   let quantityTotal = 0;
   historyRecords.forEach((val) => {
@@ -108,7 +117,7 @@ const HistoryPage = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   // Stores the item record that's being edited
   const [editInfo, setEditInfo] = useState<HistoryRecordInterface | undefined>(
-    undefined
+    undefined,
   );
 
   // Fetching the history from Firebase
@@ -130,9 +139,9 @@ const HistoryPage = () => {
               subCategory: data.subCategory,
               time: data.time.toDate(),
               totalScanned: data.totalScanned,
-              userID: data.userID
+              userID: data.userID,
             };
-          }
+          },
         );
 
         setHistoryRecords(records);
@@ -149,7 +158,7 @@ const HistoryPage = () => {
 
   const filteredRecords = useMemo(() => {
     return historyRecords.filter((record) =>
-      record.subCategory.toLowerCase().includes(searchTerm.toLowerCase())
+      record.subCategory.toLowerCase().includes(searchTerm.toLowerCase()),
     );
   }, [historyRecords, searchTerm]);
 
@@ -174,14 +183,14 @@ const HistoryPage = () => {
       // Updates the data in Firebase
       const docRef = doc(db, "matchingHistory", updatedRecord.id);
       await updateDoc(docRef, {
-        totalScanned: updatedRecord.totalScanned
+        totalScanned: updatedRecord.totalScanned,
       });
 
       // Updates the data locally
       setHistoryRecords((prevRecords) =>
         prevRecords.map((record) =>
-          record.id === updatedRecord.id ? updatedRecord : record
-        )
+          record.id === updatedRecord.id ? updatedRecord : record,
+        ),
       );
 
       message.success("Record updated successfully");
@@ -203,7 +212,7 @@ const HistoryPage = () => {
 
         // updates the data locally
         setHistoryRecords((prevRecords) =>
-          prevRecords.filter((record) => record.id !== editInfo.id)
+          prevRecords.filter((record) => record.id !== editInfo.id),
         );
 
         message.success("Record deleted successfully");
@@ -281,7 +290,6 @@ const HistoryPage = () => {
         )}
       </div>
     </div>
-
   );
 };
 
