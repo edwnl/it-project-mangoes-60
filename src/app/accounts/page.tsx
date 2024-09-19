@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
-import { Search } from "lucide-react";
+import React, { useState } from "react";
+import { Search, UserCircle } from "lucide-react";
 import AddUserModal from "@/components/modals/AddUserModal";
+import EditUserModal from "@/components/modals/EditUserModal";
 
 const UsersPage = () => {
   // Mock data for users
@@ -16,26 +17,36 @@ const UsersPage = () => {
     { name: "Jack", status: "Joined on 11th September" },
   ];
 
+  // Mock User definition
+  interface User {
+    name: string;
+    status: string;
+  }
+
+  // Functions for add user popup
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const handleOnClose = () => setShowAddUserModal(false);
 
+  // Functions for edit user popup
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const handleUserClick = (user: User) => setSelectedUser(user);
+  const handleCloseUserDetails = () => setSelectedUser(null);
+
   return (
-    // Main container with responsive width and center alignment
     <div className="p-20 w-full max-w-md mx-auto px-4 sm:px-6 md:max-w-2xl lg:max-w-4xl xl:max-w-5xl">
-      {/* Content wrapper */}
       <div className="max-w-md mx-auto">
-        {/* Header section */}
+        {/*User title and total*/}
         <h1 className="text-2xl font-bold mb-1">Users</h1>
         <p className="text-sm text-gray-500 mb-4">123 users total</p>
 
-        {/* Search input field */}
+        {/* Search bar */}
         <div className="relative mb-4">
           <input
             type="text"
             placeholder="Search by name..."
             className="w-full p-2 pl-10 border rounded-md"
           />
-          {/* Search icon from lucide-react */}
+          {/* Search icon image */}
           <Search className="absolute left-3 top-2.5 text-gray-400" size={20} />
         </div>
 
@@ -47,17 +58,20 @@ const UsersPage = () => {
           + New User
         </button>
 
-        {/* Users list container */}
         <div className="bg-white rounded-md shadow">
           {/* Map through users array to render each user */}
           {users.map((user, index) => (
             <div
               key={index}
               className="flex items-center p-3 border-b last:border-b-0"
+              onClick={() => handleUserClick(user)}
             >
-              {/* User avatar (placeholder) */}
+              {/* User avatar image */}
               <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white mr-3">
-                <span className="text-xl">&#128100;</span> {/* Person emoji */}
+                <span className="text-xl">
+                  <UserCircle />
+                </span>{" "}
+                {/* Person emoji */}
               </div>
               {/* User details */}
               <div>
@@ -68,14 +82,14 @@ const UsersPage = () => {
           ))}
         </div>
 
-        {/* Pagination controls */}
-        <div className="mt-4 flex justify-between items-center text-sm text-gray-500">
-          <button>&lt;</button>
-          <span>1/20</span>
-          <button>&gt;</button>
-        </div>
-
+        {/* Add User Popup function */}
         <AddUserModal onClose={handleOnClose} visible={showAddUserModal} />
+        {/* Edit User Popup function */}
+        <EditUserModal
+          user={selectedUser}
+          onClose={handleCloseUserDetails}
+          visible={!!selectedUser}
+        />
       </div>
     </div>
   );
