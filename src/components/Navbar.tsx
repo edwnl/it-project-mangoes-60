@@ -3,10 +3,23 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button, GetProp, Menu, MenuProps, Tag, Typography } from "antd";
-import { CameraOutlined, HistoryOutlined, InboxOutlined, LogoutOutlined, MenuOutlined } from "@ant-design/icons";
+import {
+  CameraOutlined,
+  HistoryOutlined,
+  InboxOutlined,
+  LogoutOutlined,
+  MenuOutlined,
+} from "@ant-design/icons";
 import FullLogo from "@/assets/full_logo.svg";
 import Link from "next/link";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useRouter } from "next/navigation";
 
 const { Title } = Typography;
@@ -16,18 +29,18 @@ const menuItems: MenuItem[] = [
   {
     key: "scan",
     icon: <CameraOutlined style={{ fontSize: "inherit" }} />,
-    label: (<Link href={"/scan"}>Scan</Link>)
+    label: <Link href={"/scan"}>Scan</Link>,
   },
   {
     key: "history",
     icon: <HistoryOutlined style={{ fontSize: "inherit" }} />,
-    label: <Link href={"/history"}>History</Link>
+    label: <Link href={"/history"}>History</Link>,
   },
   {
     key: "Category",
     icon: <InboxOutlined style={{ fontSize: "inherit" }} />,
-    label: <Link href={"/category"}>Categories</Link>
-  }
+    label: <Link href={"/category"}>Categories</Link>,
+  },
 ];
 
 const LogoSection = () => (
@@ -43,19 +56,19 @@ const LogoSection = () => (
 
 const LogoutButton = (props: any) => {
   const router = useRouter();
-  return (<Button
-    type="primary"
-    icon={<LogoutOutlined />}
-    onClick={() => router.push("/")}
-    className={"custom-button" + props.className ? props.className : ""}
-  >
-    Logout
-  </Button>)
+  return (
+    <Button
+      type="primary"
+      icon={<LogoutOutlined />}
+      onClick={() => router.push("/")}
+      className={"custom-button" + props.className ? props.className : ""}
+    >
+      Logout
+    </Button>
+  );
 };
 
-const DesktopNavBar = ({ username }: {
-  username: string
-}) => (
+const DesktopNavBar = ({ username }: { username: string }) => (
   <nav className="flex items-center justify-between px-8 py-6">
     <div className="">
       <LogoSection />
@@ -74,29 +87,37 @@ const DesktopNavBar = ({ username }: {
   </nav>
 );
 
-const MobileNavBar = ({ username }: {
-  username: string
-}) => {
-
+const MobileNavBar = ({ username }: { username: string }) => {
   return (
     <>
       <nav className="flex flex-col px-4 py-6">
         <div className="flex justify-between items-center w-full">
           <LogoSection />
           <Sheet>
-            <SheetTrigger><MenuOutlined /></SheetTrigger>
+            <SheetTrigger>
+              <MenuOutlined />
+            </SheetTrigger>
             <SheetContent>
               <SheetHeader>
                 <SheetTitle>Menu</SheetTitle>
               </SheetHeader>
-              <SheetDescription className={"flex flex-col h-full justify-between"}>
+              <SheetDescription
+                className={"flex flex-col h-full justify-between"}
+              >
                 <div>
                   <div className="flex flex-col justify-center items-center mt-5">
                     {/*Profile details*/}
                     <div
-                      className={"bg-red-800 rounded-full text-white w-[100px] h-[100px] flex justify-center text-xl" +
-                        " flex-col items-center mb-2"}>
-                      {username.split(" ").flatMap(value => value[0]?.toUpperCase()).toString().replaceAll(",", "")}
+                      className={
+                        "bg-red-800 rounded-full text-white w-[100px] h-[100px] flex justify-center text-xl" +
+                        " flex-col items-center mb-2"
+                      }
+                    >
+                      {username
+                        .split(" ")
+                        .flatMap((value) => value[0]?.toUpperCase())
+                        .toString()
+                        .replaceAll(",", "")}
                     </div>
                     <Title level={2}>{username}</Title>
                   </div>
@@ -111,10 +132,7 @@ const MobileNavBar = ({ username }: {
             </SheetContent>
           </Sheet>
         </div>
-
       </nav>
-
-
     </>
   );
 };
@@ -137,7 +155,6 @@ const NavBar: React.FC = () => {
 
   if (isMobile) return <MobileNavBar username={username} />;
   return <DesktopNavBar username={username} />;
-
 };
 
 export default NavBar;
