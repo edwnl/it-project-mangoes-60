@@ -21,11 +21,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useRouter } from "next/navigation";
-import { signOut, onAuthStateChanged } from 'firebase/auth';
-import { auth, db } from '@/lib/firebaseClient'; 
-import { doc, getDoc } from 'firebase/firestore';
-
-
+import { signOut, onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "@/lib/firebaseClient";
+import { doc, getDoc } from "firebase/firestore";
 
 const { Title } = Typography;
 type MenuItem = GetProp<MenuProps, "items">[number];
@@ -49,21 +47,21 @@ const menuItems: MenuItem[] = [
 ];
 
 const LogoSection = () => {
-  const [userRole, setUserRole] = useState<string | null>(null); 
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    // listens for changes in the authentication state 
+    // listens for changes in the authentication state
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const userDoc = await getDoc(doc(db, "users", user.uid));
         const userData = userDoc.data();
-        setUserRole(userData?.role || null); // update the user role 
+        setUserRole(userData?.role || null); // update the user role
       } else {
-        setUserRole(null); 
+        setUserRole(null);
       }
     });
 
-    return () => unsubscribe(); 
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -72,7 +70,7 @@ const LogoSection = () => {
         <Image src={FullLogo} alt="Medical Pantry Logo" />
       </Link>
       {userRole && (
-        <Tag className="mx-2" color={userRole === 'admin' ? 'red' : 'blue'}>
+        <Tag className="mx-2" color={userRole === "admin" ? "red" : "blue"}>
           {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
         </Tag>
       )}
@@ -80,28 +78,29 @@ const LogoSection = () => {
   );
 };
 
-
 const LogoutButton = (props: any) => {
-  const router = useRouter(); 
+  const router = useRouter();
 
-  const handleLogout = async() => {
+  const handleLogout = async () => {
     try {
-      await signOut(auth); 
-      // Clear any user data from local storage 
-      localStorage.removeItem('userRole');
-      // Redirect to login page 
-      router.push('/login');
+      await signOut(auth);
+      // Clear any user data from local storage
+      localStorage.removeItem("userRole");
+      // Redirect to login page
+      router.push("/login");
     } catch (error) {
-      console.error('Error signing out:', error); 
+      console.error("Error signing out:", error);
     }
-  }; 
+  };
 
   return (
-    <Button 
+    <Button
       type="primary"
       icon={<LogoutOutlined />}
       onClick={handleLogout}
-      className={"custom-button" + (props.className ? ` ${props.className}` : "")}
+      className={
+        "custom-button" + (props.className ? ` ${props.className}` : "")
+      }
     >
       Logout
     </Button>
