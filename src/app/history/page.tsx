@@ -16,8 +16,10 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  where
 } from "firebase/firestore";
-import { db } from "@/lib/firebaseClient";
+import { db, auth } from "@/lib/firebaseClient";
+// import { useRouter } from "next/router";
 
 // Structure of the matchingHistory record from the database
 export interface HistoryRecordInterface {
@@ -122,11 +124,22 @@ const HistoryPage = () => {
 
   // Fetching the history from Firebase
   useEffect(() => {
+
     const fetchHistoryRecords = async () => {
+      // See if the user had logged in
+      const user = auth.currentUser;
+      if (!user) {
+        message.error("Please log in to access your history");
+        return;
+      }
+
+      setIsLoading(true);
+
+      // Fetching history records from Firestore collection "matchingHistory" in descending order by time, limited to 50 records
       try {
         const historyCollection = collection(db, "matchingHistory");
         // Currently only taking the 50 most recent records
-        const q = query(historyCollection, orderBy("time", "desc"), limit(50));
+        const q = query(historyCollection,where("userID", "==", user.uid), orderBy("time", "desc"), limit(50));
         const querySnapshot = await getDocs(q);
 
         // Maps firebase data to HistoryRecordInterface
@@ -135,15 +148,15 @@ const HistoryPage = () => {
             const data = doc.data();
             return {
               id: doc.id,
-              imageURL: data.imageURL,
+              imageURL: data.imageUrl,
               subCategory: data.subCategory,
-              time: data.time.toDate(),
+              time: data.time,
               totalScanned: data.totalScanned,
               userID: data.userID,
             };
           },
         );
-
+        console.log("Fetched history records:", records);
         setHistoryRecords(records);
       } catch (error) {
         console.error("Error fetching history records:", error);

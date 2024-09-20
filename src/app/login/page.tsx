@@ -4,7 +4,11 @@ import React, { useState } from "react";
 import { Input, Button, Form, message } from "antd";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  browserLocalPersistence,
+  setPersistence,
+} from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../lib/firebaseClient";
 import Logo from "@/assets/logo_white_hole.svg";
@@ -17,6 +21,7 @@ const LoginPage: React.FC = () => {
   const onFinish = async (values: { email: string; password: string }) => {
     setLoading(true);
     try {
+      setPersistence(auth, browserLocalPersistence);
       const userCredential = await signInWithEmailAndPassword(
         auth,
         values.email,
@@ -32,7 +37,7 @@ const LoginPage: React.FC = () => {
         // Store user role in the browsers local storage
         localStorage.setItem("userRole", userData.role);
         // makes information easily accessible so we don't need to fetch from firebase every time
-
+        console.log(userData.role);
         // STILL NEED TO IMPLEMENT THE REDIRECTS
         switch (userData.role) {
           case "admin":
@@ -44,18 +49,16 @@ const LoginPage: React.FC = () => {
           default:
             router.push("/");
         }
-        // Redirect based on role
       } else {
         message.error("User role not found");
       }
+      // Redirect based on role
     } catch (error) {
       console.error("Error:", error);
       message.error("Failed to sign in . Please check your credentials");
     } finally {
       setLoading(false);
     }
-    // console.log("Success:", values);
-    // router.push("/");
   };
 
   const handleSignUp = () => {
