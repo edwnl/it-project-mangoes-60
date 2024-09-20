@@ -138,7 +138,7 @@ const SearchResultsPage: React.FC = () => {
           correct_subcategory: updatedState.correct_subcategory || null,
         });
         if (updatedState.correct_subcategory) {
-          logHistory(updatedState);
+          await logHistory(updatedState);
         }
       } catch (error) {
         console.error("Error updating feedback:", error);

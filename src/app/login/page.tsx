@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import {
   signInWithEmailAndPassword,
   browserLocalPersistence,
-  setPersistence,
+  setPersistence, browserSessionPersistence
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../lib/firebaseClient";
@@ -21,7 +21,7 @@ const LoginPage: React.FC = () => {
   const onFinish = async (values: { email: string; password: string }) => {
     setLoading(true);
     try {
-      await setPersistence(auth, browserLocalPersistence);
+      await setPersistence(auth, browserSessionPersistence);
       const userCredential = await signInWithEmailAndPassword(
         auth,
         values.email,
@@ -44,10 +44,10 @@ const LoginPage: React.FC = () => {
             router.push("/dashboard"); // just goes to dashboard - PROTOTYPE
             break;
           case "volunteer":
-            router.push("/dashboard"); // just goes to dashboard - PROTOTYPE
+            router.push("/"); // just goes to dashboard - PROTOTYPE
             break;
           default:
-            router.push("/");
+            router.push("/login");
         }
       } else {
         message.error("User role not found");

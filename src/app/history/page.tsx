@@ -16,11 +16,13 @@ import {
   doc,
   updateDoc,
   deleteDoc,
-  where
+  where, getDoc
 } from "firebase/firestore";
 import { db, auth } from "@/lib/firebaseClient";
-// import { useRouter } from "next/router";
-
+import NavBar from "@/components/Navbar";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { router } from "next/client";
+import { redirect, useRouter } from "next/navigation";
 // Structure of the matchingHistory record from the database
 export interface HistoryRecordInterface {
   id: string;
@@ -121,24 +123,31 @@ const HistoryPage = () => {
   const [editInfo, setEditInfo] = useState<HistoryRecordInterface | undefined>(
     undefined,
   );
-
-  // Fetching the history from Firebase
   useEffect(() => {
-    const fetchHistoryRecords = async () => {
-      // See if the user had logged in
-      const user = auth.currentUser;
-      if (!user) {
-        message.error("Please log in to access your history");
-        return;
-      }
 
+
+    const fetchHistoryRecords = async () => {
+      const user = auth.currentUser
+      if (!user) return Promise.reject("Not logged in");
       setIsLoading(true);
 
       // Fetching history records from Firestore collection "matchingHistory" in descending order by time, limited to 50 records
       try {
+        // fetch account type
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        const userData = userDoc.data();
+
+        if (!userData) return Promise.reject("Unable to fetch account");
+        const userRole:string = userData.role;
+        if (userRole != "volunteer" && userRole != "admin"){
+          return Promise.reject("Non existent role");
+        }
+
+        // Get history
         const historyCollection = collection(db, "matchingHistory");
-        // Currently only taking the 50 most recent records
-        const q = query(historyCollection,where("userID", "==", user.uid), orderBy("time", "desc"), limit(50));
+        // Currently only taking the 50 most recent record
+        const q = userRole == "volunteer" ? query(historyCollection,where("userID", "==", user.uid), orderBy("time", "desc"), limit(50))
+          : query(historyCollection, orderBy("time", "desc"), limit(50));
         const querySnapshot = await getDocs(q);
 
         // Maps firebase data to HistoryRecordInterface
@@ -165,7 +174,9 @@ const HistoryPage = () => {
       }
     };
 
-    fetchHistoryRecords();
+    return () => {
+      fetchHistoryRecords().then(r => console.log(r));
+    }
   }, []);
 
   const filteredRecords = useMemo(() => {
@@ -256,9 +267,11 @@ const HistoryPage = () => {
   return (
     <div
       className={
-        "min-h-screen max-w-5xl mx-auto bg-white flex flex-row justify-center"
+        "min-h-screen mx-auto bg-white"
       }
     >
+      <NavBar />
+      <div className="flex flex-row justify-center">
       <div className={"w-11/12 lg:w-2/3 items-center mt-4"}>
         <div className="header items-start w-full mb-10">
           <Title>History</Title>
@@ -300,6 +313,7 @@ const HistoryPage = () => {
             isScannedBy={editInfo.userID}
           />
         )}
+      </div>
       </div>
     </div>
   );
