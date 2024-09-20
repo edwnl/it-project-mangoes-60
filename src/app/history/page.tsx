@@ -124,7 +124,6 @@ const HistoryPage = () => {
 
   // Fetching the history from Firebase
   useEffect(() => {
-
     const fetchHistoryRecords = async () => {
       // See if the user had logged in
       const user = auth.currentUser;

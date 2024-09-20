@@ -21,7 +21,7 @@ const LoginPage: React.FC = () => {
   const onFinish = async (values: { email: string; password: string }) => {
     setLoading(true);
     try {
-      setPersistence(auth, browserLocalPersistence);
+      await setPersistence(auth, browserLocalPersistence);
       const userCredential = await signInWithEmailAndPassword(
         auth,
         values.email,
@@ -41,10 +41,10 @@ const LoginPage: React.FC = () => {
         // STILL NEED TO IMPLEMENT THE REDIRECTS
         switch (userData.role) {
           case "admin":
-            router.push("/"); // just goes to home for now - PROTOTYPE
+            router.push("/dashboard"); // just goes to dashboard - PROTOTYPE
             break;
           case "volunteer":
-            router.push("/history"); // just goes to history for now - PROTOTYPE
+            router.push("/dashboard"); // just goes to dashboard - PROTOTYPE
             break;
           default:
             router.push("/");
