@@ -8,10 +8,8 @@ import { useProtectedRoute } from "@/hooks/useProtectedRoutes";
 import NavBar from "@/components/Navbar";
 
 const UsersPage = () => {
-
   // Use protected route hook to only let admins access
-  const { isAuthorised, isLoading } = useProtectedRoute(['admin']); // only admins can access this page
-
+  const { isAuthorised, isLoading } = useProtectedRoute(["admin"]); // only admins can access this page
 
   // Mock data for users
   const users = [
