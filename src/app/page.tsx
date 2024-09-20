@@ -61,7 +61,7 @@ const CameraPage: React.FC = () => {
 
   return (
     <>
-       <NavBar />
+      <NavBar />
       <div className="container mx-auto flex flex-col justify-center w-max">
         <div className="my-8">
           <div className="flex flex-col text-3xl mb-2">

@@ -16,7 +16,8 @@ import {
   doc,
   updateDoc,
   deleteDoc,
-  where, getDoc
+  where,
+  getDoc,
 } from "firebase/firestore";
 import { db, auth } from "@/lib/firebaseClient";
 import NavBar from "@/components/Navbar";
@@ -124,10 +125,8 @@ const HistoryPage = () => {
     undefined,
   );
   useEffect(() => {
-
-
     const fetchHistoryRecords = async () => {
-      const user = auth.currentUser
+      const user = auth.currentUser;
       if (!user) return Promise.reject("Not logged in");
       setIsLoading(true);
 
@@ -138,16 +137,23 @@ const HistoryPage = () => {
         const userData = userDoc.data();
 
         if (!userData) return Promise.reject("Unable to fetch account");
-        const userRole:string = userData.role;
-        if (userRole != "volunteer" && userRole != "admin"){
+        const userRole: string = userData.role;
+        if (userRole != "volunteer" && userRole != "admin") {
           return Promise.reject("Non existent role");
         }
 
         // Get history
         const historyCollection = collection(db, "matchingHistory");
         // Currently only taking the 50 most recent record
-        const q = userRole == "volunteer" ? query(historyCollection,where("userID", "==", user.uid), orderBy("time", "desc"), limit(50))
-          : query(historyCollection, orderBy("time", "desc"), limit(50));
+        const q =
+          userRole == "volunteer"
+            ? query(
+                historyCollection,
+                where("userID", "==", user.uid),
+                orderBy("time", "desc"),
+                limit(50),
+              )
+            : query(historyCollection, orderBy("time", "desc"), limit(50));
         const querySnapshot = await getDocs(q);
 
         // Maps firebase data to HistoryRecordInterface
@@ -175,8 +181,8 @@ const HistoryPage = () => {
     };
 
     return () => {
-      fetchHistoryRecords().then(r => console.log(r));
-    }
+      fetchHistoryRecords().then((r) => console.log(r));
+    };
   }, []);
 
   const filteredRecords = useMemo(() => {
@@ -265,55 +271,51 @@ const HistoryPage = () => {
 
   // Renders the history page
   return (
-    <div
-      className={
-        "min-h-screen mx-auto bg-white"
-      }
-    >
+    <div className={"min-h-screen mx-auto bg-white"}>
       <NavBar />
       <div className="flex flex-row justify-center">
-      <div className={"w-11/12 lg:w-2/3 items-center mt-4"}>
-        <div className="header items-start w-full mb-10">
-          <Title>History</Title>
-          <div className="flex flex-row justify-between mb-4 h-full">
-            <Search
-              placeholder={"Search..."}
-              size={"large"}
-              className={"w-2/3"}
-              onSearch={handleSearch}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <Button
-              className="w-300px h-full border-dashed border-[#BF0018] text-[#BF0018] pb-1.5 pt-1.5"
-              onClick={() => {
-                message.info("Filter functionality not implemented yet");
-              }}
-            >
-              Filter <FilterOutlined />
-            </Button>
+        <div className={"w-11/12 lg:w-2/3 items-center mt-4"}>
+          <div className="header items-start w-full mb-10">
+            <Title>History</Title>
+            <div className="flex flex-row justify-between mb-4 h-full">
+              <Search
+                placeholder={"Search..."}
+                size={"large"}
+                className={"w-2/3"}
+                onSearch={handleSearch}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Button
+                className="w-300px h-full border-dashed border-[#BF0018] text-[#BF0018] pb-1.5 pt-1.5"
+                onClick={() => {
+                  message.info("Filter functionality not implemented yet");
+                }}
+              >
+                Filter <FilterOutlined />
+              </Button>
+            </div>
           </div>
-        </div>
-        {Object.keys(categorisedRecords)
-          .sort((a, b) => (moment(a, "YYYY-MM-DD").isAfter(b) ? -1 : 1))
-          .map((val) => (
-            <DailyRecord
-              key={val}
-              historyRecords={categorisedRecords[val]!}
-              displayDate={moment(val, "YYYY-MM-DD").fromNow()}
-              openModal={openModal}
+          {Object.keys(categorisedRecords)
+            .sort((a, b) => (moment(a, "YYYY-MM-DD").isAfter(b) ? -1 : 1))
+            .map((val) => (
+              <DailyRecord
+                key={val}
+                historyRecords={categorisedRecords[val]!}
+                displayDate={moment(val, "YYYY-MM-DD").fromNow()}
+                openModal={openModal}
+              />
+            ))}
+          {editInfo && (
+            <EditHistory
+              record={editInfo}
+              handleOk={handleOk}
+              handleDelete={handleDelete}
+              isModalOpen={isModalOpen}
+              handleCancel={handleCancel}
+              isScannedBy={editInfo.userID}
             />
-          ))}
-        {editInfo && (
-          <EditHistory
-            record={editInfo}
-            handleOk={handleOk}
-            handleDelete={handleDelete}
-            isModalOpen={isModalOpen}
-            handleCancel={handleCancel}
-            isScannedBy={editInfo.userID}
-          />
-        )}
-      </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -5,7 +5,13 @@ import { useRouter, useParams } from "next/navigation";
 import { Button, Tag, Spin, Modal, message, Empty } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import Image from "next/image";
-import { doc, getDoc, updateDoc, DocumentReference, setDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  DocumentReference,
+  setDoc,
+} from "firebase/firestore";
 import { auth, db } from "@/lib/firebaseClient";
 import { CategoryItem } from "@/components/CategoryGrid";
 import { categoryLoader, categoryItems } from "@/lib/categoryLoader";
@@ -145,26 +151,29 @@ const SearchResultsPage: React.FC = () => {
         message.error("Failed to submit feedback");
       }
     }
-    
   };
-  const logHistory = async ( updatedState: SearchResultsState,) => {
-    try{
-    if (params.result_id) {
-      const historyDocRef = doc(db, "matchingHistory", params.result_id as string);
+  const logHistory = async (updatedState: SearchResultsState) => {
+    try {
+      if (params.result_id) {
+        const historyDocRef = doc(
+          db,
+          "matchingHistory",
+          params.result_id as string,
+        );
 
-      await setDoc(historyDocRef, {
-        "imageUrl": uploadedImageUrl,
-        "subCategory": updatedState.correct_subcategory,
-        "time": Date.now(),
-        "totalScanned": 1,
-        "userID": auth.currentUser?.uid
-      })
-    }
+        await setDoc(historyDocRef, {
+          imageUrl: uploadedImageUrl,
+          subCategory: updatedState.correct_subcategory,
+          time: Date.now(),
+          totalScanned: 1,
+          userID: auth.currentUser?.uid,
+        });
+      }
     } catch (error) {
       message.error("Failed to log history");
       console.log(error);
     }
-  }
+  };
   const handleImageClick = () => {
     setIsImageModalVisible(true);
   };

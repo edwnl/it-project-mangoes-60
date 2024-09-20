@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 import {
   signInWithEmailAndPassword,
   browserLocalPersistence,
-  setPersistence, browserSessionPersistence
+  setPersistence,
+  browserSessionPersistence,
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../lib/firebaseClient";

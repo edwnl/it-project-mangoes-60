@@ -1,5 +1,5 @@
-"use client"
-import { useState, useEffect } from 'react';
+"use client";
+import { useState, useEffect } from "react";
 import { redirect, usePathname, useRouter } from "next/navigation";
 import { auth } from "@/lib/firebaseClient";
 
@@ -16,8 +16,8 @@ function RouteGuard({ children }) {
 
   function authCheck(url: string) {
     // redirect to login page if accessing a private page and not logged in
-    const publicPaths = ['/login', '/signup', '/unauthorized', '/404'];
-    const path = url.split('?')[0];
+    const publicPaths = ["/login", "/signup", "/unauthorized", "/404"];
+    const path = url.split("?")[0];
     if (!auth.currentUser && path && !publicPaths.includes(path)) {
       setAuthorized(false);
       redirect("/login");
@@ -26,5 +26,5 @@ function RouteGuard({ children }) {
     }
   }
 
-  return (authorized && children);
+  return authorized && children;
 }
