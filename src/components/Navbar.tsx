@@ -21,6 +21,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useRouter } from "next/navigation";
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebaseClient'; 
+
+
 
 const { Title } = Typography;
 type MenuItem = GetProp<MenuProps, "items">[number];
@@ -54,14 +58,41 @@ const LogoSection = () => (
   </div>
 );
 
+// const LogoutButton = (props: any) => {
+//   const router = useRouter();
+//   return (
+//     <Button
+//       type="primary"
+//       icon={<LogoutOutlined />}
+//       onClick={() => router.push("/")}
+//       className={"custom-button" + props.className ? props.className : ""}
+//     >
+//       Logout
+//     </Button>
+//   );
+// };
+
 const LogoutButton = (props: any) => {
-  const router = useRouter();
+  const router = useRouter(); 
+
+  const handleLogout = async() => {
+    try {
+      await signOut(auth); 
+      // Clear any user data from local storage 
+      localStorage.removeItem('userRole');
+      // Redirect to login page 
+      router.push('/login');
+    } catch (error) {
+      console.error('Error signing out:', error); 
+    }
+  }; 
+
   return (
-    <Button
+    <Button 
       type="primary"
       icon={<LogoutOutlined />}
-      onClick={() => router.push("/")}
-      className={"custom-button" + props.className ? props.className : ""}
+      onClick={handleLogout}
+      className={"custom-button" + (props.className ? ` ${props.className}` : "")}
     >
       Logout
     </Button>

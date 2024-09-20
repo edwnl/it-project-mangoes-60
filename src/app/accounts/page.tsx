@@ -5,6 +5,7 @@ import { Search, UserCircle } from "lucide-react";
 import AddUserModal from "@/components/modals/AddUserModal";
 import EditUserModal from "@/components/modals/EditUserModal";
 import { useProtectedRoute } from "@/hooks/useProtectedRoutes";
+import NavBar from "@/components/Navbar";
 
 const UsersPage = () => {
 
@@ -50,6 +51,7 @@ const UsersPage = () => {
 
   return (
     <div className="p-20 w-full max-w-md mx-auto px-4 sm:px-6 md:max-w-2xl lg:max-w-4xl xl:max-w-5xl">
+      <NavBar />
       <div className="max-w-md mx-auto">
         {/*User title and total*/}
         <h1 className="text-2xl font-bold mb-1">Users</h1>
