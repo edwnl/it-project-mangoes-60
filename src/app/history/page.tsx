@@ -18,6 +18,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebaseClient";
+import NavBar from "@/components/Navbar";
 
 // Structure of the matchingHistory record from the database
 export interface HistoryRecordInterface {
@@ -247,6 +248,7 @@ const HistoryPage = () => {
         "min-h-screen max-w-5xl mx-auto bg-white flex flex-row justify-center"
       }
     >
+      <NavBar />
       <div className={"w-11/12 lg:w-2/3 items-center mt-4"}>
         <div className="header items-start w-full mb-10">
           <Title>History</Title>

@@ -8,6 +8,7 @@ import CategoryFilterButton from "@/components/CategoryFilterButton";
 import { imageSearch } from "@/lib/search/imageSearch";
 import { useRouter } from "next/navigation";
 import SimpleNavBar from "@/components/SimpleNavBar";
+import NavBar from "@/components/Navbar";
 
 const CameraPage: React.FC = () => {
   const [username, setUsername] = useState<string>("Volunteer");
@@ -61,6 +62,7 @@ const CameraPage: React.FC = () => {
 
   return (
     <>
+      {/* <NavBar />  */}
       <SimpleNavBar />
       <div className="container mx-auto flex flex-col justify-center w-max">
         <div className="my-8">

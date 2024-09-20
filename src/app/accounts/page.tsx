@@ -4,8 +4,13 @@ import React, { useState } from "react";
 import { Search, UserCircle } from "lucide-react";
 import AddUserModal from "@/components/modals/AddUserModal";
 import EditUserModal from "@/components/modals/EditUserModal";
+import { useProtectedRoute } from "@/hooks/useProtectedRoutes";
+import NavBar from "@/components/Navbar";
 
 const UsersPage = () => {
+  // Use protected route hook to only let admins access
+  const { isAuthorised, isLoading } = useProtectedRoute(["admin"]); // only admins can access this page
+
   // Mock data for users
   const users = [
     { name: "Jack", status: "Joined on 11th September" },
@@ -32,8 +37,19 @@ const UsersPage = () => {
   const handleUserClick = (user: User) => setSelectedUser(user);
   const handleCloseUserDetails = () => setSelectedUser(null);
 
+  // Handle loading state
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  // Handle unauthorised access
+  if (!isAuthorised) {
+    return <div> You are not authorised to view this page </div>;
+  }
+
   return (
     <div className="p-20 w-full max-w-md mx-auto px-4 sm:px-6 md:max-w-2xl lg:max-w-4xl xl:max-w-5xl">
+      <NavBar />
       <div className="max-w-md mx-auto">
         {/*User title and total*/}
         <h1 className="text-2xl font-bold mb-1">Users</h1>
@@ -96,3 +112,5 @@ const UsersPage = () => {
 };
 
 export default UsersPage;
+
+// If a volunteer tries to access the accounts page, they will be routed to an "Unauthorised access page".
