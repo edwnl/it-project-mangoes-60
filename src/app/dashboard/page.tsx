@@ -8,6 +8,8 @@ import { CategoryItem } from "@/components/CategoryGrid";
 import { textSearch } from "@/lib/search/textSearch";
 import { categoryItems } from "@/lib/categoryLoader";
 
+
+
 interface SearchResult extends CategoryItem {
   confidence: number;
 }
