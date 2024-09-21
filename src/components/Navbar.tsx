@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/lib/firebaseClient";
 import { doc, getDoc } from "firebase/firestore";
+import { useAuth } from '@/contexts/AuthContext';
 
 const { Title } = Typography;
 type MenuItem = GetProp<MenuProps, "items">[number];
@@ -46,23 +47,40 @@ const menuItems: MenuItem[] = [
   },
 ];
 
+// const LogoSection = () => {
+//   const [userRole, setUserRole] = useState<string | null>(null);
+
+//   useEffect(() => {
+//     // listens for changes in the authentication state
+//     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+//       if (user) {
+//         const userDoc = await getDoc(doc(db, "users", user.uid));
+//         const userData = userDoc.data();
+//         setUserRole(userData?.role || null); // update the user role
+//       } else {
+//         setUserRole(null);
+//       }
+//     });
+
+//     return () => unsubscribe();
+//   }, []);
+
+//   return (
+//     <div className="flex items-center">
+//       <Link href={"/dashboard"}>
+//         <Image src={FullLogo} alt="Medical Pantry Logo" />
+//       </Link>
+//       {userRole && (
+//         <Tag className="mx-2" color={userRole === "admin" ? "red" : "blue"}>
+//           {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+//         </Tag>
+//       )}
+//     </div>
+//   );
+// };
+
 const LogoSection = () => {
-  const [userRole, setUserRole] = useState<string | null>(null);
-
-  useEffect(() => {
-    // listens for changes in the authentication state
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        const userData = userDoc.data();
-        setUserRole(userData?.role || null); // update the user role
-      } else {
-        setUserRole(null);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const { userRole } = useAuth(); 
 
   return (
     <div className="flex items-center">
