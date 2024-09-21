@@ -7,7 +7,6 @@ import DragDropImageUpload from "@/components/DragDropImageUpload";
 import CategoryFilterButton from "@/components/CategoryFilterButton";
 import { imageSearch } from "@/lib/search/imageSearch";
 import { useRouter } from "next/navigation";
-import SimpleNavBar from "@/components/SimpleNavBar";
 import NavBar from "@/components/Navbar";
 
 const CameraPage: React.FC = () => {
@@ -62,8 +61,7 @@ const CameraPage: React.FC = () => {
 
   return (
     <>
-      {/* <NavBar />  */}
-      <SimpleNavBar />
+      <NavBar />
       <div className="container mx-auto flex flex-col justify-center w-max">
         <div className="my-8">
           <div className="flex flex-col text-3xl mb-2">

@@ -32,7 +32,7 @@ const menuItems: MenuItem[] = [
   {
     key: "scan",
     icon: <CameraOutlined style={{ fontSize: "inherit" }} />,
-    label: <Link href={"/scan"}>Scan</Link>,
+    label: <Link href={"/"}>Scan</Link>,
   },
   {
     key: "history",
@@ -42,7 +42,7 @@ const menuItems: MenuItem[] = [
   {
     key: "Category",
     icon: <InboxOutlined style={{ fontSize: "inherit" }} />,
-    label: <Link href={"/category"}>Categories</Link>,
+    label: <Link href={"/dashboard"}>Categories</Link>,
   },
 ];
 

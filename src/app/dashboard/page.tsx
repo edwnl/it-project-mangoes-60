@@ -53,23 +53,6 @@ const DashboardPage: React.FC = () => {
 
     const formData = new FormData();
     formData.append("file", image);
-
-    // const { success, searchId, error } = await imageSearch(formData);
-    // if (!success) {
-    //   api.error({
-    //     message: "Error",
-    //     description: `Something went wrong while analyzing the image. ${error}.`,
-    //   });
-    //   resetSearch();
-    //   return;
-    // }
-    //
-    // api.success({
-    //   message: "Image Search Completed",
-    //   description: `Found ${data.length} result(s) in ${Math.round(performance.now() - startTime)}ms.`,
-    // });
-    //
-    // setSearchResults(data);
     setIsSearching(false);
   }, []);
 

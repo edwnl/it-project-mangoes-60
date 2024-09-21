@@ -4,6 +4,7 @@ import "./globals.css";
 import React from "react";
 import { ConfigProvider } from "antd";
 import { Analytics } from "@vercel/analytics/react";
+import { RouteGuard } from "@/components/RouteGuard";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -31,7 +32,8 @@ export default function RootLayout({
             },
           }}
         >
-          {children}
+          <RouteGuard>{children}</RouteGuard>
+
           <Analytics />
         </ConfigProvider>
       </body>
