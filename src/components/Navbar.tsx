@@ -24,7 +24,7 @@ import { useRouter } from "next/navigation";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/lib/firebaseClient";
 import { doc, getDoc } from "firebase/firestore";
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from "@/contexts/AuthContext";
 
 const { Title } = Typography;
 type MenuItem = GetProp<MenuProps, "items">[number];
@@ -80,7 +80,7 @@ const menuItems: MenuItem[] = [
 // };
 
 const LogoSection = () => {
-  const { userRole } = useAuth(); 
+  const { userRole } = useAuth();
 
   return (
     <div className="flex items-center">
