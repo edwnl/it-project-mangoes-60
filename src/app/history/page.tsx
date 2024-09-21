@@ -183,7 +183,7 @@ const HistoryPage = () => {
     // return () => {
     fetchHistoryRecords();
     // };
-  }, [historyRecords]);
+  }, []);
 
   const filteredRecords = useMemo(() => {
     return historyRecords.filter((record) =>
