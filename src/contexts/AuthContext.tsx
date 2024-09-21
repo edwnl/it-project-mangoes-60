@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth, db } from "@/lib/firebaseClient";
 import { doc, getDoc } from "firebase/firestore";
+import { useRouter } from 'next/navigation';
 
 // Context data
 interface AuthContextType {
@@ -27,6 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter(); 
 
   // Listener for authentication state changes
   useEffect(() => {
@@ -39,6 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setUserRole(userData?.role || null);
       } else {
         setUserRole(null);
+        router.push('/login'); // Redirect to login page if no active session 
       }
       setLoading(false);
     });
@@ -57,4 +60,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 export const useAuth = () => useContext(AuthContext);
 
 // Manages authentication state.
-// Provides centralised place to handle user authentication, role management and looading states.
+// Provides centralised place to handle user authentication, role management and loading states.
