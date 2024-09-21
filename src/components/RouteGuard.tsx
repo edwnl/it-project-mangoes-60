@@ -21,7 +21,7 @@ export function RouteGuard({ children }) {
     const path = url.split("?")[0];
 
     if (!loading) {
-      if (!user && !publicPaths.includes(path || '')) {
+      if (!user && !publicPaths.includes(path || "")) {
         setAuthorized(false);
         // client component
         router.push("/login");

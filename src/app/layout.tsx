@@ -34,10 +34,8 @@ export default function RootLayout({
               },
             }}
           >
-            <RouteGuard>
-              {children}
-            </RouteGuard>
-            
+            <RouteGuard>{children}</RouteGuard>
+
             <Analytics />
           </ConfigProvider>
         </AuthProvider>
