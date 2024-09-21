@@ -1,30 +1,41 @@
 "use client";
+
 import { useState, useEffect } from "react";
-import { redirect, usePathname, useRouter } from "next/navigation";
-import { auth } from "@/lib/firebaseClient";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
-export { RouteGuard };
-
-function RouteGuard({ children }) {
+export function RouteGuard({ children }) {
   const [authorized, setAuthorized] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  // Using the useAuth hook from centralised auth state (AuthProvider)
+  // Added a loading state to handle initial loading state more gracefully, this can be removed later
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    // on initial load - run auth check
     authCheck(pathname);
-  }, []);
+  }, [pathname, user, loading]);
 
   function authCheck(url: string) {
-    // redirect to login page if accessing a private page and not logged in
     const publicPaths = ["/login", "/signup", "/unauthorized", "/404"];
     const path = url.split("?")[0];
-    if (!auth.currentUser && path && !publicPaths.includes(path)) {
-      setAuthorized(false);
-      redirect("/login");
-    } else {
-      setAuthorized(true);
+
+    if (!loading) {
+      if (!user && !publicPaths.includes(path || "")) {
+        setAuthorized(false);
+        // client component
+        router.push("/login");
+      } else {
+        setAuthorized(true);
+      }
     }
   }
 
-  return authorized && children;
+  // Loading state check, prevents premature redirects while auth state is still being determined
+  if (loading) {
+    // You can return a loading component here if you want
+    return <div>Loading...</div>;
+  }
+
+  return authorized ? children : null; // return null to prevent any flash of unauthorised content
 }
