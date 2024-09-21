@@ -48,7 +48,7 @@ export const SubmitBtn: React.FC<React.PropsWithChildren<SubmitBtnProps>> = ({
     form
       .validateFields({ validateOnly: true })
       .then(() => {
-        // Only allow submit if totalScanned has changed and is valid
+        // Only allow subit if totalScanned has changed and is valid
         setSubmittable(
           totalScanned !== undefined && totalScanned !== originalValue,
         );

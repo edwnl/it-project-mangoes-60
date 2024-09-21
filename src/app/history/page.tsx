@@ -180,9 +180,9 @@ const HistoryPage = () => {
       }
     };
 
-    return () => {
-      fetchHistoryRecords().then((r) => console.log(r));
-    };
+    // return () => {
+    fetchHistoryRecords();
+    // };
   }, []);
 
   const filteredRecords = useMemo(() => {
