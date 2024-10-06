@@ -1,105 +1,64 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
-import { Button, GetProp, Menu, MenuProps, Tag, Typography } from "antd";
+import { Layout, Menu, Button, Tag } from "antd";
 import {
-  CameraOutlined,
-  HistoryOutlined,
-  InboxOutlined,
   LogoutOutlined,
   MenuOutlined,
+  InboxOutlined,
+  CameraOutlined,
+  HistoryOutlined,
+  ProfileOutlined,
 } from "@ant-design/icons";
-import FullLogo from "@/assets/full_logo.svg";
-import Link from "next/link";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { useRouter } from "next/navigation";
-import { signOut, onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "@/lib/firebaseClient";
-import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
+import FullLogo from "@/assets/full_logo.svg";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebaseClient";
+import { useRouter } from "next/navigation";
 
-const { Title } = Typography;
-type MenuItem = GetProp<MenuProps, "items">[number];
+const { Header } = Layout;
 
-const menuItems: MenuItem[] = [
-  {
-    key: "scan",
-    icon: <CameraOutlined style={{ fontSize: "inherit" }} />,
-    label: <Link href={"/"}>Scan</Link>,
-  },
-  {
-    key: "history",
-    icon: <HistoryOutlined style={{ fontSize: "inherit" }} />,
-    label: <Link href={"/history"}>History</Link>,
-  },
-  {
-    key: "Category",
-    icon: <InboxOutlined style={{ fontSize: "inherit" }} />,
-    label: <Link href={"/dashboard"}>Categories</Link>,
-  },
-];
-
-// const LogoSection = () => {
-//   const [userRole, setUserRole] = useState<string | null>(null);
-
-//   useEffect(() => {
-//     // listens for changes in the authentication state
-//     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-//       if (user) {
-//         const userDoc = await getDoc(doc(db, "users", user.uid));
-//         const userData = userDoc.data();
-//         setUserRole(userData?.role || null); // update the user role
-//       } else {
-//         setUserRole(null);
-//       }
-//     });
-
-//     return () => unsubscribe();
-//   }, []);
-
-//   return (
-//     <div className="flex items-center">
-//       <Link href={"/dashboard"}>
-//         <Image src={FullLogo} alt="Medical Pantry Logo" />
-//       </Link>
-//       {userRole && (
-//         <Tag className="mx-2" color={userRole === "admin" ? "red" : "blue"}>
-//           {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
-//         </Tag>
-//       )}
-//     </div>
-//   );
-// };
-
-const LogoSection = () => {
+const NavBar = () => {
   const { userRole } = useAuth();
-
-  return (
-    <div className="flex items-center">
-      <Link href={"/dashboard"}>
-        <Image src={FullLogo} alt="Medical Pantry Logo" />
-      </Link>
-      {userRole && (
-        <Tag className="mx-2" color={userRole === "admin" ? "red" : "blue"}>
-          {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
-        </Tag>
-      )}
-    </div>
-  );
-};
-
-const LogoutButton = (props: any) => {
+  const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const router = useRouter();
 
-  const handleLogout = async () => {
+  const baseMenuItems = [
+    {
+      key: "scan",
+      icon: <CameraOutlined />,
+      label: "Scan",
+      href: "/",
+    },
+    {
+      key: "history",
+      icon: <HistoryOutlined />,
+      label: "History",
+      href: "/history",
+    },
+    {
+      key: "categories",
+      icon: <InboxOutlined />,
+      label: "Categories",
+      href: "/categories",
+    },
+  ];
+
+  const adminMenuItem = {
+    key: "accounts",
+    icon: <ProfileOutlined />,
+    label: "Accounts",
+    href: "/accounts",
+  };
+
+  const menuItems = {
+    volunteer: baseMenuItems,
+    admin: [...baseMenuItems, adminMenuItem],
+  };
+
+  const handleSignOut = async () => {
     try {
       await signOut(auth);
       // Clear any user data from local storage
@@ -111,107 +70,97 @@ const LogoutButton = (props: any) => {
     }
   };
 
-  return (
-    <Button
-      type="primary"
-      icon={<LogoutOutlined />}
-      onClick={handleLogout}
-      className={
-        "custom-button" + (props.className ? ` ${props.className}` : "")
-      }
-    >
-      Logout
-    </Button>
+  const renderMenuItem = (item) => (
+    <Menu.Item key={item.key} icon={item.icon} onClick={item.onClick}>
+      {item.href ? (
+        <Link href={item.href} onClick={() => setMobileMenuVisible(false)}>
+          {item.label}
+        </Link>
+      ) : (
+        item.label
+      )}
+    </Menu.Item>
   );
-};
 
-const DesktopNavBar = ({ username }: { username: string }) => (
-  <nav className="flex items-center justify-between px-8 py-6">
-    <div className="">
-      <LogoSection />
-    </div>
-    <div className="flex-grow flex justify-center mx-10 max-w-md">
-      <Menu
-        items={menuItems}
-        mode={"horizontal"}
-        className={"border-0"}
-        style={{ minWidth: 0, flex: "auto" }}
-      />
-    </div>
-    <div className="flex justify-end">
-      <LogoutButton />
-    </div>
-  </nav>
-);
+  const renderAuthButton = () => {
+    return (
+      <Button
+        type={"primary"}
+        className={"hidden xl:flex"}
+        icon={<LogoutOutlined />}
+        onClick={handleSignOut}
+      >
+        Logout
+      </Button>
+    );
+  };
 
-const MobileNavBar = ({ username }: { username: string }) => {
   return (
     <>
-      <nav className="flex flex-col px-4 py-6">
-        <div className="flex justify-between items-center w-full">
-          <LogoSection />
-          <Sheet>
-            <SheetTrigger>
-              <MenuOutlined />
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
-              </SheetHeader>
-              <SheetDescription
-                className={"flex flex-col h-full justify-between"}
+      <Header className="p-0 h-auto bg-white mb-6">
+        <div className="flex justify-between items-center h-16 px-8">
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center">
+              <Image src={FullLogo} alt="Medical Pantry Logo" />
+              {userRole && (
+                <Tag
+                  className="mx-2"
+                  color={userRole === "admin" ? "red" : "blue"}
+                >
+                  {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+                </Tag>
+              )}
+            </Link>
+          </div>
+
+          {userRole && (
+            <div className="hidden xl:block absolute left-1/2 transform -translate-x-1/2 ">
+              <Menu
+                className="border-none bg-transparent"
+                mode="horizontal"
+                disabledOverflow={true}
+                selectable={false}
+                selectedKeys={[]}
               >
-                <div>
-                  <div className="flex flex-col justify-center items-center mt-5">
-                    {/*Profile details*/}
-                    <div
-                      className={
-                        "bg-red-800 rounded-full text-white w-[100px] h-[100px] flex justify-center text-xl" +
-                        " flex-col items-center mb-2"
-                      }
-                    >
-                      {username
-                        .split(" ")
-                        .flatMap((value) => value[0]?.toUpperCase())
-                        .toString()
-                        .replaceAll(",", "")}
-                    </div>
-                    <Title level={2}>{username}</Title>
-                  </div>
-                  <Menu
-                    defaultSelectedKeys={["scan"]}
-                    items={menuItems}
-                    className={"text-xl"}
-                  />
-                </div>
-                <LogoutButton className={"mb-10"} />
-              </SheetDescription>
-            </SheetContent>
-          </Sheet>
+                {menuItems[userRole].map(renderMenuItem)}
+              </Menu>
+            </div>
+          )}
+
+          <div className="flex items-center">
+            {renderAuthButton()}
+            {userRole && (
+              <div className="xl:hidden ml-4">
+                <Button
+                  type="text"
+                  icon={
+                    <MenuOutlined className={"border-2 rounded-md p-1.5"} />
+                  }
+                  onClick={() => setMobileMenuVisible(!mobileMenuVisible)}
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </nav>
+
+        {mobileMenuVisible && userRole && (
+          <div className="xl:hidden px-4">
+            <Menu mode="vertical" className="absolute w-full z-40">
+              {menuItems[userRole].map(renderMenuItem)}
+              <Menu.Item
+                key="logout"
+                icon={<LogoutOutlined className={"font-semibold"} />}
+                onClick={handleSignOut}
+                className="font-semibold"
+              >
+                Logout
+              </Menu.Item>
+            </Menu>
+          </div>
+        )}
+      </Header>
     </>
   );
-};
-
-const NavBar: React.FC = () => {
-  const [isMobile, setIsMobile] = useState(false);
-  const [username, setUsername] = useState("Volunteer");
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-
-    setUsername("Vicky Lucas");
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  if (isMobile) return <MobileNavBar username={username} />;
-  return <DesktopNavBar username={username} />;
 };
 
 export default NavBar;
