@@ -17,22 +17,24 @@ const CreateSubcategoryModal: React.FC<CreateSubcategoryModalProps> = ({
       title="New Sub-Category"
       open={isVisible}
       width={350}
-      className={"top-8"}
+      className="top-8"
       onCancel={onClose}
       footer={null}
     >
       <div>
-        {}
         <p>Create options will go here</p>
       </div>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginTop: "20px",
+        }}
+      >
         <Button onClick={onClose} style={{ marginRight: 8 }}>
           Cancel
         </Button>
-        <Button
-          type="primary"
-          className="custom-button"
-        >
+        <Button type="primary" className="custom-button">
           Confirm
         </Button>
       </div>

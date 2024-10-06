@@ -14,8 +14,9 @@ interface SubcategoryDetailModalProps {
 const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
   isVisible,
   onClose,
+  subcategory,
+  isAdmin,
 }) => {
-
   const handleClose = () => {
     onClose();
   };

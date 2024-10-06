@@ -8,10 +8,7 @@ interface FilterModalProps {
   onClose: () => void;
 }
 
-const FilterModal: React.FC<FilterModalProps> = ({
-  isVisible,
-  onClose,
-}) => {
+const FilterModal: React.FC<FilterModalProps> = ({ isVisible, onClose }) => {
   return (
     <Modal
       title="Filter by Category"
@@ -20,7 +17,6 @@ const FilterModal: React.FC<FilterModalProps> = ({
       footer={null}
     >
       <div>
-        {}
         <p>Filter options</p>
       </div>
     </Modal>

@@ -39,6 +39,7 @@ const CategoryPage: React.FC = () => {
 
   const isAdmin = userRole === "admin";
 
+  // Trims the subcategory name if it exceeds the specified length
   const trimSubcategoryName = (
     name: string,
     maxLength: number = 22,
@@ -51,6 +52,7 @@ const CategoryPage: React.FC = () => {
   // Use all subcategories without filtering
   const filteredSubcategories = useMemo(() => subcategories, [subcategories]);
 
+  // Items grouped by category name
   const groupedItems = useMemo(() => {
     return filteredSubcategories.reduce(
       (acc, item) => {
@@ -64,11 +66,13 @@ const CategoryPage: React.FC = () => {
     );
   }, [filteredSubcategories]);
 
+  // Handle pagination of the items
   const paginatedItems = useMemo(() => {
     let items: Subcategory[] = [];
     let categoryCount: Record<string, number> = {};
     let totalCount = 0;
 
+    // Iterate through categories and items of each category
     for (const category of Object.keys(groupedItems)) {
       for (const item of groupedItems[category]) {
         if (totalCount >= pageSize * currentPage) break;
@@ -84,6 +88,7 @@ const CategoryPage: React.FC = () => {
     return { items, categoryCount };
   }, [groupedItems, currentPage, pageSize]);
 
+  // Render each subcategory item in the list
   const renderCategoryItem = (item: Subcategory) => (
     <List.Item
       key={item.id}
@@ -112,14 +117,17 @@ const CategoryPage: React.FC = () => {
     </List.Item>
   );
 
+  // Render loading page
   if (loading) {
     return <LoadingPage />;
   }
 
+  // Render errors
   if (error) {
     return <div>Error: {error}</div>;
   }
 
+  // Render main category page
   return (
     <div>
       <NavBar />
@@ -157,7 +165,11 @@ const CategoryPage: React.FC = () => {
             </div>
 
             {activeFilter && (
-              <Tag closable onClose={() => setActiveFilter(null)} className="mb-4">
+              <Tag
+                closable
+                onClose={() => setActiveFilter(null)}
+                className="mb-4"
+              >
                 Filter: {activeFilter}
               </Tag>
             )}
