@@ -6,6 +6,7 @@ import { ConfigProvider } from "antd";
 import { Analytics } from "@vercel/analytics/react";
 import { RouteGuard } from "@/components/RouteGuard";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SubcategoriesProvider } from "@/contexts/SubcategoriesContext";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -26,18 +27,20 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${montserrat.className}`}>
         <AuthProvider>
-          <ConfigProvider
-            theme={{
-              token: {
-                fontFamily: "inherit",
-                colorPrimary: "#BF0018",
-              },
-            }}
-          >
-            <RouteGuard>{children}</RouteGuard>
+          <SubcategoriesProvider>
+            <ConfigProvider
+              theme={{
+                token: {
+                  fontFamily: "inherit",
+                  colorPrimary: "#BF0018",
+                },
+              }}
+            >
+              <RouteGuard>{children}</RouteGuard>
 
-            <Analytics />
-          </ConfigProvider>
+              <Analytics />
+            </ConfigProvider>
+          </SubcategoriesProvider>
         </AuthProvider>
       </body>
     </html>
