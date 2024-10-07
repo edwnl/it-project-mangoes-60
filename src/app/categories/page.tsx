@@ -68,6 +68,7 @@ const CategoryPage: React.FC = () => {
         if (!acc[item.category_name]) {
           acc[item.category_name] = [];
         }
+        //@ts-ignore
         acc[item.category_name].push(item);
         return acc;
       },
@@ -235,6 +236,7 @@ const CategoryPage: React.FC = () => {
       <FilterModal
         isVisible={isFilterModalVisible}
         onClose={() => setIsFilterModalVisible(false)}
+        onFilter={handleFilter}
       />
 
       {isAdmin && (
