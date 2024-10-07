@@ -131,7 +131,7 @@ const CategoryPage: React.FC = () => {
   if (loading) {
     return <LoadingPage />;
   }
-  
+
   // Render errors
   if (error) {
     return <div>Error: {error}</div>;
@@ -250,4 +250,3 @@ const CategoryPage: React.FC = () => {
 };
 
 export default CategoryPage;
-
