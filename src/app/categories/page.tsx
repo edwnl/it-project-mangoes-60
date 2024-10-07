@@ -59,6 +59,7 @@ const CategoryPage: React.FC = () => {
         if (!acc[item.category_name]) {
           acc[item.category_name] = [];
         }
+        //@ts-ignore
         acc[item.category_name].push(item);
         return acc;
       },
@@ -74,6 +75,7 @@ const CategoryPage: React.FC = () => {
 
     // Iterate through categories and items of each category
     for (const category of Object.keys(groupedItems)) {
+      //@ts-ignore
       for (const item of groupedItems[category]) {
         if (totalCount >= pageSize * currentPage) break;
         if (totalCount >= pageSize * (currentPage - 1)) {
@@ -116,7 +118,15 @@ const CategoryPage: React.FC = () => {
       <div className={"mr-3"}>N/A</div>
     </List.Item>
   );
+  const handleFilter = (category: string) => {
+    setActiveFilter(category);
+    setCurrentPage(1);
+  };
 
+  const clearFilter = () => {
+    setActiveFilter(null);
+    setCurrentPage(1);
+  };
   // Render loading page
   if (loading) {
     return <LoadingPage />;
