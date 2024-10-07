@@ -49,8 +49,17 @@ const CategoryPage: React.FC = () => {
       : name;
   };
 
-  // Use all subcategories without filtering
-  const filteredSubcategories = useMemo(() => subcategories, [subcategories]);
+  // searching for categories
+  const filteredSubcategories = useMemo(() => {
+    return subcategories.filter(
+      (item) =>
+        (item.subcategory_name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+          item.location.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        (!activeFilter || item.category_name === activeFilter),
+    );
+  }, [subcategories, searchTerm, activeFilter]);
 
   // Items grouped by category name
   const groupedItems = useMemo(() => {
@@ -59,6 +68,7 @@ const CategoryPage: React.FC = () => {
         if (!acc[item.category_name]) {
           acc[item.category_name] = [];
         }
+        // @ts-ignore
         acc[item.category_name].push(item);
         return acc;
       },
@@ -121,7 +131,7 @@ const CategoryPage: React.FC = () => {
   if (loading) {
     return <LoadingPage />;
   }
-
+  
   // Render errors
   if (error) {
     return <div>Error: {error}</div>;
@@ -165,11 +175,7 @@ const CategoryPage: React.FC = () => {
             </div>
 
             {activeFilter && (
-              <Tag
-                closable
-                onClose={() => setActiveFilter(null)}
-                className="mb-4"
-              >
+              <Tag closable onClose={clearFilter} className="mb-4">
                 Filter: {activeFilter}
               </Tag>
             )}
@@ -221,7 +227,6 @@ const CategoryPage: React.FC = () => {
       <FilterModal
         isVisible={isFilterModalVisible}
         onClose={() => setIsFilterModalVisible(false)}
-        onFilter={setActiveFilter}
       />
 
       {isAdmin && (
@@ -245,3 +250,4 @@ const CategoryPage: React.FC = () => {
 };
 
 export default CategoryPage;
+
