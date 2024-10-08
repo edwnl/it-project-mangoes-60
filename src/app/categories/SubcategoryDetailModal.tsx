@@ -7,7 +7,6 @@ import { useSubcategories } from "@/contexts/SubcategoriesContext";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { deleteSubcategory, updateSubcategory } from "@/app/categories/actions";
 
-
 const { Option } = Select;
 
 interface SubcategoryDetailModalProps {
@@ -125,7 +124,6 @@ const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
             ))}
           </Select>
         </Form.Item>
-
 
         {/* renders input field for location */}
         <Form.Item name="location" label="Location">
