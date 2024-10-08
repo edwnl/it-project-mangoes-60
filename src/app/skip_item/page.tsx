@@ -1,30 +1,27 @@
 "use client";
 import React, { useMemo, useEffect, useState } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import NavBar from "@/components/Navbar";
 import SkipItemModal from "./SkipItemModal";
-
 
 //import CategorySearchOptionModal from "./CategorySearchOptionModal";
 
 const SkipItemPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const router = useRouter(); 
-
+  const router = useRouter();
 
   const handleSearch = (value) => {
     setSearchTerm(value);
   };
 
   const handleConfirm = (selected) => {
-    // Handle confirmation to skip the item 
+    // Handle confirmation to skip the item
     console.log("Confirm skip item :", selected);
     // Navigate to the /scan page
-    router.push('/');
+    router.push("/");
   };
 
-  
-  // Render main page 
+  // Render main page
   return (
     <div>
       <NavBar />
@@ -32,9 +29,7 @@ const SkipItemPage = () => {
         onConfirm={handleCategoryConfirm}
         onSearch={handleSearch}
       /> */}
-      <SkipItemModal
-        onConfirm={handleConfirm}
-      />
+      <SkipItemModal onConfirm={handleConfirm} />
     </div>
   );
 };
