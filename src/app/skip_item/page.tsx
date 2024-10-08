@@ -1,26 +1,26 @@
 "use client";
 import React, { useMemo, useEffect, useState } from "react";
-import Image from "next/image";
-import Title from "antd/lib/typography/Title";
-import Search from "antd/lib/input/Search";
-import { Button, List, Spin, message } from "antd";
-import { FilterOutlined } from "@ant-design/icons";
+import { useRouter } from 'next/navigation';
 import NavBar from "@/components/Navbar";
 import SkipItemModal from "./SkipItemModal";
+
 
 //import CategorySearchOptionModal from "./CategorySearchOptionModal";
 
 const SkipItemPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const router = useRouter(); 
 
 
   const handleSearch = (value) => {
     setSearchTerm(value);
   };
 
-  const handleCategoryConfirm = (selectedCategory) => {
-    // Handle the selected category
-    console.log("Selected category:", selectedCategory);
+  const handleConfirm = (selected) => {
+    // Handle confirmation to skip the item 
+    console.log("Confirm skip item :", selected);
+    // Navigate to the /scan page
+    router.push('/');
   };
 
   
@@ -33,7 +33,7 @@ const SkipItemPage = () => {
         onSearch={handleSearch}
       /> */}
       <SkipItemModal
-        onConfirm={handleCategoryConfirm}
+        onConfirm={handleConfirm}
       />
     </div>
   );
