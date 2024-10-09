@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Modal, Input, Button, Popconfirm } from "antd";
+import React, { useEffect, useState } from "react";
+import { Button, Input, Modal, Popconfirm } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
-import { renameCategory, deleteCategory } from "./actions";
+import { deleteCategory, renameCategory } from "@/app/categories/actions";
 
 interface CategoryManageModalProps {
   isVisible: boolean;
@@ -11,6 +11,7 @@ interface CategoryManageModalProps {
   categoryName: string;
 }
 
+// modal that allows users to manage categories, including renaming or deleting
 const CategoryManageModal: React.FC<CategoryManageModalProps> = ({
   isVisible,
   onClose,
@@ -47,6 +48,7 @@ const CategoryManageModal: React.FC<CategoryManageModalProps> = ({
     }
   };
 
+  // renders modal with input for category name and action buttons (update or delete)
   return (
     <Modal
       title="Manage Category"

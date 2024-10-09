@@ -12,6 +12,7 @@ interface FilterModalProps {
   onFilter: (category: string) => void;
 }
 
+// modal that allows users to filter sub-categories by category
 const FilterModal: React.FC<FilterModalProps> = ({
   isVisible,
   onClose,
@@ -28,6 +29,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
     onClose();
   };
 
+  // renders modal with a select dropdown for filtering by category
   return (
     <Modal
       title="Filter by Category"
@@ -35,6 +37,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
       onCancel={onClose}
       footer={null}
     >
+      {/* renders select dropdown for choosing a category */}
       <Select
         style={{ width: "100%" }}
         placeholder="Select a category"

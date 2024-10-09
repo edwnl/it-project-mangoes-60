@@ -32,7 +32,7 @@ const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
     if (isVisible) {
       form.setFieldsValue({
         ...subcategory,
-        category_name: [subcategory.category_name],
+        category_name: subcategory.category_name,
       });
       setIsChanged(false);
     } else {
@@ -51,7 +51,6 @@ const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
   };
 
   // handles saving changes to a sub-category
-
   const handleUpdate = async (values: any) => {
     try {
       await updateSubcategory(subcategory.id, values);

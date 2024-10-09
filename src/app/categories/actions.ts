@@ -2,19 +2,20 @@
 
 import { db, storage } from "@/lib/firebaseClient";
 import {
-  collection,
   addDoc,
-  updateDoc,
+  collection,
   deleteDoc,
   doc,
-  writeBatch,
-  query,
-  where,
   getDocs,
+  query,
+  updateDoc,
+  where,
+  writeBatch,
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { Subcategory } from "@/types/types";
 
+// creates a new subcategory with the provided form data
 export async function createSubcategory(formData: FormData): Promise<string> {
   try {
     const file = formData.get("file") as File;
@@ -38,6 +39,7 @@ export async function createSubcategory(formData: FormData): Promise<string> {
   }
 }
 
+// updates an existing subcategory with new data
 export async function updateSubcategory(
   id: string,
   data: Partial<Subcategory>,
@@ -51,6 +53,7 @@ export async function updateSubcategory(
   }
 }
 
+// deletes a subcategory by ID
 export async function deleteSubcategory(id: string): Promise<void> {
   try {
     const subcategoryRef = doc(db, "subcategories", id);
@@ -61,18 +64,7 @@ export async function deleteSubcategory(id: string): Promise<void> {
   }
 }
 
-export async function uploadImage(file: File): Promise<string> {
-  try {
-    const fileName = `subcategories/${Date.now()}_${file.name}`;
-    const storageRef = ref(storage, fileName);
-    await uploadBytes(storageRef, file);
-    return await getDownloadURL(storageRef);
-  } catch (error) {
-    console.error("Error uploading image:", error);
-    throw new Error("Failed to upload image");
-  }
-}
-
+// renames all subcategories under the specified category
 export async function renameCategory(
   oldName: string,
   newName: string,
@@ -89,6 +81,7 @@ export async function renameCategory(
   await batch.commit();
 }
 
+// deletes all subcategories under the specified category
 export async function deleteCategory(categoryName: string): Promise<void> {
   const subcategoriesRef = collection(db, "subcategories");
   const q = query(subcategoriesRef, where("category_name", "==", categoryName));
