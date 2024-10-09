@@ -16,8 +16,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # - name: Check TypeScript compilation
-      #   run: npx tsc --noEmit
+      - name: Check TypeScript compilation
+        run: npm run type-check
 
       - name: Check Prettier formatting
-        run: npx prettier --check .
+        run: npm run check-format
