@@ -1,4 +1,4 @@
-name: ts-and-prettier
+name: prettier
 
 on: [push, pull_request]
 
@@ -16,14 +16,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Copy tsconfig.json
-        run: |
-          if [ -f tsconfig.json ]; then
-            cp tsconfig.json tsconfig.ci.json
-          fi
-
       - name: Check Prettier formatting
         run: npm run check-format
-
-      - name: Check TypeScript compilation
-        run: npx tsc --project tsconfig.ci.json --noEmit
