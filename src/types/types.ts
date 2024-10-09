@@ -6,7 +6,7 @@ export interface Subcategory {
   category_name: string;
   image_url: string;
   location: string;
-  isFull?: boolean
+  isFull?: boolean;
 }
 
 export interface SubcategoryResult extends Subcategory {

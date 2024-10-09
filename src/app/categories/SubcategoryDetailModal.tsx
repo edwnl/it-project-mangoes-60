@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button, Form, Image, Input, Modal, Popconfirm, Select, Switch } from "antd";
+import {
+  Button,
+  Form,
+  Image,
+  Input,
+  Modal,
+  Popconfirm,
+  Select,
+  Switch,
+} from "antd";
 import { Subcategory } from "@/types/types";
 import { useSubcategories } from "@/contexts/SubcategoriesContext";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
@@ -72,10 +81,8 @@ const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
 
   const handleBoxIsFull = (isFull) => {
     // Handle when box is full
-
     // Update details to db
-    
-  }
+  };
 
   // renders modal with form fields to edit sub-category details
   return (
@@ -105,7 +112,7 @@ const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
         <Form.Item name="subcategory_name" label="Name">
           <Input disabled={!isAdmin} />
         </Form.Item>
-        
+
         {/* renders select field for category */}
         <Form.Item
           rules={[
@@ -141,9 +148,9 @@ const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
           <Input.TextArea disabled={!isAdmin} />
         </Form.Item>
 
-        {/* render input field for box is full toggle */} 
+        {/* render input field for box is full toggle */}
         <Form.Item name="isFull" label="Box is full" layout={"horizontal"}>
-          <Switch onChange={handleBoxIsFull}/>
+          <Switch onChange={handleBoxIsFull} />
         </Form.Item>
         {/* renders action buttons for saving or deleting sub-category (admin only) */}
         {isAdmin && (
@@ -167,7 +174,6 @@ const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
             </Popconfirm>
           </Form.Item>
         )}
-        
       </Form>
     </Modal>
   );
