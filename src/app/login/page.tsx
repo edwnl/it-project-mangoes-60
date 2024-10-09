@@ -13,6 +13,7 @@ import {
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../lib/firebaseClient";
 import Logo from "@/assets/logo_white_hole.svg";
+import { withGuard } from "@/components/GuardRoute";
 
 const LoginPage: React.FC = () => {
   const [form] = Form.useForm();
@@ -123,6 +124,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
-
-// need protected route
+export default withGuard(LoginPage, { requireNonAuth: true });

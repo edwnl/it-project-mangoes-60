@@ -24,6 +24,7 @@ import NavBar from "@/components/Navbar";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { router } from "next/client";
 import { redirect, useRouter } from "next/navigation";
+import { withGuard } from "@/components/GuardRoute";
 // Structure of the matchingHistory record from the database
 export interface HistoryRecordInterface {
   id: string;
@@ -321,4 +322,4 @@ const HistoryPage = () => {
   );
 };
 
-export default HistoryPage;
+export default withGuard(HistoryPage, { requireAuth: true });
