@@ -11,9 +11,11 @@ import {
   query,
   where,
   getDocs,
+  onSnapshot,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Subcategory } from "@/types/types";
+import { unsubscribe } from "diagnostics_channel";
 
 export async function createSubcategory(formData: FormData): Promise<string> {
   try {
@@ -43,6 +45,7 @@ export async function updateSubcategory(
   data: Partial<Subcategory>,
 ): Promise<void> {
   try {
+    // Get ref for subcategory
     const subcategoryRef = doc(db, "subcategories", id);
     await updateDoc(subcategoryRef, data);
   } catch (error) {
@@ -101,3 +104,12 @@ export async function deleteCategory(categoryName: string): Promise<void> {
 
   await batch.commit();
 }
+
+const _boxIsFullQuery = query(collection(db, "subcategories"), where("isFull", "==", true))
+const _unsubscribeBoxIsFullListener = onSnapshot(_boxIsFullQuery, (snapshot) => {
+  snapshot.docChanges().forEach(change => {
+    if (change.type == "added"){
+      console.log(`this ${change.doc.data()} is now full`);
+    }
+  });
+});
