@@ -1,45 +1,37 @@
 "use client";
-import React, { useMemo, useEffect, useState } from "react";
-import Image from "next/image";
-import Title from "antd/lib/typography/Title";
-import Search from "antd/lib/input/Search";
-import { Button, List, Spin, message } from "antd";
-import { FilterOutlined } from "@ant-design/icons";
-import moment from "moment";
-import { EditHistory } from "@/components/modals/EditHistory";
-import {
-  collection,
-  query,
-  getDocs,
-  orderBy,
-  limit,
-  doc,
-  updateDoc,
-  deleteDoc,
-  where,
-  getDoc,
-} from "firebase/firestore";
-import { db, auth } from "@/lib/firebaseClient";
-import NavBar from "@/components/Navbar";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { router } from "next/client";
-import { redirect, useRouter } from "next/navigation";
-import { withGuard } from "@/components/GuardRoute";
-// Structure of the matchingHistory record from the database
-export interface HistoryRecordInterface {
-  id: string;
-  imageURL: string;
-  subCategory: string;
-  time: Date;
-  totalScanned: number;
-  userID: string;
-}
 
-// Categorize history records by date, this function groups records by their date
-const categoriseByTime = (data: HistoryRecordInterface[]) => {
-  let result: Record<string, Array<HistoryRecordInterface>> = {};
+import React, { useEffect, useMemo, useState } from "react";
+import { Button, Empty, Input, message, Tag } from "antd";
+import { FilterOutlined, SearchOutlined } from "@ant-design/icons";
+import moment from "moment";
+import { Timestamp } from "firebase/firestore";
+import NavBar from "@/components/Navbar";
+import LoadingPage from "@/components/Loading";
+import { SearchHistory, UserData } from "@/types/types";
+import { useAuth } from "@/contexts/AuthContext";
+import isBetween from "dayjs/plugin/isBetween";
+import {
+  deleteHistoryRecord,
+  fetchAllUsers,
+  fetchHistoryRecords,
+  updateHistoryRecord,
+} from "@/app/history/actions";
+import dayjs, { Dayjs } from "dayjs";
+import { useSubcategories } from "@/contexts/SubcategoriesContext";
+import DailyRecord from "@/app/history/components/DailyRecord";
+import FilterModal from "@/app/history/components/FilterModal";
+import { EditHistory } from "@/app/history/components/EditHistory";
+import { withGuard } from "@/components/GuardRoute";
+
+dayjs.extend(isBetween);
+
+// categorizes history records by their timestamp (formatted by date)
+const categoriseByTime = (data: SearchHistory[]) => {
+  let result: Record<string, Array<SearchHistory>> = {};
   for (const record of data) {
-    const date = moment(record.time).format("YYYY-MM-DD");
+    const date = moment(
+      new Date((record.timestamp as Timestamp).seconds * 1000),
+    ).format("YYYY-MM-DD");
     if (result.hasOwnProperty(date)) {
       result[date]?.push(record);
     } else {
@@ -49,177 +41,119 @@ const categoriseByTime = (data: HistoryRecordInterface[]) => {
   return result;
 };
 
-interface DailyRecordProps {
-  historyRecords: HistoryRecordInterface[];
-  displayDate: string;
-  openModal: (info: HistoryRecordInterface) => void;
-}
-
-// Component to display the records for a single day
-// This component will render a list of history records for a specific date, including summary of total items
-const DailyRecord: React.FC<DailyRecordProps> = ({
-  historyRecords,
-  displayDate,
-  openModal,
-}) => {
-  // Calculates total quantity for the day
-  let quantityTotal = 0;
-  historyRecords.forEach((val) => {
-    quantityTotal += val.totalScanned;
-  });
-
-  return (
-    <div>
-      <div>
-        <div className="flex flex-row justify-between p-1">
-          <h1>{displayDate}</h1>
-          <div>
-            <b>{quantityTotal}</b> items
-          </div>
-        </div>
-        {/* renders list of history records for the day */}
-        <List
-          dataSource={historyRecords}
-          renderItem={(item) => (
-            <List.Item
-              key={item.id}
-              className={"pr-2 pl-2"}
-              onClick={() => openModal(item)} // This opens the edit modal when the item is clicked
-            >
-              <List.Item.Meta
-                avatar={
-                  <Image
-                    src={item.imageURL}
-                    alt={"product photo"}
-                    width={50}
-                    height={50}
-                    className={"rounded-md"}
-                  />
-                }
-                title={<b>{item.subCategory}</b>}
-                description={`${moment(item.time).format("HH:mm")}`}
-              ></List.Item.Meta>
-              <div>+{item.totalScanned}</div>
-            </List.Item>
-          )}
-          className={"border-2 rounded-md p-2"}
-        ></List>
-      </div>
-    </div>
-  );
-};
-
-// Main history page component
+// main component for displaying history records
 const HistoryPage = () => {
-  // Stores all fetched history records
-  const [historyRecords, setHistoryRecords] = useState<
-    HistoryRecordInterface[]
-  >([]);
-  // Indicates if data is being fetched
+  const [historyRecords, setHistoryRecords] = useState<SearchHistory[]>([]);
+  const [filteredRecords, setFilteredRecords] = useState<SearchHistory[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  // Stores the current search term
   const [searchTerm, setSearchTerm] = useState<string>("");
-  // Controls the visibility of edit modal
   const [isModalOpen, setModalOpen] = useState(false);
-  // Stores the item record that's being edited
-  const [editInfo, setEditInfo] = useState<HistoryRecordInterface | undefined>(
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [editInfo, setEditInfo] = useState<SearchHistory | undefined>(
     undefined,
   );
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState<
+    [Dayjs | null, Dayjs | null] | null
+  >(null);
+  const { user } = useAuth();
+  const { subcategories, getSubcategoryById } = useSubcategories();
+
+  // fetches and loads history records, sets user and record data
   useEffect(() => {
-    const fetchHistoryRecords = async () => {
-      const user = auth.currentUser;
-      if (!user) return Promise.reject("Not logged in");
+    const loadHistoryRecords = async () => {
+      if (!user) return;
       setIsLoading(true);
 
-      // Fetching history records from Firestore collection "matchingHistory" in descending order by time, limited to 50 records
       try {
-        // fetch account type
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        const userData = userDoc.data();
-
-        if (!userData) return Promise.reject("Unable to fetch account");
-        const userRole: string = userData.role;
-        if (userRole != "volunteer" && userRole != "admin") {
-          return Promise.reject("Non existent role");
-        }
-
-        // Get history
-        const historyCollection = collection(db, "matchingHistory");
-        // Currently only taking the 50 most recent record
-        const q =
-          userRole == "volunteer"
-            ? query(
-                historyCollection,
-                where("userID", "==", user.uid),
-                orderBy("time", "desc"),
-                limit(50),
-              )
-            : query(historyCollection, orderBy("time", "desc"), limit(50));
-        const querySnapshot = await getDocs(q);
-
-        // Maps firebase data to HistoryRecordInterface
-        const records: HistoryRecordInterface[] = querySnapshot.docs.map(
-          (doc) => {
-            const data = doc.data();
-            return {
-              id: doc.id,
-              imageURL: data.imageUrl,
-              subCategory: data.subCategory,
-              time: data.time,
-              totalScanned: data.totalScanned,
-              userID: data.userID,
-            };
-          },
-        );
-        console.log("Fetched history records:", records);
-        setHistoryRecords(records);
+        const records: SearchHistory[] = await fetchHistoryRecords(user.uid);
+        const completedRecords = records.map((record) => ({
+          ...record,
+          results: record.results.map((result) =>
+            getSubcategoryById(result.id),
+          ),
+        })) as SearchHistory[];
+        setHistoryRecords(completedRecords);
+        setFilteredRecords(completedRecords);
+        const allUsers = await fetchAllUsers();
+        setUsers(allUsers);
       } catch (error) {
-        console.error("Error fetching history records:", error);
-        message.error("Failed to load history records");
+        message.error(`Failed to load history records.`);
+        console.log(error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    // return () => {
-    fetchHistoryRecords();
-    // };
-  }, []);
+    if (subcategories) {
+      loadHistoryRecords();
+    }
+  }, [user, subcategories]);
 
-  const filteredRecords = useMemo(() => {
-    return historyRecords.filter((record) =>
-      record.subCategory.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
-  }, [historyRecords, searchTerm]);
+  // applies filters to the loaded history records (search, user selection, date range)
+  useEffect(() => {
+    const filtered = historyRecords.filter((record) => {
+      const subcategory = subcategories?.find(
+        (sub) => sub.id === record.correct_subcategory_id,
+      );
+      const searchFields = [
+        record.user_data?.name,
+        record.user_data?.email,
+        subcategory && subcategory.subcategory_name,
+      ];
+
+      const matchesSearch =
+        searchTerm === "" ||
+        searchFields.some(
+          (field) =>
+            field && field.toLowerCase().includes(searchTerm.toLowerCase()),
+        );
+
+      const matchesUser = !selectedUser || record.user_id === selectedUser;
+
+      const recordDate = dayjs.unix((record.timestamp as Timestamp).seconds);
+      const matchesDateRange =
+        !dateRange ||
+        (dateRange[0] &&
+          dateRange[1] &&
+          recordDate.isBetween(dateRange[0], dateRange[1], null, "[]"));
+
+      const keepRecord = matchesSearch && matchesUser && matchesDateRange;
+
+      return keepRecord;
+    });
+
+    setFilteredRecords(filtered);
+  }, [historyRecords, searchTerm, selectedUser, dateRange]);
 
   const categorisedRecords = useMemo(() => {
     return categoriseByTime(filteredRecords);
   }, [filteredRecords]);
 
-  // Updates searchTerm when the user types in the search box
   const handleSearch = (value: string) => {
-    setSearchTerm(value);
+    setSearchTerm(value.trim());
   };
 
-  // Called when user clicks on history record
-  const openModal = (info: HistoryRecordInterface) => {
+  // opens modal to edit specific history record
+  const openModal = (info: SearchHistory) => {
     setEditInfo(info);
     setModalOpen(true);
   };
 
-  // Called when a user confirms changes in the edit modal
-  const handleOk = async (updatedRecord: HistoryRecordInterface) => {
+  // handles updating a specific history record after editing
+  const handleOk = async (updatedRecord: SearchHistory) => {
     try {
-      // Updates the data in Firebase
-      const docRef = doc(db, "matchingHistory", updatedRecord.id);
-      await updateDoc(docRef, {
-        totalScanned: updatedRecord.totalScanned,
+      await updateHistoryRecord(updatedRecord.history_id, {
+        correct_subcategory_id: updatedRecord.correct_subcategory_id,
+        scanned_quantity: updatedRecord.scanned_quantity,
       });
 
-      // Updates the data locally
       setHistoryRecords((prevRecords) =>
         prevRecords.map((record) =>
-          record.id === updatedRecord.id ? updatedRecord : record,
+          record.history_id === updatedRecord.history_id
+            ? { ...record, ...updatedRecord }
+            : record,
         ),
       );
 
@@ -232,19 +166,16 @@ const HistoryPage = () => {
     }
   };
 
-  // Called when a user deletes the record
+  // handles deletion of a specific history record
   const handleDelete = async () => {
     if (editInfo) {
       try {
-        // Delete the record in firebase
-        const docRef = doc(db, "matchingHistory", editInfo.id);
-        await deleteDoc(docRef);
-
-        // updates the data locally
+        await deleteHistoryRecord(editInfo.history_id);
         setHistoryRecords((prevRecords) =>
-          prevRecords.filter((record) => record.id !== editInfo.id),
+          prevRecords.filter(
+            (record) => record.history_id !== editInfo.history_id,
+          ),
         );
-
         message.success("Record deleted successfully");
         setModalOpen(false);
         setEditInfo(undefined);
@@ -255,57 +186,107 @@ const HistoryPage = () => {
     }
   };
 
-  // Called when you exit out of the edit modal
+  // handles closing the edit modal without changes
   const handleCancel = () => {
     setModalOpen(false);
     setEditInfo(undefined);
   };
 
-  // Displays a loading symbol while data is being fetched
+  // opens filter modal
+  const openFilterModal = () => {
+    setIsFilterModalOpen(true);
+  };
+
+  // handles closing the filter modal
+  const handleFilterCancel = () => {
+    setIsFilterModalOpen(false);
+  };
+
+  // applies selected filters
+  const handleFilterApply = () => {
+    setIsFilterModalOpen(false);
+  };
+
+  // clears all selected filters
+  const clearFilters = () => {
+    setSelectedUser(null);
+    setDateRange(null);
+  };
+
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spin size="large" />
-      </div>
-    );
+    return <LoadingPage />;
   }
 
-  // Renders the history page
+  // renders the page layout and UI components
   return (
-    <div className={"min-h-screen mx-auto bg-white"}>
+    <>
+      {/* renders navigation bar */}
       <NavBar />
-      <div className="flex flex-row justify-center">
-        <div className={"w-11/12 lg:w-2/3 items-center mt-4"}>
-          <div className="header items-start w-full mb-10">
-            <Title>History</Title>
-            <div className="flex flex-row justify-between mb-4 h-full">
-              <Search
-                placeholder={"Search..."}
-                size={"large"}
-                className={"w-2/3"}
-                onSearch={handleSearch}
-                onChange={(e) => setSearchTerm(e.target.value)}
+      <div className="flex flex-row justify-center px-8">
+        <div className="items-center flex-grow max-w-xl">
+          <div className="items-start mb-8">
+            <p className="text-3xl font-bold mb-4">History</p>
+
+            {/* renders search input and filter button */}
+            <div className="flex flex-row justify-between mb-4">
+              <Input
+                className="mr-4 flex-grow"
+                prefix={<SearchOutlined />}
+                placeholder="Search..."
+                onChange={(e) => handleSearch(e.target.value)}
               />
               <Button
-                className="w-300px h-full border-dashed border-[#BF0018] text-[#BF0018] pb-1.5 pt-1.5"
-                onClick={() => {
-                  message.info("Filter functionality not implemented yet");
-                }}
+                icon={<FilterOutlined />}
+                onClick={openFilterModal}
+                className="w-300px text-base h-full border-dashed border-[#BF0018] text-[#BF0018]"
               >
-                Filter <FilterOutlined />
+                Filter
               </Button>
             </div>
+
+            {/* renders applied filters as tags if present */}
+            {(selectedUser || dateRange) && (
+              <div className="mb-4">
+                {selectedUser && (
+                  <Tag
+                    closable
+                    onClose={() => setSelectedUser(null)}
+                    color="blue"
+                  >
+                    User: {users.find((u) => u.id === selectedUser)?.name}
+                  </Tag>
+                )}
+                {dateRange && (
+                  <Tag
+                    closable
+                    onClose={() => setDateRange(null)}
+                    color="green"
+                  >
+                    Date: {dateRange[0]?.format("YYYY-MM-DD")} to{" "}
+                    {dateRange[1]?.format("YYYY-MM-DD")}
+                  </Tag>
+                )}
+              </div>
+            )}
           </div>
-          {Object.keys(categorisedRecords)
-            .sort((a, b) => (moment(a, "YYYY-MM-DD").isAfter(b) ? -1 : 1))
-            .map((val) => (
-              <DailyRecord
-                key={val}
-                historyRecords={categorisedRecords[val]!}
-                displayDate={moment(val, "YYYY-MM-DD").fromNow()}
-                openModal={openModal}
-              />
-            ))}
+
+          {/* renders list of history records or empty state */}
+          {historyRecords.length === 0 ? (
+            <Empty />
+          ) : (
+            Object.keys(categorisedRecords)
+              .sort((a, b) => (moment(a, "YYYY-MM-DD").isAfter(b) ? -1 : 1))
+              .map((val) => (
+                <DailyRecord
+                  key={val}
+                  historyRecords={categorisedRecords[val]!}
+                  displayDate={moment(val, "YYYY-MM-DD").fromNow()}
+                  openModal={openModal}
+                />
+              ))
+          )}
+
+          {/* renders edit modal if edit info is available */}
           {editInfo && (
             <EditHistory
               record={editInfo}
@@ -313,12 +294,14 @@ const HistoryPage = () => {
               handleDelete={handleDelete}
               isModalOpen={isModalOpen}
               handleCancel={handleCancel}
-              isScannedBy={editInfo.userID}
             />
           )}
+
+          {/* renders filter modal */}
+          <FilterModal />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
