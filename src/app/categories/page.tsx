@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import Image from "next/image";
-import { Button, List, Input, Pagination, Tag } from "antd";
+import { Button, Input, List, Pagination, Tag } from "antd";
 import {
   FilterOutlined,
   PlusOutlined,
@@ -13,11 +13,12 @@ import LoadingPage from "@/components/Loading";
 import { Subcategory } from "@/types/types";
 import { useSubcategories } from "@/contexts/SubcategoriesContext";
 import { useAuth } from "@/contexts/AuthContext";
-import CreateSubcategoryModal from "./CreateSubcategoryModal";
-import CategoryManageModal from "./CategoryManageModal";
-import SubcategoryDetailModal from "./SubcategoryDetailModal";
-import FilterModal from "@/app/categories/FilterSubcategoryModal";
+import CategoryManageModal from "@/app/categories/components/CategoryManageModal";
+import CreateSubcategoryModal from "@/app/categories/components/CreateSubcategoryModal";
+import SubcategoryDetailModal from "@/app/categories/components/SubcategoryDetailModal";
+import FilterSubcategoryModal from "@/app/categories/components/FilterSubcategoryModal";
 
+// main page for managing categories and sub-categories
 const CategoryPage: React.FC = () => {
   const { subcategories, loading, error } = useSubcategories();
   const { user, userRole } = useAuth();
@@ -39,7 +40,7 @@ const CategoryPage: React.FC = () => {
 
   const isAdmin = userRole === "admin";
 
-  // Trims the subcategory name if it exceeds the specified length
+  // trims subcategory name to a specified maximum length
   const trimSubcategoryName = (
     name: string,
     maxLength: number = 22,
@@ -49,7 +50,7 @@ const CategoryPage: React.FC = () => {
       : name;
   };
 
-  // searching for categories
+  // filters subcategories based on search term and active category filter
   const filteredSubcategories = useMemo(() => {
     return subcategories.filter(
       (item) =>
@@ -61,14 +62,14 @@ const CategoryPage: React.FC = () => {
     );
   }, [subcategories, searchTerm, activeFilter]);
 
-  // Items grouped by category name
+  // groups filtered subcategories by category
   const groupedItems = useMemo(() => {
     return filteredSubcategories.reduce(
       (acc, item) => {
         if (!acc[item.category_name]) {
           acc[item.category_name] = [];
         }
-        //@ts-ignore
+        // @ts-ignore
         acc[item.category_name].push(item);
         return acc;
       },
@@ -76,15 +77,14 @@ const CategoryPage: React.FC = () => {
     );
   }, [filteredSubcategories]);
 
-  // Handle pagination of the items
+  // paginates the grouped items based on the current page and page size
   const paginatedItems = useMemo(() => {
     let items: Subcategory[] = [];
     let categoryCount: Record<string, number> = {};
     let totalCount = 0;
 
-    // Iterate through categories and items of each category
     for (const category of Object.keys(groupedItems)) {
-      //@ts-ignore
+      // @ts-ignore
       for (const item of groupedItems[category]) {
         if (totalCount >= pageSize * currentPage) break;
         if (totalCount >= pageSize * (currentPage - 1)) {
@@ -99,7 +99,7 @@ const CategoryPage: React.FC = () => {
     return { items, categoryCount };
   }, [groupedItems, currentPage, pageSize]);
 
-  // Render each subcategory item in the list
+  // renders each subcategory as a list item
   const renderCategoryItem = (item: Subcategory) => (
     <List.Item
       key={item.id}
@@ -127,34 +127,38 @@ const CategoryPage: React.FC = () => {
       <div className={"mr-3"}>N/A</div>
     </List.Item>
   );
+
+  // handles setting the active filter based on selected category
   const handleFilter = (category: string) => {
     setActiveFilter(category);
     setCurrentPage(1);
   };
 
+  // clears the active category filter
   const clearFilter = () => {
     setActiveFilter(null);
     setCurrentPage(1);
   };
-  // Render loading page
+
   if (loading) {
     return <LoadingPage />;
   }
 
-  // Render errors
   if (error) {
     return <div>Error: {error}</div>;
   }
 
-  // Render main category page
+  // renders the page content, including navbar, search, filter, and list of categories/subcategories
   return (
     <div>
       <NavBar />
       <div className="flex flex-row justify-center px-8">
         <div className="items-center flex-grow max-w-xl">
           <div className="items-start mb-8">
+            {/* renders page title */}
             <p className="text-3xl font-bold mb-4">Categories</p>
 
+            {/* renders search input and filter button */}
             <div className="flex flex-col sm:flex-row justify-between mb-4">
               <Input
                 className="mr-4 mb-4 sm:mb-0"
@@ -183,12 +187,14 @@ const CategoryPage: React.FC = () => {
               </div>
             </div>
 
+            {/* renders active filter as a tag if present */}
             {activeFilter && (
               <Tag closable onClose={clearFilter} className="mb-4">
                 Filter: {activeFilter}
               </Tag>
             )}
 
+            {/* renders each category section and its sub-categories */}
             {Object.entries(paginatedItems.categoryCount).map(
               ([category, count]) => (
                 <div key={category} className="mb-8">
@@ -217,6 +223,7 @@ const CategoryPage: React.FC = () => {
               ),
             )}
 
+            {/* renders pagination */}
             <Pagination
               current={currentPage}
               total={filteredSubcategories.length}
@@ -228,12 +235,13 @@ const CategoryPage: React.FC = () => {
         </div>
       </div>
 
+      {/* renders modals for creating subcategories, filtering, and managing categories */}
       <CreateSubcategoryModal
         isVisible={isCreateModalVisible}
         onClose={() => setIsCreateModalVisible(false)}
       />
 
-      <FilterModal
+      <FilterSubcategoryModal
         isVisible={isFilterModalVisible}
         onClose={() => setIsFilterModalVisible(false)}
         onFilter={handleFilter}

@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Modal, Form, Input, Select, Button, message } from "antd";
+import { Button, Form, Input, message, Modal, Select } from "antd";
 import { useSubcategories } from "@/contexts/SubcategoriesContext";
+import { createSubcategory } from "@/app/categories/actions";
 import DragDropImageUpload from "@/components/DragDropImageUpload";
-import { createSubcategory } from "./actions";
 
 const { Option } = Select;
 
@@ -13,6 +13,7 @@ interface CreateSubcategoryModalProps {
   onClose: () => void;
 }
 
+// modal that allows users to create a new sub-category
 const CreateSubcategoryModal: React.FC<CreateSubcategoryModalProps> = ({
   isVisible,
   onClose,
@@ -58,6 +59,7 @@ const CreateSubcategoryModal: React.FC<CreateSubcategoryModalProps> = ({
     form.setFieldsValue({ image: file });
   };
 
+  // validates that the location input only contains numbers and dots
   const validateLocation = (_: any, value: string) => {
     if (!value) {
       return Promise.reject("Please input the location");
@@ -68,6 +70,7 @@ const CreateSubcategoryModal: React.FC<CreateSubcategoryModalProps> = ({
     return Promise.resolve();
   };
 
+  // renders modal for creating a new sub-category
   return (
     <Modal
       title="New Sub-Category"
@@ -78,12 +81,15 @@ const CreateSubcategoryModal: React.FC<CreateSubcategoryModalProps> = ({
       footer={null}
     >
       <Form form={form} onFinish={handleCreateSubcategory} layout="vertical">
+        {/* renders image upload field */}
         <Form.Item
           name="image"
           rules={[{ required: true, message: "Please upload an image" }]}
         >
           <DragDropImageUpload onSearchResult={onSearchResult} />
         </Form.Item>
+
+        {/* renders input field for sub-category name */}
         <Form.Item
           name="name"
           label="Name"
@@ -91,6 +97,8 @@ const CreateSubcategoryModal: React.FC<CreateSubcategoryModalProps> = ({
         >
           <Input />
         </Form.Item>
+
+        {/* renders select field for category */}
         <Form.Item
           name="category"
           label="Category"
@@ -113,6 +121,8 @@ const CreateSubcategoryModal: React.FC<CreateSubcategoryModalProps> = ({
             ))}
           </Select>
         </Form.Item>
+
+        {/* renders input field for location */}
         <Form.Item
           name="location"
           label="Location"
@@ -123,9 +133,13 @@ const CreateSubcategoryModal: React.FC<CreateSubcategoryModalProps> = ({
         >
           <Input />
         </Form.Item>
+
+        {/* renders input field for additional notes */}
         <Form.Item name="notes" label="Notes">
           <Input.TextArea />
         </Form.Item>
+
+        {/* renders action buttons: cancel and confirm */}
         <Form.Item>
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
             <Button onClick={onClose} style={{ marginRight: 8 }}>
