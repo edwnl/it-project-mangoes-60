@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Modal, Form, Input, Select, Button, Image, Popconfirm } from "antd";
+import React, { useEffect, useState } from "react";
+import { Button, Form, Image, Input, Modal, Popconfirm, Select } from "antd";
 import { Subcategory } from "@/types/types";
 import { useSubcategories } from "@/contexts/SubcategoriesContext";
-import { deleteSubcategory, updateSubcategory } from "./actions";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
+import { deleteSubcategory, updateSubcategory } from "@/app/categories/actions";
 
 const { Option } = Select;
 
@@ -16,6 +16,7 @@ interface SubcategoryDetailModalProps {
   isAdmin: boolean;
 }
 
+// modal that displays detailed information about a sub-category, with options for admins to update or delete
 const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
   isVisible,
   onClose,
@@ -26,6 +27,7 @@ const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
   const { subcategories } = useSubcategories();
   const [isChanged, setIsChanged] = useState(false);
 
+  // loads sub-category details into form when modal is opened
   useEffect(() => {
     if (isVisible) {
       form.setFieldsValue({
@@ -48,6 +50,8 @@ const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
     setIsChanged(true);
   };
 
+  // handles saving changes to a sub-category
+
   const handleUpdate = async (values: any) => {
     try {
       await updateSubcategory(subcategory.id, values);
@@ -57,6 +61,7 @@ const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
     }
   };
 
+  // handles deleting a sub-category
   const handleDelete = async () => {
     try {
       await deleteSubcategory(subcategory.id);
@@ -66,6 +71,7 @@ const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
     }
   };
 
+  // renders modal with form fields to edit sub-category details
   return (
     <Modal
       title="Subcategory Details"
@@ -81,6 +87,7 @@ const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
         layout="vertical"
         onValuesChange={handleValuesChange}
       >
+        {/* renders sub-category image */}
         <Image
           width={300}
           preview={false}
@@ -88,10 +95,12 @@ const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
           alt={subcategory.subcategory_name}
         />
 
+        {/* renders input field for sub-category name */}
         <Form.Item name="subcategory_name" label="Name">
           <Input disabled={!isAdmin} />
         </Form.Item>
 
+        {/* renders select field for category */}
         <Form.Item
           rules={[
             { required: true, message: "Please select or enter a category" },
@@ -116,14 +125,17 @@ const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
           </Select>
         </Form.Item>
 
+        {/* renders input field for location */}
         <Form.Item name="location" label="Location">
           <Input disabled={!isAdmin} />
         </Form.Item>
 
+        {/* renders input field for notes */}
         <Form.Item name="notes" label="Notes">
           <Input.TextArea disabled={!isAdmin} />
         </Form.Item>
 
+        {/* renders action buttons for saving or deleting sub-category (admin only) */}
         {isAdmin && (
           <Form.Item>
             <Button

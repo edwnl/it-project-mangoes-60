@@ -67,6 +67,10 @@ const CameraPage: React.FC = () => {
           <div className="flex flex-col text-3xl mb-2">
             <h1>Welcome,</h1>
             <h1 className="font-bold">{username}!</h1>
+            <p className="max-w-[300px] md:max-w-[350px] mt-4 text-justify text-gray-500 text-sm">
+              Please capture the label if available. Make sure it's legible and
+              clear!
+            </p>
           </div>
           <CategoryFilterButton
             onCategoryChange={handleCategoryChange}
