@@ -1,4 +1,4 @@
-name: ts-and-prettier
+name: prettier
 
 on: [push, pull_request]
 
@@ -16,8 +16,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # - name: Check TypeScript compilation
-      #   run: npx tsc --noEmit
-
       - name: Check Prettier formatting
-        run: npx prettier --check .
+        run: npm run check-format

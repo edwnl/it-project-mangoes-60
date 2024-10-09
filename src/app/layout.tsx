@@ -4,7 +4,6 @@ import "./globals.css";
 import React from "react";
 import { ConfigProvider } from "antd";
 import { Analytics } from "@vercel/analytics/react";
-import { RouteGuard } from "@/components/RouteGuard";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SubcategoriesProvider } from "@/contexts/SubcategoriesContext";
 
@@ -36,7 +35,7 @@ export default function RootLayout({
                 },
               }}
             >
-              <RouteGuard>{children}</RouteGuard>
+              {children}
 
               <Analytics />
             </ConfigProvider>

@@ -8,6 +8,7 @@ import CategoryFilterButton from "@/components/CategoryFilterButton";
 import { imageSearch } from "@/lib/search/imageSearch";
 import { useRouter } from "next/navigation";
 import NavBar from "@/components/Navbar";
+import { withGuard } from "@/components/GuardRoute";
 
 const CameraPage: React.FC = () => {
   const [username, setUsername] = useState<string>("Volunteer");
@@ -102,4 +103,4 @@ const CameraPage: React.FC = () => {
   );
 };
 
-export default CameraPage;
+export default withGuard(CameraPage, { requireAuth: true });

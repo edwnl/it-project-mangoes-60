@@ -8,6 +8,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../../lib/firebaseClient";
 import Logo from "@/assets/logo_white_hole.svg";
+import { withGuard } from "@/components/GuardRoute";
 
 const { Option } = Select;
 
@@ -139,4 +140,4 @@ const SignUpPage: React.FC = () => {
   );
 };
 
-export default SignUpPage;
+export default withGuard(SignUpPage, { requireNonAuth: true });

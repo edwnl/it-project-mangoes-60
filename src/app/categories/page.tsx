@@ -17,6 +17,7 @@ import CategoryManageModal from "@/app/categories/components/CategoryManageModal
 import CreateSubcategoryModal from "@/app/categories/components/CreateSubcategoryModal";
 import SubcategoryDetailModal from "@/app/categories/components/SubcategoryDetailModal";
 import FilterSubcategoryModal from "@/app/categories/components/FilterSubcategoryModal";
+import { withGuard } from "@/components/GuardRoute";
 
 // main page for managing categories and sub-categories
 const CategoryPage: React.FC = () => {
@@ -267,4 +268,4 @@ const CategoryPage: React.FC = () => {
   );
 };
 
-export default CategoryPage;
+export default withGuard(CategoryPage, { requireAuth: true });
