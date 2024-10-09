@@ -20,8 +20,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
 });
 
-// Component that wrapts the entire application
-// Manages User, UserRole and Loading states
+// context provider for managing user authentication and session
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -30,7 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Listener for authentication state changes
+  // listens for authentication state changes and updates the user and userRole accordingly
   useEffect(() => {
     // listen for auth changes
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -41,7 +40,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setUserRole(userData?.role || null);
       } else {
         setUserRole(null);
-        router.push("/login"); // Redirect to login page if no active session
       }
       setLoading(false);
     });
