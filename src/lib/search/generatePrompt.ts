@@ -1,10 +1,28 @@
-import { CategoryItem } from "@/components/CategoryGrid";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebaseClient";
+import { Subcategory } from "@/types/types";
 
+// fetches all subcategories from Firestore
+export async function getCategoriesServer(): Promise<Subcategory[]> {
+  const array: Subcategory[] = [];
+  try {
+    const querySnapshot = await getDocs(collection(db, "subcategories"));
+    querySnapshot.forEach((doc) => {
+      array.push({ ...(doc.data() as Subcategory), id: doc.id });
+    });
+    return array;
+  } catch (error) {
+    console.error("Error loading categories:", error);
+    return [];
+  }
+}
+
+// generates an AI prompt based on the available subcategories and selected category
 export function generateAIPrompt(
-  categoryItems: CategoryItem[],
+  subcategories: Subcategory[],
   selectedCategory: string | null,
 ): string {
-  const categoryList = categoryItems
+  const categoryList = subcategories
     .map(
       (item) => `${item.id} - ${item.category_name} - ${item.subcategory_name}`,
     )
@@ -20,6 +38,8 @@ export function generateAIPrompt(
   console.log(prompt);
 
   prompt += categoryList;
+
+  console.log(categoryList);
 
   return prompt.trim();
 }
