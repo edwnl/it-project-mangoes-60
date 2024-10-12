@@ -1,222 +1,142 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { Button, Tag, Spin, Modal, message, Empty } from "antd";
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import { useParams, useRouter } from "next/navigation";
+import { Button, Empty, message, Modal, Spin, Tag } from "antd";
 import Image from "next/image";
+import NavBar from "@/components/Navbar";
 import {
-  doc,
-  getDoc,
-  updateDoc,
-  DocumentReference,
-  setDoc,
-} from "firebase/firestore";
-import { auth, db } from "@/lib/firebaseClient";
-import { CategoryItem } from "@/components/CategoryGrid";
-import { categoryLoader, categoryItems } from "@/lib/categoryLoader";
+  fetchSearchResults,
+  updateCorrectSubCategory,
+} from "@/app/scan/[result_id]/actions";
+import { SearchHistory, Subcategory } from "@/types/types";
+import { uppercaseToReadable } from "@/lib/utils";
+import { useSubcategories } from "@/contexts/SubcategoriesContext";
+import EditSubcategoryModal from "@/app/scan/[result_id]/components/EditSubcategoryModal";
+import { withGuard } from "@/components/GuardRoute";
 
-interface SearchResult extends CategoryItem {
+interface SearchResult extends Subcategory {
   confidence: number;
 }
 
-interface SearchResultsState {
-  results: SearchResult[];
-  feedback_status: "NOT_PROVIDED" | "CORRECT" | "INCORRECT";
-  correct_subcategory?: string;
-}
-
+// main page displaying the results of a scan
 const SearchResultsPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
-  const [searchResultsState, setSearchResultsState] =
-    useState<SearchResultsState>({
-      results: [],
-      feedback_status: "NOT_PROVIDED",
-    });
-  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const [results, setResults] = useState<SearchHistory | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isSubmittingFeedback, setIsSubmittingFeedback] =
-    useState<boolean>(false);
-  const [isConfirmModalVisible, setIsConfirmModalVisible] =
-    useState<boolean>(false);
-  const [isImageModalVisible, setIsImageModalVisible] =
-    useState<boolean>(false);
-  const [selectedItem, setSelectedItem] = useState<SearchResult | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
+  const [imageModalOpen, setImageModalOpen] = useState<boolean>(false);
+  const [selectedSubcategory, setSelectedSubcategory] =
+    useState<Subcategory | null>(null);
+  const { getSubcategoryById } = useSubcategories();
 
+  // fetch search results on component mount
   useEffect(() => {
-    const fetchSearchResults = async (resultId: string) => {
-      try {
-        const searchDocRef = doc(db, "searchResults", resultId);
-        const searchDocSnap = await getDoc(searchDocRef);
-
-        if (searchDocSnap.exists()) {
-          const data = searchDocSnap.data();
-          setUploadedImageUrl(data.imageUrl);
-
-          const fullResults = data.results
-            .map((result: SearchResult) => {
-              const categoryItem = categoryLoader.getCategoryById(
-                result.id.toString(),
-              );
-              return categoryItem
-                ? { ...categoryItem, confidence: result.confidence }
-                : null;
-            })
-            .filter((item: SearchResult | null) => item !== null);
-
-          setSearchResultsState({
-            results: fullResults.slice(0, 4), // Limit to 4 results
-            feedback_status: data.feedback_status || "NOT_PROVIDED",
-            correct_subcategory: data.correct_subcategory,
-          });
-        } else {
-          console.error("No such document!");
-        }
-      } catch (error) {
-        console.error("Error fetching search results:", error);
-      } finally {
-        setIsLoading(false);
+    const loadSearchResults = async () => {
+      const result = await fetchSearchResults(params.result_id as string);
+      if (result) {
+        // complete results with subcategory details from context
+        const completedResult = {
+          ...result,
+          results: result.results.map((result) =>
+            getSubcategoryById(result.id),
+          ),
+        } as SearchHistory;
+        console.log(completedResult);
+        setResults(completedResult);
       }
+      setIsLoading(false);
     };
 
     if (params.result_id) {
-      fetchSearchResults(params.result_id as string);
+      loadSearchResults();
     }
   }, [params.result_id]);
 
-  const handleBack = () => {
-    router.push("/");
-  };
-
+  // open edit modal when a result card is clicked
   const handleCardClick = (item: SearchResult) => {
-    setSelectedItem(item);
-    setIsConfirmModalVisible(true);
+    setSelectedSubcategory(item);
+    setEditModalOpen(true);
   };
 
-  const handleConfirmCategorySelection = async () => {
-    if (selectedItem) {
-      setIsSubmittingFeedback(true);
-      const updatedState: SearchResultsState = {
-        ...searchResultsState,
-        feedback_status: "CORRECT",
-        correct_subcategory: selectedItem.id,
-      };
-      setSearchResultsState(updatedState);
-      await updateFeedbackInFirestore(updatedState);
-      setIsSubmittingFeedback(false);
-      setIsConfirmModalVisible(false);
-      message.success("Feedback submitted successfully");
-    }
-  };
-
-  const handleCantFindCategory = () => {
-    setIsConfirmModalVisible(true);
-    setSelectedItem(null);
-  };
-
-  const handleConfirmIncorrectResults = async () => {
-    setIsSubmittingFeedback(true);
-    const updatedState: SearchResultsState = {
-      ...searchResultsState,
-      feedback_status: "INCORRECT",
-      correct_subcategory: undefined,
-    };
-    setSearchResultsState(updatedState);
-    await updateFeedbackInFirestore(updatedState);
-    setIsSubmittingFeedback(false);
-    setIsConfirmModalVisible(false);
-    message.success("All results marked as incorrect");
-  };
-
-  const updateFeedbackInFirestore = async (
-    updatedState: SearchResultsState,
+  // handle subcategory update
+  const handleConfirmCategorySelection = async (
+    subcategoryId: string,
+    subcategoryName: string,
+    subcategoryLocation: string,
+    quantity: number,
+    isBoxFull: boolean,
   ) => {
-    if (params.result_id) {
-      try {
-        const searchDocRef: DocumentReference = doc(
-          db,
-          "searchResults",
-          params.result_id as string,
-        );
-        await updateDoc(searchDocRef, {
-          feedback_status: updatedState.feedback_status,
-          correct_subcategory: updatedState.correct_subcategory || null,
-        });
-        if (updatedState.correct_subcategory) {
-          await logHistory(updatedState);
-        }
-      } catch (error) {
-        console.error("Error updating feedback:", error);
-        message.error("Failed to submit feedback");
-      }
-    }
-  };
-  const logHistory = async (updatedState: SearchResultsState) => {
+    setEditModalOpen(false);
+    setIsLoading(true);
     try {
-      if (params.result_id) {
-        const historyDocRef = doc(
-          db,
-          "matchingHistory",
-          params.result_id as string,
-        );
-
-        await setDoc(historyDocRef, {
-          imageUrl: uploadedImageUrl,
-          subCategory: updatedState.correct_subcategory,
-          time: Date.now(),
-          totalScanned: 1,
-          userID: auth.currentUser?.uid,
-        });
-      }
+      await updateCorrectSubCategory(
+        params.result_id as string,
+        subcategoryId,
+        subcategoryName,
+        subcategoryLocation,
+        quantity,
+        isBoxFull,
+      );
+      // update the state with the new correct subcategory and quantity
+      setResults((prevResults) => {
+        if (!prevResults) return null;
+        return {
+          ...prevResults,
+          correct_subcategory_id: subcategoryId,
+          scanned_quantity: quantity,
+        };
+      });
     } catch (error) {
-      message.error("Failed to log history");
-      console.log(error);
+      message.error("Failed to update subcategory.");
+    } finally {
+      setIsLoading(false);
     }
   };
-  const handleImageClick = () => {
-    setIsImageModalVisible(true);
-  };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spin size="large" />
-      </div>
-    );
-  }
+  // open image modal
+  const handleImageClick = () => {
+    setImageModalOpen(true);
+  };
 
   return (
-    <div className="min-h-screen max-w-5xl mx-auto bg-white p-4">
-      <header className="flex justify-between items-center mb-6">
-        <Button
-          icon={<ArrowLeftOutlined />}
-          onClick={handleBack}
-          className="custom-button"
-        >
-          Back
-        </Button>
-      </header>
-
-      <main className={"max-w-xl mx-auto"}>
-        <h1 className="text-2xl font-bold mb-1">Search Results</h1>
-        <p className={"mb-4"}>
+    <>
+      <NavBar />
+      <div className="max-w-xl mx-auto px-8">
+        {/* renders the page header */}
+        <h1 className="text-3xl font-bold mb-1">Scan Results</h1>
+        <p className="mb-1">
           Showing results for{" "}
           <span className="cursor-pointer underline" onClick={handleImageClick}>
             image.
           </span>{" "}
         </p>
 
+        {/* renders any applied category filter */}
+        {results && results.category_filter_name && (
+          <Tag className={"mb-4"} color={"red"}>
+            Filter Applied: {uppercaseToReadable(results.category_filter_name)}
+          </Tag>
+        )}
+
+        {/* renders user who scanned the items */}
+        {results && results.user_data && (
+          <Tag className={"mb-4"}>Scanned By: {results.user_data.name}</Tag>
+        )}
+
+        {/* renders the search results or empty state */}
         <div className="relative mb-6">
-          {isSubmittingFeedback && (
+          {isLoading && (
             <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10">
               <Spin size="large" />
             </div>
           )}
 
-          {searchResultsState.results.length > 0 ? (
+          {results && results.results.length > 0 ? (
             <div className="grid grid-cols-2 gap-4 justify-items-center">
-              {searchResultsState.results.map((result) => (
+              {results.results.map((result) => (
+                // renders individual result cards
                 <div
                   key={result.id}
                   className="border rounded-lg p-4 cursor-pointer w-full max-w-[300px]"
@@ -229,15 +149,12 @@ const SearchResultsPage: React.FC = () => {
                     height={150}
                     className="mb-2 object-contain mx-auto"
                   />
-                  <p className="text-sm text-gray-500">{result.id}</p>
+                  <p className="text-sm text-gray-500">{result.location}</p>
                   <p className="font-semibold">{result.subcategory_name}</p>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    <Tag>{result.category_name}</Tag>
-                    {searchResultsState.correct_subcategory === result.id && (
+                    <Tag>{uppercaseToReadable(result.category_name)}</Tag>
+                    {results.correct_subcategory_id === result.id && (
                       <Tag color="green">Correct</Tag>
-                    )}
-                    {searchResultsState.feedback_status === "INCORRECT" && (
-                      <Tag color="red">Incorrect</Tag>
                     )}
                   </div>
                 </div>
@@ -251,66 +168,55 @@ const SearchResultsPage: React.FC = () => {
           )}
         </div>
 
-        {searchResultsState.results.length > 0 && (
+        {/* renders the search again button */}
+        {results && results.results.length > 0 && (
           <div className="flex justify-center relative">
-            {isSubmittingFeedback && (
+            {isLoading && (
               <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10">
                 <Spin size="small" />
               </div>
             )}
             <Button
-              onClick={handleCantFindCategory}
+              onClick={() => router.push("/")}
               className="custom-button bg-[#BF0018] text-white hover:bg-[#8B0012] border-none"
-              disabled={isSubmittingFeedback}
             >
-              Mark all as Incorrect
+              Search Again
             </Button>
           </div>
         )}
-      </main>
 
-      <Modal
-        title="Confirm Category Selection"
-        open={isConfirmModalVisible}
-        onOk={
-          selectedItem
-            ? handleConfirmCategorySelection
-            : handleConfirmIncorrectResults
-        }
-        onCancel={() => setIsConfirmModalVisible(false)}
-        okText={
-          selectedItem ? "Confirm Selection" : "Yes, mark all as incorrect"
-        }
-        cancelText="Cancel"
-      >
-        {selectedItem ? (
-          <p>
-            Are you sure you want to select "{selectedItem.subcategory_name}" as
-            the correct category?
-          </p>
-        ) : (
-          <p>Are you sure you want to mark all results as incorrect?</p>
-        )}
-      </Modal>
+        {/* renders the edit subcategory modal */}
+        <EditSubcategoryModal
+          isOpen={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          selectedSubcategory={selectedSubcategory}
+          correctSubcategoryId={results?.correct_subcategory_id || ""}
+          currentQuantity={results?.scanned_quantity || 1}
+          boxFull={results?.isCorrectCategoryFull || false}
+          onConfirm={handleConfirmCategorySelection}
+        />
 
-      <Modal
-        title="Searched Image"
-        open={isImageModalVisible}
-        onCancel={() => setIsImageModalVisible(false)}
-        footer={null}
-      >
-        {uploadedImageUrl && (
-          <Image
-            src={uploadedImageUrl}
-            alt="Searched Image"
-            width={400}
-            height={400}
-            className="object-contain"
-          />
-        )}
-      </Modal>
-    </div>
+        {/* renders the modal to show the searched image */}
+        <Modal
+          title="Searched Image"
+          open={imageModalOpen}
+          onCancel={() => setImageModalOpen(false)}
+          footer={null}
+          width={350}
+        >
+          {results && results.image_url && (
+            <Image
+              src={results.image_url}
+              alt="Searched Image"
+              width={300}
+              height={300}
+              className="rounded-md"
+            />
+          )}
+        </Modal>
+      </div>
+    </>
   );
 };
 
-export default SearchResultsPage;
+export default withGuard(SearchResultsPage, { requireAuth: true });

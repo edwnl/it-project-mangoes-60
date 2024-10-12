@@ -64,7 +64,7 @@ const DailyRecord: React.FC<DailyRecordProps> = ({
                   <div className={"flex flex-col"}>
                     <p className={"font-semibold text-black"}>
                       {
-                        getSubcategoryById(item.correct_subcategory_id)
+                        getSubcategoryById(item.correct_subcategory_id!)
                           .subcategory_name
                       }
                     </p>

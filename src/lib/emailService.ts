@@ -1,6 +1,8 @@
 "use server";
 
 import nodemailer from "nodemailer";
+import { db } from "./firebaseClient";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 
 // function to send an invitation email with a link to create an account
 export const sendInvitationEmail = async (
@@ -35,4 +37,50 @@ export const sendInvitationEmail = async (
     console.error("Error sending invitation email:", error);
     throw new Error("Failed to send invitation email");
   }
+};
+
+//get subscribers for internal updates
+const _getInternalSubscribers = async () => {
+  const subscribersCollectionRef = collection(db, "internalUpdateSubscribers");
+  const querySnapshot = await getDocs(subscribersCollectionRef);
+  const subscribers: string[] = [];
+  querySnapshot.forEach((doc) => {
+    subscribers.push(doc.data().email);
+  });
+  return subscribers;
+};
+
+// function to send an email notify when a box is full
+export const sendBoxStatus = async (
+  subcategoryName: string,
+  subcategoryLocation: string,
+) => {
+  // sets up the transporter using nodemailer with Gmail credentials
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  (await _getInternalSubscribers()).forEach(async (email) => {
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "A Subcategory has been filled!",
+      html: `
+      <h1>Dear Admins</h1>
+      <p>The box ${subcategoryName} at ${subcategoryLocation} has been reported to be filled out.</p>
+    `,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log("Box status update email sent successfully");
+    } catch (error) {
+      console.error("Error sending Box status update email:", error);
+      throw new Error("Failed to send Box status update email");
+    }
+  });
 };
