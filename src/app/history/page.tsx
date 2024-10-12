@@ -298,7 +298,17 @@ const HistoryPage = () => {
           )}
 
           {/* renders filter modal */}
-          <FilterModal />
+          <FilterModal
+            isOpen={isFilterModalOpen}
+            onClose={handleFilterCancel}
+            onApply={handleFilterApply}
+            onClear={clearFilters}
+            users={users}
+            selectedUser={selectedUser}
+            setSelectedUser={setSelectedUser}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+          />
         </div>
       </div>
     </>
