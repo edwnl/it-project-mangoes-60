@@ -177,7 +177,7 @@ const SearchResultsPage: React.FC = () => {
               </div>
             )}
             <Button
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/skip_item")}
               className="custom-button bg-[#BF0018] text-white hover:bg-[#8B0012] border-none"
             >
               Can't find the category?
