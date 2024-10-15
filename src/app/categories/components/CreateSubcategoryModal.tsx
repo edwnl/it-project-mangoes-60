@@ -70,10 +70,10 @@ const CreateSubcategoryModal: React.FC<CreateSubcategoryModalProps> = ({
     return Promise.resolve();
   };
 
-  // renders modal for creating a new sub-category
+  // renders modal for creating a new item
   return (
     <Modal
-      title="New Sub-Category"
+      title="New Item"
       open={isVisible}
       width={350}
       className={"top-8"}

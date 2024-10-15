@@ -73,7 +73,7 @@ const SubcategoryDetailModal: React.FC<SubcategoryDetailModalProps> = ({
   // renders modal with form fields to edit sub-category details
   return (
     <Modal
-      title="Subcategory Details"
+      title="Item Details"
       open={isVisible}
       className={"top-10"}
       width={350}
