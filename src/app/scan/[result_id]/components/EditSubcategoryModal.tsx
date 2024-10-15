@@ -82,7 +82,7 @@ const EditSubcategoryModal: React.FC<EditSubcategoryModalProps> = ({
   const isCorrectSubcategory = selectedSubcategory?.id === correctSubcategoryId;
   const isBoxStatusChanged = boxFull != isBoxFull;
   const isQuantityChanged = quantity !== currentQuantity;
-  const buttonText = isCorrectSubcategory ? "Update" : "Change Subcategory";
+  const buttonText = isCorrectSubcategory ? "Update" : "Change Item";
   const isButtonDisabled =
     isCorrectSubcategory && !isQuantityChanged && !isBoxStatusChanged;
   console.log(isBoxStatusChanged);
@@ -90,7 +90,7 @@ const EditSubcategoryModal: React.FC<EditSubcategoryModalProps> = ({
   // renders the modal content for editing the sub-category details
   return (
     <Modal
-      title="Edit Sub-Category"
+      title="Edit Item"
       className="top-14"
       open={isOpen}
       onCancel={onClose}
