@@ -43,7 +43,7 @@ const LoginPage: React.FC = () => {
         // STILL NEED TO IMPLEMENT THE REDIRECTS
         switch (userData.role) {
           case "admin":
-            router.push("/dashboard"); // just goes to dashboard - PROTOTYPE
+            router.push("/categories"); // just goes to dashboard - PROTOTYPE
             break;
           case "volunteer":
             router.push("/"); // just goes to dashboard - PROTOTYPE
