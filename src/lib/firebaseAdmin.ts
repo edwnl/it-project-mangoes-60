@@ -8,6 +8,7 @@ const firebaseAdminConfig = {
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET!,
 };
 
+// initializes the Firebase Admin SDK with environment variables
 if (!getApps().length) {
   admin.initializeApp({
     credential: admin.credential.cert(firebaseAdminConfig),
@@ -17,3 +18,4 @@ if (!getApps().length) {
 
 export const adminDb: admin.firestore.Firestore = admin.firestore();
 export const adminStorage: admin.storage.Storage = admin.storage();
+export const adminAuth: admin.auth.Auth = admin.auth();
