@@ -2,23 +2,22 @@
 
 import React, {
   createContext,
-  useContext,
-  useState,
-  useEffect,
   ReactNode,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 import { Subcategory } from "@/types/types";
 import { db } from "@/lib/firebaseClient";
 import {
+  addDoc,
   collection,
+  deleteDoc,
+  doc,
+  DocumentData,
   onSnapshot,
   QuerySnapshot,
-  DocumentData,
-  doc,
   updateDoc,
-  addDoc,
-  deleteDoc,
-  getDoc,
 } from "firebase/firestore";
 
 interface SubcategoriesContextType {
@@ -35,6 +34,7 @@ const SubcategoriesContext = createContext<
   SubcategoriesContextType | undefined
 >(undefined);
 
+// context provider for managing subcategories data
 export const SubcategoriesProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -42,6 +42,7 @@ export const SubcategoriesProvider: React.FC<{ children: ReactNode }> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // loads all subcategories from the Firestore collection on mount
   useEffect(() => {
     const subcategoriesCollection = collection(db, "subcategories");
 
@@ -68,6 +69,7 @@ export const SubcategoriesProvider: React.FC<{ children: ReactNode }> = ({
     return () => unsubscribe();
   }, []);
 
+  // updates data of a subcategory by id
   const updateSubcategory = async (
     id: string,
     data: Partial<Subcategory>,
@@ -81,6 +83,7 @@ export const SubcategoriesProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  // creates a new subcategory
   const createSubcategory = async (
     data: Omit<Subcategory, "id">,
   ): Promise<string> => {
@@ -94,6 +97,7 @@ export const SubcategoriesProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  // deletes a subcategory by ID
   const deleteSubcategory = async (id: string): Promise<void> => {
     try {
       const subcategoryRef = doc(db, "subcategories", id);
@@ -104,6 +108,7 @@ export const SubcategoriesProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  // fetches a subcategory by its ID
   const getSubcategoryById = (id: string): Subcategory => {
     const result = subcategories.find((subcategory) => subcategory.id === id);
     if (!result) throw new Error(`Cold not find subcategory with ID ${id}`);
