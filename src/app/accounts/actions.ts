@@ -57,7 +57,7 @@ export const createInvitation = async (
     // Send invitation email
     await sendInvitationEmail(
       email,
-      `https://it-proj-midsem-sprint.vercel.app/signup/${docRef.id}`,
+      `https://it-project-mangoes-60.vercel.app/signup/${docRef.id}`,
     );
 
     return docRef.id;
@@ -188,9 +188,4 @@ export const fetchUserData = async (
     console.error("Error fetching user data:", error);
     return null;
   }
-};
-
-export const deleteUser = (id: string) => {
-  // check for existence
-  // delete the
 };
