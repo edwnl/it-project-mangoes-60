@@ -13,7 +13,6 @@ import { withGuard } from "@/components/GuardRoute";
 
 const CameraPage: React.FC = () => {
   // state setup
-  const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [categoryFilterID, setCategoryFilter] = useState<string | null>(null);
@@ -43,15 +42,13 @@ const CameraPage: React.FC = () => {
 
       console.log(result);
 
-      if (result.success && result.searchId) {
+      if (result.searchId) {
         router.push(`/scan/${result.searchId}`);
       } else {
         throw new Error(result.error || "Failed to process image");
       }
     } catch (err: any) {
-      const errorMessage = err.message;
-      setError(errorMessage);
-      message.error(errorMessage);
+      message.error(err);
       setIsLoading(false);
     }
   };
