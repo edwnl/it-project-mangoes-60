@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Button, Modal, Select } from "antd";
-import { FilterIcon } from "lucide-react";
 import { uppercaseToReadable } from "@/lib/utils";
 import { useSubcategories } from "@/contexts/SubcategoriesContext";
+import { FilterOutlined } from "@ant-design/icons";
 
 interface CategoryFilterButtonProps {
   onCategoryChange: (category: string | null) => void;
@@ -38,7 +38,7 @@ const CategoryFilterButton: React.FC<CategoryFilterButtonProps> = ({
         onClick={() => setIsModalVisible(true)}
         disabled={isDisabled}
       >
-        <FilterIcon />
+        <FilterOutlined />
         Category Filter:
         <div className="font-bold">
           {categoryName ? uppercaseToReadable(categoryName) : "None"}
