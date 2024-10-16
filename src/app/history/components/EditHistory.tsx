@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, InputNumber, Modal, Select } from "antd";
+import { Button, Image, InputNumber, Modal, Select } from "antd";
 import { SearchHistory } from "@/types/types";
 import { useSubcategories } from "@/contexts/SubcategoriesContext";
+import { useRouter } from "next/navigation";
 
 interface EditHistoryProps {
   record: SearchHistory;
@@ -25,6 +26,7 @@ export const EditHistory: React.FC<EditHistoryProps> = ({
 }) => {
   const [updatedRecord, setUpdatedRecord] = useState<SearchHistory>(record);
   const { subcategories } = useSubcategories();
+  const router = useRouter();
   if (!subcategories) throw new Error("Item list not found!");
 
   // handles changes in the selected subcategory
@@ -47,6 +49,7 @@ export const EditHistory: React.FC<EditHistoryProps> = ({
     <Modal
       title="Edit History"
       open={isModalOpen}
+      width={350}
       onOk={onOk}
       onCancel={handleCancel}
       footer={[
@@ -61,6 +64,16 @@ export const EditHistory: React.FC<EditHistoryProps> = ({
         </Button>,
       ]}
     >
+      {/* renders history image */}
+      <div className="flex justify-center mb-4">
+        <Image
+          width={200}
+          preview={false}
+          src={updatedRecord.image_url}
+          alt="history record image"
+        />
+      </div>
+
       {/* renders subcategory selection dropdown */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -109,6 +122,19 @@ export const EditHistory: React.FC<EditHistoryProps> = ({
         <p>
           {record.user_data?.name || "Unknown"} (
           {record.user_data?.email || "No email"})
+        </p>
+      </div>
+
+      {/* renders link that can take the users back to the scan results */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          ID
+        </label>
+        <p
+          className={"underline cursor-pointer"}
+          onClick={() => router.push(`/scan/${record.history_id}`)}
+        >
+          {record.history_id}
         </p>
       </div>
     </Modal>
