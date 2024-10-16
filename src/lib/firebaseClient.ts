@@ -1,10 +1,10 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore, Firestore } from "firebase/firestore";
-import { getStorage, FirebaseStorage } from "firebase/storage";
+import { getApp, getApps, initializeApp } from "firebase/app";
+import { Firestore, getFirestore } from "firebase/firestore";
+import { FirebaseStorage, getStorage } from "firebase/storage";
 import {
+  browserLocalPersistence,
   getAuth,
   setPersistence,
-  browserLocalPersistence,
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -16,13 +16,13 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
+// initializes the Firebase Client SDK with environment variables
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db: Firestore = getFirestore(app);
 const storage: FirebaseStorage = getStorage(app);
 const auth = getAuth(app);
 
-// Explicityly set persistence to local to makes sure it is there
+// explicitly set persistence to local to makes sure it is there
 setPersistence(auth, browserLocalPersistence);
 
 export { db, storage, auth };

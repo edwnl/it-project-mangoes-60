@@ -28,8 +28,8 @@
 
 .ant-upload,
 .ant-upload-select {
-  width: 350px !important;
-  height: 350px !important;
+  width: 300px !important;
+  height: 300px !important;
 }
 
 @layer base {
@@ -60,6 +60,7 @@
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -92,7 +93,18 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.ant-input,
+.ant-input-affix-wrapper input,
+.ant-form-item-control-input input {
+  font-size: 16px !important;
+}
+
+.ant-list-item {
+  border: none !important;
 }

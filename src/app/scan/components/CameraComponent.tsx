@@ -1,23 +1,25 @@
 "use client";
 
-import React, { useRef, useState, useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, message } from "antd";
 import { CameraOutlined } from "@ant-design/icons";
-import { imageSearch } from "@/lib/search/imageSearch";
-import CameraButton from "@/components/CameraButton";
+import CameraButton from "@/app/scan/components/CameraButton";
 
+// constants for image capture and processing
 const SQUARE_SIZE = 300;
 const MAX_UPLOAD_SIZE = 512;
 
 const CameraComponent: React.FC<{
   onSearchResult: (formData: FormData) => Promise<void>;
 }> = ({ onSearchResult }) => {
+  // refs and state setup
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
+  // start the camera stream
   const startCamera = useCallback(async (): Promise<void> => {
     try {
       const constraints: MediaStreamConstraints = {
@@ -41,6 +43,7 @@ const CameraComponent: React.FC<{
     }
   }, []);
 
+  // stop the camera stream
   const stopCamera = useCallback((): void => {
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
@@ -48,6 +51,7 @@ const CameraComponent: React.FC<{
     }
   }, [stream]);
 
+  // capture image from video stream
   const captureImage = useCallback((): void => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
@@ -81,6 +85,7 @@ const CameraComponent: React.FC<{
     }
   }, [stopCamera]);
 
+  // process and upload captured image
   const processAndUploadImage = async (imageDataUrl: string) => {
     const img = new Image();
     img.onload = async () => {
@@ -101,11 +106,11 @@ const CameraComponent: React.FC<{
           if (blob) {
             try {
               setIsProcessing(true);
-              // Prepare form data for API call
+              // prepare form data for API call
               const formData = new FormData();
               formData.append("file", blob, "image.jpg");
 
-              // Call onSearchResult with formData
+              // call onSearchResult with formData
               await onSearchResult(formData);
             } catch (error) {
               console.error("Error processing image:", error);
@@ -122,17 +127,20 @@ const CameraComponent: React.FC<{
     img.src = imageDataUrl;
   };
 
+  // confirm and process captured photo
   const confirmPhoto = useCallback(async (): Promise<void> => {
     if (capturedImage) {
       await processAndUploadImage(capturedImage);
     }
   }, [capturedImage, onSearchResult]);
 
+  // retake photo
   const retakePhoto = useCallback((): void => {
     setCapturedImage(null);
     startCamera();
   }, [startCamera]);
 
+  // set video element attributes
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.setAttribute("playsinline", "true");
@@ -145,6 +153,7 @@ const CameraComponent: React.FC<{
     <div className="flex flex-col items-center space-y-4">
       {!capturedImage ? (
         <>
+          {/* video preview */}
           <div
             className="relative bg-gray-200 rounded-lg overflow-hidden mb-4"
             style={{ width: `${SQUARE_SIZE}px`, height: `${SQUARE_SIZE}px` }}
@@ -157,6 +166,7 @@ const CameraComponent: React.FC<{
               className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full object-cover"
             />
           </div>
+          {/* start camera or capture button */}
           {!stream ? (
             <Button
               className="flex items-center custom-button"
@@ -172,6 +182,7 @@ const CameraComponent: React.FC<{
         </>
       ) : (
         <>
+          {/* captured image preview */}
           <div
             className="bg-gray-200 rounded-lg overflow-hidden"
             style={{ width: `${SQUARE_SIZE}px`, height: `${SQUARE_SIZE}px` }}
@@ -182,6 +193,7 @@ const CameraComponent: React.FC<{
               className="w-full h-full object-cover"
             />
           </div>
+          {/* retake or confirm buttons */}
           <div className="flex space-x-4">
             <Button onClick={retakePhoto} disabled={isProcessing}>
               Retake

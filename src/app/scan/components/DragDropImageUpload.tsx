@@ -1,34 +1,43 @@
 "use client";
 
 import React, { useState } from "react";
-import { Upload, message, Button } from "antd";
+import { Button, message, Upload } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import ImgCrop from "antd-img-crop";
 import type { RcFile, UploadProps } from "antd/es/upload/interface";
 
 interface DragDropImageUploadProps {
   onSearchResult: (formData: FormData) => Promise<void>;
+  immediateUpload?: boolean;
 }
 
 const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
   onSearchResult,
+  immediateUpload = false,
 }) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [croppedFile, setCroppedFile] = useState<RcFile | null>(null);
 
-  const handleChange: UploadProps["onChange"] = (info) => {
+  // handle image upload and cropping
+  const handleChange: UploadProps["onChange"] = async (info) => {
     if (info.file.status === "done") {
       const localImageUrl = URL.createObjectURL(
         info.file.originFileObj as Blob,
       );
       setImageUrl(localImageUrl);
       setCroppedFile(info.file.originFileObj as RcFile);
+
+      if (immediateUpload) {
+        await processImage(info.file.originFileObj as RcFile);
+      }
     }
   };
 
-  const processImage = async () => {
-    if (!croppedFile) {
+  // process the uploaded image
+  const processImage = async (file: RcFile | null = null) => {
+    const fileToProcess = file || croppedFile;
+    if (!fileToProcess) {
       message.error("No image selected");
       return;
     }
@@ -36,7 +45,7 @@ const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
     setIsProcessing(true);
 
     const formData = new FormData();
-    formData.append("file", croppedFile);
+    formData.append("file", fileToProcess);
 
     try {
       await onSearchResult(formData);
@@ -48,6 +57,7 @@ const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
     }
   };
 
+  // upload button UI
   const uploadButton = (
     <div className="flex flex-col items-center justify-center h-full">
       <PlusOutlined />
@@ -57,6 +67,7 @@ const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
 
   return (
     <div className="w-full max-w-2xl mx-auto">
+      {/* image upload and crop component */}
       <ImgCrop
         modalOk="Crop"
         modalProps={{
@@ -98,10 +109,11 @@ const DragDropImageUpload: React.FC<DragDropImageUploadProps> = ({
           )}
         </Upload>
       </ImgCrop>
-      {croppedFile && (
+      {/* search button (shown only if not immediate upload) */}
+      {croppedFile && !immediateUpload && (
         <div className="mt-4 text-center">
           <Button
-            onClick={processImage}
+            onClick={() => processImage()}
             disabled={isProcessing}
             className="custom-button"
           >

@@ -1,11 +1,11 @@
 import Image from "next/image";
 import CameraButtonImg from "@/assets/CameraButton.svg";
-import { MouseEventHandler } from "react";
 
 interface CameraButtonProps {
   onClick?: () => void;
 }
 
+// simple camera button component with an image
 const CameraButton = (props: CameraButtonProps) => {
   return (
     <a onClick={props.onClick}>

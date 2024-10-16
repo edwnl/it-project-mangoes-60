@@ -5,10 +5,7 @@ import { adminDb } from "@/lib/firebaseAdmin";
 import { firestore } from "firebase-admin";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "@/lib/firebaseClient";
-import {
-  generateAIPrompt,
-  getCategoriesServer,
-} from "@/lib/search/generatePrompt";
+import { generateAIPrompt, getCategoriesServer } from "@/lib/generatePrompt";
 import { SearchHistory, Subcategory } from "@/types/types";
 
 const openai = new OpenAI({
@@ -47,9 +44,8 @@ export async function imageSearch(formData: FormData): Promise<{
       category_filter_name: category_filter,
       timestamp: firestore.FieldValue.serverTimestamp(),
       user_id: uid,
-      correct_subcategory_id: null,
+      correct_subcategory_id: topResults[0].id,
       scanned_quantity: 1,
-      isCorrectCategoryFull: false,
     };
 
     // Store search results in Firestore
@@ -135,6 +131,7 @@ async function processImageWithOpenAI(
   ) {
     throw new Error("Invalid or empty response from OpenAI.");
   }
+
   return response.choices[0].message.content || "";
 }
 

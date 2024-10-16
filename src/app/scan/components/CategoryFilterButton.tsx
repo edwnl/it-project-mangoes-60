@@ -1,31 +1,29 @@
 import React, { useState } from "react";
 import { Button, Modal, Select } from "antd";
 import { FilterIcon } from "lucide-react";
-import { categoryItems } from "@/lib/categoryLoader";
+import { uppercaseToReadable } from "@/lib/utils";
+import { useSubcategories } from "@/contexts/SubcategoriesContext";
 
 interface CategoryFilterButtonProps {
   onCategoryChange: (category: string | null) => void;
   isDisabled?: boolean;
 }
 
-const formatCategoryName = (name: string): string => {
-  return name
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
-};
-
+// component for selecting and displaying category filters
 const CategoryFilterButton: React.FC<CategoryFilterButtonProps> = ({
   onCategoryChange,
   isDisabled = false,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [categoryName, setCategoryName] = useState<string | null>(null);
+  const { subcategories } = useSubcategories();
 
+  // get unique categories from subcategories
   const uniqueCategories = Array.from(
-    new Set(categoryItems.map((item) => item.category_name)),
+    new Set(subcategories.map((item) => item.category_name)),
   );
 
+  // handle category selection
   const handleCategoryChange = (value: string | null) => {
     setCategoryName(value);
     onCategoryChange(value);
@@ -34,6 +32,7 @@ const CategoryFilterButton: React.FC<CategoryFilterButtonProps> = ({
 
   return (
     <>
+      {/* category filter button */}
       <Button
         className="w-fit border-dashed text-[#72000B] border-[#72000B] border-2"
         onClick={() => setIsModalVisible(true)}
@@ -42,9 +41,10 @@ const CategoryFilterButton: React.FC<CategoryFilterButtonProps> = ({
         <FilterIcon />
         Category Filter:
         <div className="font-bold">
-          {categoryName ? formatCategoryName(categoryName) : "None"}
+          {categoryName ? uppercaseToReadable(categoryName) : "None"}
         </div>
       </Button>
+      {/* category selection modal */}
       <Modal
         title="Select Category"
         open={isModalVisible}
@@ -61,7 +61,7 @@ const CategoryFilterButton: React.FC<CategoryFilterButtonProps> = ({
           <Select.Option value={null}>None</Select.Option>
           {uniqueCategories.map((category) => (
             <Select.Option key={category} value={category}>
-              {formatCategoryName(category)}
+              {uppercaseToReadable(category)}
             </Select.Option>
           ))}
         </Select>

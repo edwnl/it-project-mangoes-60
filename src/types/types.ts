@@ -27,9 +27,8 @@ export interface SearchHistory {
   category_filter_name: string;
   timestamp: firestore.FieldValue;
   user_id: string;
-  correct_subcategory_id: string | null;
+  correct_subcategory_id: string;
   scanned_quantity?: number;
   history_id?: string;
   user_data?: UserData;
-  isCorrectCategoryFull: boolean;
 }

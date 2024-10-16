@@ -63,10 +63,7 @@ const SearchResultsPage: React.FC = () => {
   // handle subcategory update
   const handleConfirmCategorySelection = async (
     subcategoryId: string,
-    subcategoryName: string,
-    subcategoryLocation: string,
     quantity: number,
-    isBoxFull: boolean,
   ) => {
     setEditModalOpen(false);
     setIsLoading(true);
@@ -74,10 +71,7 @@ const SearchResultsPage: React.FC = () => {
       await updateCorrectSubCategory(
         params.result_id as string,
         subcategoryId,
-        subcategoryName,
-        subcategoryLocation,
         quantity,
-        isBoxFull,
       );
       // update the state with the new correct subcategory and quantity
       setResults((prevResults) => {
@@ -192,7 +186,6 @@ const SearchResultsPage: React.FC = () => {
           selectedSubcategory={selectedSubcategory}
           correctSubcategoryId={results?.correct_subcategory_id || ""}
           currentQuantity={results?.scanned_quantity || 1}
-          boxFull={results?.isCorrectCategoryFull || false}
           onConfirm={handleConfirmCategorySelection}
         />
 
