@@ -1,143 +1,178 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
-import { Input, Button, Tag, Form } from "antd";
-import {
-  SearchOutlined,
-  LogoutOutlined,
-  CameraOutlined,
-} from "@ant-design/icons";
-import FullLogo from "@/assets/full_logo.svg";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import Link from "next/link";
-import DragDropImageUpload from "./modals/DragDropImageUpload";
+import Image from "next/image";
+import { Button, Layout, Menu, Tag } from "antd";
+import {
+  CameraOutlined,
+  CloudServerOutlined,
+  HistoryOutlined,
+  InboxOutlined,
+  LogoutOutlined,
+  MenuOutlined,
+  ProfileOutlined,
+} from "@ant-design/icons";
+import { useAuth } from "@/contexts/AuthContext";
+import FullLogo from "@/assets/FullLogo.svg";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebaseClient";
+import { useRouter } from "next/navigation";
 
-interface SearchBarForm {
-  query: string;
-}
+const { Header } = Layout;
 
-interface NavBarProps {
-  onSearch: (query: string) => Promise<void>;
-  onImageSearch: (image: File) => Promise<void>;
-}
-
-const NavBar: React.FC<NavBarProps> = ({ onSearch, onImageSearch }) => {
-  const [isMobile, setIsMobile] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isImageModalVisible, setIsImageModalVisible] = useState(false);
+// navigation bar that displays links and user info
+const NavBar = () => {
+  const { userRole } = useAuth();
+  const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+  const baseMenuItems = [
+    {
+      key: "scan",
+      icon: <CameraOutlined />,
+      label: "Scan",
+      href: "/",
+    },
+    // {
+    //   key: "scan_result",
+    //   icon: <CloudServerOutlined />,
+    //   label: "Scan Result",
+    //   href: "scan/o0dwIzQ5T9loaIwesZeh",
+    // },
+    {
+      key: "history",
+      icon: <HistoryOutlined />,
+      label: "History",
+      href: "/history",
+    },
+    {
+      key: "categories",
+      icon: <InboxOutlined />,
+      label: "Categories",
+      href: "/categories",
+    },
+  ];
 
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
+  const adminMenuItem = {
+    key: "accounts",
+    icon: <ProfileOutlined />,
+    label: "Accounts",
+    href: "/accounts",
+  };
 
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+  const menuItems = {
+    volunteer: baseMenuItems,
+    admin: [...baseMenuItems, adminMenuItem],
+  };
 
-  const LogoSection = () => (
-    <div className="flex items-center">
-      <Link href="/dashboard">
-        <Image src={FullLogo} alt="Medical Pantry Logo" />
-      </Link>
-      <Tag className="mx-2" color="red">
-        Admin
-      </Tag>
-    </div>
+  // logs the user out and redirects to the login page
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      // Clear any user data from local storage
+      localStorage.removeItem("userRole");
+      // Redirect to login page
+      router.push("/login");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
+  const renderMenuItem = (item) => (
+    <Menu.Item key={item.key} icon={item.icon} onClick={item.onClick}>
+      {item.href ? (
+        <Link href={item.href} onClick={() => setMobileMenuVisible(false)}>
+          {item.label}
+        </Link>
+      ) : (
+        item.label
+      )}
+    </Menu.Item>
   );
 
-  const handleForm = async (value: SearchBarForm) => {
-    setIsLoading(true);
-    await onSearch(value.query);
-    setIsLoading(false);
-  };
-
-  const handleImageUpload = async (file: File) => {
-    setIsLoading(true);
-    setIsImageModalVisible(false);
-    await onImageSearch(file);
-    setIsLoading(false);
-  };
-
-  const [form] = Form.useForm();
-  const SearchBar = () => (
-    <div className="w-full">
-      <Form
-        name={"searchBar"}
-        form={form}
-        disabled={isLoading}
-        onFinish={handleForm}
+  const renderAuthButton = () => {
+    return (
+      <Button
+        type={"primary"}
+        className={"hidden xl:flex"}
+        icon={<LogoutOutlined />}
+        onClick={handleSignOut}
       >
-        <Form.Item name={"query"}>
-          <Input
-            placeholder="Enter item name..."
-            prefix={<SearchOutlined />}
-            suffix={
-              <CameraOutlined
-                className="cursor-pointer"
-                onClick={() => setIsImageModalVisible(true)}
-              />
-            }
-            className="w-full"
-            onPressEnter={(e) => {
-              e.preventDefault();
-              form.submit();
-            }}
-          />
-        </Form.Item>
-      </Form>
-    </div>
-  );
+        Logout
+      </Button>
+    );
+  };
 
-  const LogoutButton = () => (
-    <Button
-      type="primary"
-      icon={<LogoutOutlined />}
-      onClick={() => router.push("/")}
-      className="custom-button"
-    >
-      Logout
-    </Button>
-  );
-
-  const DesktopNavBar = () => (
-    <nav className="flex items-center justify-between px-8 py-6">
-      <div className="">
-        <LogoSection />
-      </div>
-      <div className="flex-grow flex justify-center mx-10 max-w-md">
-        <SearchBar />
-      </div>
-      <div className="flex justify-end">
-        <LogoutButton />
-      </div>
-    </nav>
-  );
-
-  const MobileNavBar = () => (
-    <nav className="flex flex-col px-4 py-6">
-      <div className="flex justify-between items-center w-full">
-        <LogoSection />
-        <LogoutButton />
-      </div>
-      <div className="mt-4 w-full">
-        <SearchBar />
-      </div>
-    </nav>
-  );
-
+  // renders the navigation links and logout button
   return (
     <>
-      {isMobile ? <MobileNavBar /> : <DesktopNavBar />}
-      <DragDropImageUpload
-        isVisible={isImageModalVisible}
-        onClose={() => setIsImageModalVisible(false)}
-        onImageConfirm={handleImageUpload}
-      />
+      <Header className="p-0 h-auto bg-white mb-6">
+        <div className="flex justify-between items-center h-16 px-8">
+          {/* renders the logo with role tag */}
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center">
+              <Image src={FullLogo} alt="Medical Pantry Logo" />
+              {userRole && (
+                <Tag
+                  className="mx-2"
+                  color={userRole === "admin" ? "red" : "blue"}
+                >
+                  {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+                </Tag>
+              )}
+            </Link>
+          </div>
+
+          {/* renders the navigation links */}
+          {userRole && (
+            <div className="hidden xl:block absolute left-1/2 transform -translate-x-1/2 ">
+              <Menu
+                className="border-none bg-transparent"
+                mode="horizontal"
+                disabledOverflow={true}
+                selectable={false}
+                selectedKeys={[]}
+              >
+                {menuItems[userRole].map(renderMenuItem)}
+              </Menu>
+            </div>
+          )}
+
+          {/* renders the mobile navbar (un-expanded) */}
+          <div className="flex items-center">
+            {renderAuthButton()}
+            {userRole && (
+              <div className="xl:hidden ml-4">
+                <Button
+                  type="text"
+                  icon={
+                    <MenuOutlined className={"border-2 rounded-md p-1.5"} />
+                  }
+                  onClick={() => setMobileMenuVisible(!mobileMenuVisible)}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* renders the mobile navbar (expanded) */}
+        {mobileMenuVisible && userRole && (
+          <div className="xl:hidden px-4">
+            <Menu mode="vertical" className="absolute w-full z-40">
+              {menuItems[userRole].map(renderMenuItem)}
+              <Menu.Item
+                key="logout"
+                icon={<LogoutOutlined className={"font-semibold"} />}
+                onClick={handleSignOut}
+                className="font-semibold"
+              >
+                Logout
+              </Menu.Item>
+            </Menu>
+          </div>
+        )}
+      </Header>
     </>
   );
 };
