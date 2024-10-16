@@ -131,7 +131,7 @@ export const EditHistory: React.FC<EditHistoryProps> = ({
           ID
         </label>
         <p
-          className={"underline"}
+          className={"underline cursor-pointer"}
           onClick={() => router.push(`/scan/${record.history_id}`)}
         >
           {record.history_id}
