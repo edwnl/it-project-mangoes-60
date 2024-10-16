@@ -57,7 +57,7 @@ export const createInvitation = async (
     // Send invitation email
     await sendInvitationEmail(
       email,
-      `https://it-project-mangoes-60.vercel.app/signup/${docRef.id}`,
+      `https://it-proj-midsem-sprint.vercel.app/signup/${docRef.id}`,
     );
 
     return docRef.id;
