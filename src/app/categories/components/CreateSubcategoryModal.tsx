@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Form, Input, message, Modal, Select } from "antd";
 import { useSubcategories } from "@/contexts/SubcategoriesContext";
 import { createSubcategory } from "@/app/categories/actions";
-import DragDropImageUpload from "@/components/DragDropImageUpload";
+import DragDropImageUpload from "@/app/scan/components/DragDropImageUpload";
 
 const { Option } = Select;
 
@@ -44,11 +44,11 @@ const CreateSubcategoryModal: React.FC<CreateSubcategoryModalProps> = ({
       formData.append("notes", values.notes || "");
 
       await createSubcategory(formData);
-      message.success("Subcategory created successfully");
+      message.success("Item created successfully");
       form.resetFields();
       onClose();
     } catch (error) {
-      message.error("Failed to create subcategory");
+      message.error("Failed to create item");
     } finally {
       setIsProcessing(false);
     }
@@ -86,7 +86,10 @@ const CreateSubcategoryModal: React.FC<CreateSubcategoryModalProps> = ({
           name="image"
           rules={[{ required: true, message: "Please upload an image" }]}
         >
-          <DragDropImageUpload onSearchResult={onSearchResult} />
+          <DragDropImageUpload
+            onSearchResult={onSearchResult}
+            immediateUpload
+          />
         </Form.Item>
 
         {/* renders input field for sub-category name */}
