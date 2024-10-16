@@ -3,23 +3,25 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Layout, Menu, Button, Tag } from "antd";
+import { Button, Layout, Menu, Tag } from "antd";
 import {
+  CameraOutlined,
+  CloudServerOutlined,
+  HistoryOutlined,
+  InboxOutlined,
   LogoutOutlined,
   MenuOutlined,
-  InboxOutlined,
-  CameraOutlined,
-  HistoryOutlined,
   ProfileOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
-import FullLogo from "@/assets/full_logo.svg";
+import FullLogo from "@/assets/FullLogo.svg";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebaseClient";
 import { useRouter } from "next/navigation";
 
 const { Header } = Layout;
 
+// navigation bar that displays links and user info
 const NavBar = () => {
   const { userRole } = useAuth();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
@@ -32,6 +34,12 @@ const NavBar = () => {
       label: "Scan",
       href: "/",
     },
+    // {
+    //   key: "scan_result",
+    //   icon: <CloudServerOutlined />,
+    //   label: "Scan Result",
+    //   href: "scan/o0dwIzQ5T9loaIwesZeh",
+    // },
     {
       key: "history",
       icon: <HistoryOutlined />,
@@ -58,6 +66,7 @@ const NavBar = () => {
     admin: [...baseMenuItems, adminMenuItem],
   };
 
+  // logs the user out and redirects to the login page
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -95,10 +104,12 @@ const NavBar = () => {
     );
   };
 
+  // renders the navigation links and logout button
   return (
     <>
       <Header className="p-0 h-auto bg-white mb-6">
         <div className="flex justify-between items-center h-16 px-8">
+          {/* renders the logo with role tag */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
               <Image src={FullLogo} alt="Medical Pantry Logo" />
@@ -113,6 +124,7 @@ const NavBar = () => {
             </Link>
           </div>
 
+          {/* renders the navigation links */}
           {userRole && (
             <div className="hidden xl:block absolute left-1/2 transform -translate-x-1/2 ">
               <Menu
@@ -127,6 +139,7 @@ const NavBar = () => {
             </div>
           )}
 
+          {/* renders the mobile navbar (un-expanded) */}
           <div className="flex items-center">
             {renderAuthButton()}
             {userRole && (
@@ -143,6 +156,7 @@ const NavBar = () => {
           </div>
         </div>
 
+        {/* renders the mobile navbar (expanded) */}
         {mobileMenuVisible && userRole && (
           <div className="xl:hidden px-4">
             <Menu mode="vertical" className="absolute w-full z-40">
