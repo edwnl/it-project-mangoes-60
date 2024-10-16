@@ -189,3 +189,9 @@ export const fetchUserData = async (
     return null;
   }
 };
+
+export const deleteUser = (id:string) => {
+  // check for existence
+
+  // delete the
+}
