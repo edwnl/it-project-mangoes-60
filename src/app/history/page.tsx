@@ -10,7 +10,12 @@ import LoadingPage from "@/components/Loading";
 import { SearchHistory, UserData } from "@/types/types";
 import { useAuth } from "@/contexts/AuthContext";
 import isBetween from "dayjs/plugin/isBetween";
-import { deleteHistoryRecord, fetchAllUsers, fetchHistoryRecords, updateHistoryRecord } from "@/app/history/actions";
+import {
+  deleteHistoryRecord,
+  fetchAllUsers,
+  fetchHistoryRecords,
+  updateHistoryRecord,
+} from "@/app/history/actions";
 import dayjs, { Dayjs } from "dayjs";
 import { useSubcategories } from "@/contexts/SubcategoriesContext";
 import DailyRecord from "@/app/history/components/DailyRecord";
@@ -210,11 +215,11 @@ const HistoryPage = () => {
     return <LoadingPage />;
   }
   const displayDate = (time) => {
-    let secondsElapsed = moment().diff(time, 'days');
+    let secondsElapsed = moment().diff(time, "days");
     let displayString = moment(time).fromNow();
     if (secondsElapsed < 1) return "Today";
     return displayString;
-  }
+  };
   // renders the page layout and UI components
   return (
     <>
