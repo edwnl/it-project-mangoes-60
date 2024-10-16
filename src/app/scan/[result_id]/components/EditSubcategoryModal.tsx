@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button, Descriptions, message, Modal, Switch, Tag } from "antd";
+import { Button, Descriptions, message, Modal, Tag } from "antd";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { Subcategory } from "@/types/types";
+import ReportFullButton from "@/components/ReportFullButton";
 
 interface EditSubcategoryModalProps {
   isOpen: boolean;
@@ -12,14 +13,7 @@ interface EditSubcategoryModalProps {
   selectedSubcategory: Subcategory | null;
   correctSubcategoryId: string;
   currentQuantity: number;
-  boxFull: boolean;
-  onConfirm: (
-    subcategoryId: string,
-    subcategoryName: string,
-    subcategoryLocation: string,
-    quantity: number,
-    boxFull: boolean,
-  ) => Promise<void>;
+  onConfirm: (subcategoryId: string, quantity: number) => Promise<void>;
 }
 
 // modal that allows users to edit the details of a selected sub-category
@@ -29,19 +23,14 @@ const EditSubcategoryModal: React.FC<EditSubcategoryModalProps> = ({
   selectedSubcategory,
   correctSubcategoryId,
   currentQuantity,
-  boxFull,
   onConfirm,
 }) => {
   const [quantity, setQuantity] = useState<number>(currentQuantity);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isBoxFull, setIsBoxFull] = useState<boolean>(boxFull);
   // reset quantity and box status when modal opens
   useEffect(() => {
-    if (isOpen) {
-      setQuantity(currentQuantity);
-      setIsBoxFull(boxFull);
-    }
-  }, [isOpen, currentQuantity, boxFull]);
+    if (isOpen) setQuantity(currentQuantity);
+  }, [isOpen, currentQuantity]);
 
   // handle quantity input change
   const handleQuantityChange = (value: string) => {
@@ -51,28 +40,16 @@ const EditSubcategoryModal: React.FC<EditSubcategoryModalProps> = ({
     }
   };
 
-  // handle box is full change
-  const handleBoxFullChange = (checked: boolean) => {
-    setIsBoxFull(checked);
-    if (checked) console.log("The box has been set to full");
-  };
-
   // handle confirm button click
   const handleConfirm = async () => {
     if (!selectedSubcategory) return;
     setIsLoading(true);
     try {
-      await onConfirm(
-        selectedSubcategory.id,
-        selectedSubcategory.subcategory_name,
-        selectedSubcategory.location,
-        quantity,
-        isBoxFull,
-      );
-      message.success("Subcategory updated successfully.");
+      await onConfirm(selectedSubcategory.id, quantity);
+      message.success("Item updated successfully.");
       onClose();
     } catch (error) {
-      message.error("Failed to update subcategory.");
+      message.error("Failed to update item.");
     } finally {
       setIsLoading(false);
     }
@@ -80,12 +57,9 @@ const EditSubcategoryModal: React.FC<EditSubcategoryModalProps> = ({
 
   // check if the selected subcategory is correct and if the quantity has changed
   const isCorrectSubcategory = selectedSubcategory?.id === correctSubcategoryId;
-  const isBoxStatusChanged = boxFull != isBoxFull;
   const isQuantityChanged = quantity !== currentQuantity;
   const buttonText = isCorrectSubcategory ? "Update" : "Change Item";
-  const isButtonDisabled =
-    isCorrectSubcategory && !isQuantityChanged && !isBoxStatusChanged;
-  console.log(isBoxStatusChanged);
+  const isButtonDisabled = isCorrectSubcategory && !isQuantityChanged;
 
   // renders the modal content for editing the sub-category details
   return (
@@ -130,12 +104,6 @@ const EditSubcategoryModal: React.FC<EditSubcategoryModalProps> = ({
                 max={150}
               />
             </Descriptions.Item>
-            <Descriptions.Item label="Box is full" span={3}>
-              <Switch
-                defaultChecked={isBoxFull}
-                onChange={handleBoxFullChange}
-              />
-            </Descriptions.Item>
           </Descriptions>
 
           {/* renders the confirmation button */}
@@ -143,7 +111,7 @@ const EditSubcategoryModal: React.FC<EditSubcategoryModalProps> = ({
             onClick={handleConfirm}
             loading={isLoading}
             disabled={isButtonDisabled}
-            className={`w-full ${
+            className={`w-full mb-2 ${
               isButtonDisabled
                 ? "bg-gray-300 text-gray-600"
                 : "custom-button bg-[#BF0018] text-white hover:bg-[#8B0012]"
@@ -151,6 +119,8 @@ const EditSubcategoryModal: React.FC<EditSubcategoryModalProps> = ({
           >
             {buttonText}
           </Button>
+
+          <ReportFullButton subcategory={selectedSubcategory} />
         </>
       )}
     </Modal>

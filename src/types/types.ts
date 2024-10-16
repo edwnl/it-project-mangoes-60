@@ -31,5 +31,4 @@ export interface SearchHistory {
   scanned_quantity?: number;
   history_id?: string;
   user_data?: UserData;
-  isCorrectCategoryFull: boolean;
 }
