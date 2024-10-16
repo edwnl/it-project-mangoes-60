@@ -190,8 +190,7 @@ export const fetchUserData = async (
   }
 };
 
-export const deleteUser = (id:string) => {
+export const deleteUser = (id: string) => {
   // check for existence
-
   // delete the
-}
+};
