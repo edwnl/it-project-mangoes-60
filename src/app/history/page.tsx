@@ -119,9 +119,7 @@ const HistoryPage = () => {
           dateRange[1] &&
           recordDate.isBetween(dateRange[0], dateRange[1], null, "[]"));
 
-      const keepRecord = matchesSearch && matchesUser && matchesDateRange;
-
-      return keepRecord;
+      return matchesSearch && matchesUser && matchesDateRange;
     });
 
     setFilteredRecords(filtered);
@@ -216,7 +214,12 @@ const HistoryPage = () => {
   if (isLoading) {
     return <LoadingPage />;
   }
-
+  const displayDate = (time) => {
+    let secondsElapsed = moment().diff(time, "days");
+    let displayString = moment(time).fromNow();
+    if (secondsElapsed < 1) return "Today";
+    return displayString;
+  };
   // renders the page layout and UI components
   return (
     <>
@@ -280,7 +283,7 @@ const HistoryPage = () => {
                 <DailyRecord
                   key={val}
                   historyRecords={categorisedRecords[val]!}
-                  displayDate={moment(val, "YYYY-MM-DD").fromNow()}
+                  displayDate={displayDate(val)}
                   openModal={openModal}
                 />
               ))
