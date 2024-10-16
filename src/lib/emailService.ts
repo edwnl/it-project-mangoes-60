@@ -96,7 +96,7 @@ export const sendBoxStatus = async (
     },
   });
 
-  for (const email of (await _getInternalSubscribers())) {
+  for (const email of await _getInternalSubscribers()) {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
