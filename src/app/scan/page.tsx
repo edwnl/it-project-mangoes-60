@@ -16,7 +16,7 @@ const CameraPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [categoryFilterID, setCategoryFilter] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, userFirstName } = useAuth();
 
   const router = useRouter();
 
@@ -78,7 +78,7 @@ const CameraPage: React.FC = () => {
         <div className="mb-10">
           <div className="flex flex-col text-3xl mb-2">
             <h1>Welcome,</h1>
-            <h1 className="font-bold">Username!</h1>
+            <h1 className="font-bold">{userFirstName || "Volunteer"}!</h1>
           </div>
           <CategoryFilterButton
             onCategoryChange={handleCategoryChange}
