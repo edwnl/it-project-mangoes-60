@@ -25,7 +25,7 @@ export const EditHistory: React.FC<EditHistoryProps> = ({
 }) => {
   const [updatedRecord, setUpdatedRecord] = useState<SearchHistory>(record);
   const { subcategories } = useSubcategories();
-  if (!subcategories) throw new Error("Subcategory list not found!");
+  if (!subcategories) throw new Error("Item list not found!");
 
   // handles changes in the selected subcategory
   const handleSubcategoryChange = (value: string) => {
@@ -69,7 +69,7 @@ export const EditHistory: React.FC<EditHistoryProps> = ({
         <Select
           showSearch
           style={{ width: "100%" }}
-          placeholder="Select a subcategory"
+          placeholder="Select an item"
           optionFilterProp="children"
           value={updatedRecord.correct_subcategory_id}
           onChange={handleSubcategoryChange}
